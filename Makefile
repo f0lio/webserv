@@ -1,22 +1,27 @@
 
 
-.PHONEY: all clean fclean re bonus run
+.PHONEY : all clean fclean re bonus run
 
 NAME    = webserv
 CC		= clang++ --std=c++98
 FLAGS   = #-Wall -Werror -Wextra
-INCLUDE = -I includes -I ../includes
+INCLUDES= -I includes 
 
-PARSER  = 
+UTILS	= helpers.cpp
+CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp
 REQ		= 
 RES		= 
+SERVER	= Server.cpp Socket.cpp
 
 
-SRCS    = 	./src/webserv.cpp\
-			$(PARSER:%.cpp=./src/parser/%.cpp)
+SRCS    = 	./src/webserv.cpp \
+			$(UTILS:%.cpp=./src/utils/%.cpp)\
+			$(CONFIG:%.cpp=./src/Configuration/%.cpp)\
+			$(SERVER:%.cpp=./src/Networking/%.cpp)
+
 
 $(NAME): $(SRCS)
-	@$(CC) $(FLAGS) $(INCLUDE) $(SRCS) -o $(NAME)
+	@$(CC) $(FLAGS) $(INCLUDES) $(SRCS) -o $(NAME)
 
 all: $(NAME)
 
@@ -29,4 +34,4 @@ fclean: clean
 re: fclean all
 
 run: fclean all
-	@./$(NAME) ./webserv.conf
+	@./$(NAME) ./other/sample.conf

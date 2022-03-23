@@ -9,5 +9,8 @@
 #include <map>
 
 #include "../src/utils/Console.hpp"
-#include "../src/Configuration.hpp"
-#include "../src/Server.hpp"
+#include "../src/Configuration/Configuration.hpp"
+#include "../src/Networking/Server.hpp"
+
+
+static Console console;
