@@ -6,31 +6,29 @@
 #include <vector>
 #include <set>
 
-// IDENTIFIER => STRING | NUMBER | KEYWORD
-
 namespace parser
 {
     enum TokenType
     {
         SEPARATOR,
         IDENTIFIER,
-        PARAM_LITERAL, // STRING | NUMBER 
+        PARAM_LITERAL, // STRING | NUMBER
         COMMENT,
         END_OF_FILE
     };
-    
+
     static const char *sTokenTypeStrings[] = {
-        
+
         "SEPARATOR",
         "IDENTIFIER",
         "PARAM_LITERAL",
         "COMMENT",
         "END_OF_FILE"};
 
-    //array of valid identifiers
+    // array of valid identifiers
     static const char *validIdentifiers[] = {
         "listen",
-        "host", //tempo
+        "host", // tempo
         "port",
         "root",
         "location",
@@ -61,8 +59,6 @@ namespace parser
 
         void tokenize();
         void print();
-
-        void skipWhitespaces();
 
         std::vector<Token> getTokens();
 

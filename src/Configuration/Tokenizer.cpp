@@ -12,23 +12,17 @@ namespace parser
 
     std::vector<Token> Tokenizer::getTokens() { return _tokens; };
 
-    void Tokenizer::skipWhitespaces()
-    {
-        while (_stream.peek() == ' ' || _stream.peek() == '\t')
-            _stream.get();
-    }
-
     void Tokenizer::tokenize()
     {
         char c;
         bool has_identifier = false;
         std::string value;
-        std::string tSeperators("{};");
 
         while (_stream.get(c))
         {
-            skipWhitespaces();
-            if (c == '\n')
+            if (c == ' ' || c == '\t')
+                continue;
+            else if (c == '\n')
             {
                 _line_number++;
                 has_identifier = false;
@@ -42,17 +36,16 @@ namespace parser
                 has_identifier = false;
                 continue;
             }
-            else if (tSeperators.find(c) != std::string::npos)
+            else if (c == '{' || c == '}' || c == ';')
             {
                 _tokens.push_back(Token(SEPARATOR, std::string(1, c), _line_number));
                 has_identifier = false;
             }
-
             else if (c == '"' || c == '\'')
             {
                 char quote = c;
 
-                value = "";
+                value.clear();
                 while (_stream.get(c))
                 {
                     if (c == quote)
@@ -97,7 +90,6 @@ namespace parser
                 }
             }
         }
-
         _tokens.push_back(Token(END_OF_FILE, "", _line_number));
     }
 
@@ -105,7 +97,7 @@ namespace parser
     {
         for (std::vector<Token>::iterator it = _tokens.begin(); it != _tokens.end(); ++it)
         {
-            std::cout << sTokenTypeStrings[it->_type] << ": " << it->_value << std::endl;
+            std::cout << sTokenTypeStrings[it->_type] << "\t:\t[" << it->_value << "]" << std::endl;
         }
     }
 
