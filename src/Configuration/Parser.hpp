@@ -9,7 +9,7 @@
 namespace parser
 {
 
-    std::string _valid_simple_directives[] = {
+    static std::string _valid_simple_directives[] = {
         "host",
         "port",
         "root",
@@ -17,7 +17,7 @@ namespace parser
         "server_names",
         "methods"};
 
-    std::string _valid_block_directives[] = {
+    static std::string _valid_block_directives[] = {
         "location"};
 
     class Parser

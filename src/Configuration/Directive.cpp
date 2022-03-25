@@ -8,6 +8,7 @@ namespace parser
         const std::string &key, const std::vector<std::string> &params)
         : _key(key), _params(params)
     {
+        ;
     }
 
     Directive::Directive()

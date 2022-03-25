@@ -13,4 +13,7 @@
 #include "../src/Networking/Server.hpp"
 
 
+// helper function prototypes
+bool  is_included(char c, char *str);
+
 static Console console;

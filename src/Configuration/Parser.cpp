@@ -15,4 +15,15 @@ namespace parser
             _valid_block_directives,
             _valid_block_directives + sizeof(_valid_block_directives) / sizeof(_valid_block_directives[0]));
     }
+    Parser::~Parser() {}
+
+    void Parser::parse(std::vector<Token> &tokens)
+    {
+        std::cout << "Parsing.." << std::endl;
+    }
+    void Parser::print() const
+    {
+        std::cout << "Printing.." << std::endl;
+    }
+
 } // namespace parser

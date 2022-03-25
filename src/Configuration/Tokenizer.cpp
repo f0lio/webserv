@@ -1,49 +1,112 @@
 
-
 #include "Tokenizer.hpp"
 
 namespace parser
 {
+    Token::Token() {}
+    Token::Token(TokenType type, std::string value, size_t line) : _type(type), _value(value), _line(line) {}
+    Token::~Token() {}
 
-    Tokenizer::Tokenizer(std::istream &stream) : _stream(stream), _hasNext(false) {}
-
+    Tokenizer::Tokenizer(std::istream &stream) : _stream(stream), _line_number(0) {}
     Tokenizer::~Tokenizer() {}
 
-    Token Tokenizer::next()
+    std::vector<Token> Tokenizer::getTokens() { return _tokens; };
+
+    void Tokenizer::skipWhitespaces()
     {
-        if (_hasNext)
+        while (_stream.peek() == ' ' || _stream.peek() == '\t')
+            _stream.get();
+    }
+
+    void Tokenizer::tokenize()
+    {
+        char c;
+        bool has_identifier = false;
+        std::string value;
+        std::string tSeperators("{};");
+
+        while (_stream.get(c))
         {
-            _current = _next;
-            _hasNext = false;
+            skipWhitespaces();
+            if (c == '\n')
+            {
+                _line_number++;
+                has_identifier = false;
+            }
+            else if (c == '#')
+            {
+                while (_stream.get(c) && c != '\n')
+                    value += c;
+                _tokens.push_back(Token(COMMENT, value, _line_number));
+                value.clear();
+                has_identifier = false;
+                continue;
+            }
+            else if (tSeperators.find(c) != std::string::npos)
+            {
+                _tokens.push_back(Token(SEPARATOR, std::string(1, c), _line_number));
+                has_identifier = false;
+            }
+
+            else if (c == '"' || c == '\'')
+            {
+                char quote = c;
+
+                value = "";
+                while (_stream.get(c))
+                {
+                    if (c == quote)
+                    {
+                        _tokens.push_back(Token(PARAM_LITERAL, value, _line_number));
+                        break;
+                    }
+                    else if (c == '\\')
+                    {
+                        _stream.get(c);
+                        if (c == quote)
+                            value += quote;
+                        else if (c == '\\')
+                            value += '\\';
+                        else
+                            throw std::runtime_error("Invalid escape sequence");
+                    }
+                    else
+                        value += c;
+                }
+            }
+            else
+            {
+                std::string value;
+                value += c;
+                while (_stream.get(c))
+                {
+                    if (isalnum(c) || c == '_' || c == '.' || c == '/')
+                        value += c;
+                    else
+                    {
+                        _stream.unget();
+                        if (has_identifier == false)
+                        {
+                            _tokens.push_back(Token(IDENTIFIER, value, _line_number));
+                            has_identifier = true;
+                        }
+                        else
+                            _tokens.push_back(Token(PARAM_LITERAL, value, _line_number));
+                        break;
+                    }
+                }
+            }
         }
-        return _current;
+
+        _tokens.push_back(Token(END_OF_FILE, "", _line_number));
     }
 
-    Token Tokenizer::peek()
+    void Tokenizer::print()
     {
-        if (!_hasNext)
+        for (std::vector<Token>::iterator it = _tokens.begin(); it != _tokens.end(); ++it)
         {
-            _next = next();
-            _hasNext = true;
+            std::cout << sTokenTypeStrings[it->_type] << ": " << it->_value << std::endl;
         }
-        return _next;
-    }
-
-    void Tokenizer::skipWhitespace()
-    {
-        // while (peek().type == WHITESPACE) {
-        //     next();
-        // }
-    }
-
-    void Tokenizer::skipComment()
-    {
-        // if (peek().type == POTENTIAL_COMMENT) {
-        //     next();
-        //     while (peek().type != COMMENT) {
-        //         next();
-        //     }
-        // }
     }
 
 }

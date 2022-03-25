@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
         config.print();
 #endif
-
         ws::Server server(config);
         server.start();
     }

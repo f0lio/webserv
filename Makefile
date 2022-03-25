@@ -13,7 +13,6 @@ REQ		=
 RES		= 
 SERVER	= Server.cpp Socket.cpp
 
-
 SRCS    = 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\
 			$(CONFIG:%.cpp=./src/Configuration/%.cpp)\
@@ -21,7 +20,7 @@ SRCS    = 	./src/webserv.cpp \
 
 
 $(NAME): $(SRCS)
-	@$(CC) $(FLAGS) $(INCLUDES) $(SRCS) -o $(NAME)
+	@$(CC) $(SRCS) $(INCLUDES) $(FLAGS) -o $(NAME)
 
 all: $(NAME)
 

@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "webserv.hpp"
@@ -51,6 +52,8 @@ namespace parser
         ~Directive();
 
         DirectiveType getType();
+    
+    // friend class Parser;
 
     private:
         DirectiveType _type;
