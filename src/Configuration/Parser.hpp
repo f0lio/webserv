@@ -8,8 +8,7 @@
 
 namespace parser
 {
-
-    static std::string _valid_simple_directives[] = {
+    static std::string _simple_directives[] = {
         "host",
         "port",
         "root",
@@ -17,22 +16,28 @@ namespace parser
         "server_names",
         "methods"};
 
-    static std::string _valid_block_directives[] = {
-        "location"};
+    static std::string _block_directives[] = {
+        "location",
+        "server"};
 
     class Parser
     {
     public:
-        Parser(std::vector<Token> &tokens);
+        Parser(Tokenizer &tokenizer);
         ~Parser();
 
-        void parse(std::vector<Token> &tokens);
+        void parse();
         void print() const;
 
+        bool isValidIdentifier(const std::string &identifier) const;
+        bool isValidSimpleDirective(const std::string &directive) const;
+        bool isValidBlockDirective(const std::string &directive) const;
+
     private:
+        Tokenizer &_tokenizer;
+        std::vector<Token> _tokens;
         std::vector<Token>::iterator current_token;
         std::vector<Token>::iterator end_token;
-        std::vector<Token> _tokens;
     };
 
 } // namespace parser

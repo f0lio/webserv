@@ -4,26 +4,40 @@
 
 namespace parser
 {
-    Parser::Parser(std::vector<Token> &tokens) : _tokens(tokens)
+    Parser::Parser(Tokenizer &tokenizer) : _tokenizer(tokenizer)
     {
-
-        std::set<std::string> valid_simple_directives(
-            _valid_simple_directives,
-            _valid_simple_directives + sizeof(_valid_simple_directives) / sizeof(_valid_simple_directives[0]));
-
-        std::set<std::string> valid_block_directives(
-            _valid_block_directives,
-            _valid_block_directives + sizeof(_valid_block_directives) / sizeof(_valid_block_directives[0]));
     }
+
     Parser::~Parser() {}
 
-    void Parser::parse(std::vector<Token> &tokens)
+    void Parser::parse()
     {
-        std::cout << "Parsing.." << std::endl;
+        _tokenizer.tokenize();
+        _tokens = _tokenizer.getTokens();
+        _tokenizer.print();
     }
+
     void Parser::print() const
     {
-        std::cout << "Printing.." << std::endl;
+    }
+
+    bool Parser::isValidIdentifier(const std::string &identifier) const
+    {
+        if (identifier.empty())
+            return false;
+
+        for (size_t i = 0; i < (sizeof(_simple_directives) / sizeof(_simple_directives[0])); i++)
+        {
+            if (identifier == _simple_directives[i])
+                return true;
+        }
+
+        for (size_t i = 0; i < (sizeof(_block_directives) / sizeof(_block_directives[0])); i++)
+        {
+            if (identifier == _block_directives[i])
+                return true;
+        }
+        return false;
     }
 
 } // namespace parser

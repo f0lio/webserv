@@ -17,10 +17,12 @@ namespace ws
         std::ifstream file(_path.c_str());
         if (!file.is_open())
             throw std::runtime_error("Can't open file: " + _path);
-        
+
         parser::Tokenizer tokenizer(file);
-        tokenizer.tokenize();
-        tokenizer.print();
+        parser::Parser parser(tokenizer);
+        
+        parser.parse();
+        parser.print();
 
         file.close();
         // parser::Parser parser(tokenizer.getTokens());

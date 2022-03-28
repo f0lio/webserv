@@ -18,6 +18,7 @@ namespace parser
         bool has_identifier = false;
         std::string value;
 
+        _line_number = 1;
         while (_stream.get(c))
         {
             if (c == ' ' || c == '\t')
@@ -29,7 +30,7 @@ namespace parser
             }
             else if (c == '#')
             {
-                while (_stream.get(c) && c != '\n')
+                while (_stream.peek() != '\n' && _stream.get(c))
                     value += c;
                 _tokens.push_back(Token(COMMENT, value, _line_number));
                 value.clear();
@@ -45,14 +46,16 @@ namespace parser
             {
                 char quote = c;
 
-                value.clear();
                 while (_stream.get(c))
                 {
                     if (c == quote)
                     {
                         _tokens.push_back(Token(PARAM_LITERAL, value, _line_number));
+                        value.clear();
                         break;
                     }
+                    else if (c == '\n')
+                        throw std::runtime_error("unexpected newline in string literal");
                     else if (c == '\\')
                     {
                         _stream.get(c);
@@ -96,9 +99,23 @@ namespace parser
     void Tokenizer::print()
     {
         for (std::vector<Token>::iterator it = _tokens.begin(); it != _tokens.end(); ++it)
-        {
-            std::cout << sTokenTypeStrings[it->_type] << "\t:\t[" << it->_value << "]" << std::endl;
-        }
+            printf("%3.zu, %-15s=  [%s]\n", it->_line, sTokenTypeStrings[it->_type], it->_value.c_str());
     }
 
+    bool Tokenizer::hasNext()
+    {
+        return _tokens.size() > 0;
+    }
+
+    Token Tokenizer::next()
+    {
+        if (_tokens.size() > 0)
+        {
+            _current = _tokens.front();
+            _tokens.erase(_tokens.begin());
+            return _current;
+        }
+        else
+            throw std::runtime_error("No more tokens");
+    }
 }

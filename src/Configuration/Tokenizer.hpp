@@ -6,6 +6,8 @@
 #include <vector>
 #include <set>
 
+#include <stdio.h> //printf
+
 namespace parser
 {
     enum TokenType
@@ -62,6 +64,10 @@ namespace parser
 
         std::vector<Token> getTokens();
 
+        bool    hasNext();
+        Token   next();
+
+
     private:
         std::vector<Token> _tokens;
         std::istream &_stream;
@@ -69,5 +75,6 @@ namespace parser
         Token _next;
         size_t _line_number;
         bool _hasNext;
+        size_t _index;
     };
 }
