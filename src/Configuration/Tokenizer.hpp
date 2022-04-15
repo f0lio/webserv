@@ -10,42 +10,40 @@
 
 namespace parser
 {
+    /*
+        adding `Context` prototype cuz gcc stops at
+        the very first namespace it faces, ig.
+    */
+    class Context;
     enum TokenType
     {
-        SEPARATOR,
         IDENTIFIER,
         PARAM_LITERAL, // STRING | NUMBER
+        BLOCK_OPEN,
+        BLOCK_CLOSE,
+        SDIRECTIVE_END,
         COMMENT,
         END_OF_FILE
     };
 
-    static const char *sTokenTypeStrings[] = {
-
-        "SEPARATOR",
+    static const char *TokenTypeStrings[] = {
         "IDENTIFIER",
         "PARAM_LITERAL",
+        "BLOCK_OPEN",
+        "BLOCK_CLOSE",
+        "SDIRECTIVE_END",
         "COMMENT",
         "END_OF_FILE"};
 
-    // array of valid identifiers
-    static const char *validIdentifiers[] = {
-        "listen",
-        "host", // tempo
-        "port",
-        "root",
-        "location",
-        "index",
-        "server_names",
-        "methods"};
-
     class Token
     {
+        friend class Tokenizer;
+        friend class Parser; //!
+
     public:
         Token();
         Token(TokenType type, std::string value, size_t line);
         ~Token();
-
-        friend class Tokenizer;
 
     private:
         TokenType _type;
@@ -55,26 +53,24 @@ namespace parser
 
     class Tokenizer
     {
+        friend class Parser;
+
     public:
         Tokenizer(std::istream &stream);
         ~Tokenizer();
 
-        void tokenize();
-        void print();
-
+        void print() const;
         std::vector<Token> getTokens();
 
-        bool    hasNext();
-        Token   next();
-
-
     private:
+        void tokenize();
+        Token next();
+        bool hasNext() const;
+        Token peek() const;
+
         std::vector<Token> _tokens;
         std::istream &_stream;
-        Token _current;
-        Token _next;
         size_t _line_number;
-        bool _hasNext;
         size_t _index;
     };
 }

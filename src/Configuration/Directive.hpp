@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "webserv.hpp"
@@ -26,40 +25,52 @@ example:
 
 namespace parser
 {
-
-    enum DirectiveType
+    class Context;
+    class SimpleDirective
     {
-        SIMPLE = 1,
-        BLOCK = 2,
-        CONTEXT = 4
-    };
+        friend class Parser;
 
-    // static std::string simple_directives_[] = {
-    //     "host",
-    //     "port",
-    //     "root",
-    //     "location",
-    //     "server_names",
-    //     "methods"};
-
-    // static std::vector<std::string> valid_keys;
-
-    class Directive
-    {
     public:
-        Directive();
-        Directive(const std::string &key, const std::vector<std::string> &_params);
-        ~Directive();
+        SimpleDirective();
+        SimpleDirective(const std::string &key, const std::vector<std::string> &params);
+        ~SimpleDirective();
 
-        DirectiveType getType();
-    
-    // friend class Parser;
+        const SimpleDirective &operator=(SimpleDirective const &rhs);
+
+        std::string getKey() const;
+        std::vector<std::string> getArgs() const;
+        void print() const;
 
     private:
-        DirectiveType _type;
         std::string _key;
-        std::vector<std::string> _params;
-        std::map<std::string, Directive> _blocks;
+        std::vector<std::string> _args;
+    };
+
+    class BlockDirective
+    {
+        friend class Parser;
+
+    public:
+        BlockDirective();
+        BlockDirective(const std::string &key, const std::vector<std::string> &_params);
+        ~BlockDirective();
+
+        std::string getKey() const;
+        std::string getArgs() const;
+        std::map<std::string, SimpleDirective> getDirectives() const;
+
+        void addDirective(const SimpleDirective &dir)
+        {
+            // std::map<std::string, SimpleDirective> _directives;
+            _directives_vec.push_back(dir);
+        }
+        void print() const;
+
+    private:
+        std::string _key;
+        std::string _arg;
+        std::map<std::string, SimpleDirective> _directives;
+        std::vector<SimpleDirective> _directives_vec;
     };
 
 } // namespace parser

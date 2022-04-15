@@ -6,11 +6,13 @@ namespace ws
 
     Configuration::Configuration(const std::string &path) : _path(path)
     {
-        // valid_keys.insert(valid_keys.end(), valid_keys_, valid_keys_ + sizeof(valid_keys_) / sizeof(valid_keys_[0]));
         ;
-    };
+    }
 
-    Configuration::~Configuration(){};
+    Configuration::~Configuration()
+    {
+
+    }
 
     void Configuration::parse()
     {
@@ -20,17 +22,19 @@ namespace ws
 
         parser::Tokenizer tokenizer(file);
         parser::Parser parser(tokenizer);
-        
+
         parser.parse();
         parser.print();
-
         file.close();
-        // parser::Parser parser(tokenizer.getTokens());
-    
     }
 
     void Configuration::print() const
     {
         std::cout << "Printing.." << std::endl;
+    }
+
+    std::vector<parser::Context> Configuration::getContexts() const
+    {
+        return _servers;
     }
 } // namespace ws

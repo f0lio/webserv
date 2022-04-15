@@ -39,7 +39,12 @@ namespace parser
             }
             else if (c == '{' || c == '}' || c == ';')
             {
-                _tokens.push_back(Token(SEPARATOR, std::string(1, c), _line_number));
+                if (c == '{')
+                    _tokens.push_back(Token(BLOCK_OPEN, std::string(1, c), _line_number));
+                else if (c == '}')
+                    _tokens.push_back(Token(BLOCK_CLOSE, std::string(1, c), _line_number));
+                else if (c == ';')
+                    _tokens.push_back(Token(SDIRECTIVE_END, std::string(1, c), _line_number));
                 has_identifier = false;
             }
             else if (c == '"' || c == '\'')
@@ -96,26 +101,28 @@ namespace parser
         _tokens.push_back(Token(END_OF_FILE, "", _line_number));
     }
 
-    void Tokenizer::print()
+    bool Tokenizer::hasNext() const
     {
-        for (std::vector<Token>::iterator it = _tokens.begin(); it != _tokens.end(); ++it)
-            printf("%3.zu, %-15s=  [%s]\n", it->_line, sTokenTypeStrings[it->_type], it->_value.c_str());
-    }
-
-    bool Tokenizer::hasNext()
-    {
-        return _tokens.size() > 0;
+        return _index < _tokens.size();
     }
 
     Token Tokenizer::next()
     {
-        if (_tokens.size() > 0)
-        {
-            _current = _tokens.front();
-            _tokens.erase(_tokens.begin());
-            return _current;
-        }
-        else
-            throw std::runtime_error("No more tokens");
+        if (_index < _tokens.size())
+            return _tokens[_index++];
+        return _tokens.back();
+    }
+
+    Token Tokenizer::peek() const
+    {
+        if (_index < _tokens.size())
+            return _tokens[_index];
+        return _tokens.back();
+    }
+
+    void Tokenizer::print() const
+    {
+        for (std::vector<Token>::const_iterator it = _tokens.begin(); it != _tokens.end(); ++it)
+            printf("%3.zu, %-15s=  [%s]\n", it->_line, TokenTypeStrings[it->_type], it->_value.c_str());
     }
 }

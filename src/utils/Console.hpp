@@ -20,7 +20,7 @@ public:
     void warn(const std::string &msg)
     {
 #ifndef CONSOLE_OFF
-        std::cerr << "\033[1;33m" << msg << "\033[0m" << std::endl;
+        std::cout << "\033[1;33m" << msg << "\033[0m" << std::endl;
 #endif
     }
 

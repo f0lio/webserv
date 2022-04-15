@@ -1,17 +1,12 @@
-
-
 #pragma once
 
 #include <map>
 #include "./Context.hpp"
 #include "./Parser.hpp"
 
-#define SSTR(x) static_cast<std::ostringstream &>(           \
-                    (std::ostringstream() << std::dec << x)) \
-                    .str()
+
 namespace ws
 {
-    class Context;
     class Configuration
     {
     public:
@@ -20,9 +15,10 @@ namespace ws
 
         void parse();
         void print() const;
+        std::vector<parser::Context> getContexts() const;
 
     private:
-        std::map<int, parser::Context> _servers;
+        std::vector<parser::Context> _servers;
         std::string _path;
     };
 }

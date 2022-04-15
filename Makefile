@@ -1,12 +1,11 @@
 
-.PHONEY : all clean fclean re bonus run dirs
+.PHONEY : all clean fclean re bonus run
 
 ## variables
 NAME    = webserv
 CC		= clang++
-FLAGS   = --std=c++98 #-Wall -Werror -Wextra
+FLAGS   = #-std=c++98  # -D CONSOLE_OFF  #-Wall -Werror -Wextra
 INCLUDES= includes 
-OBJDIR  = .objects
 
 UTILS	= helpers.cpp
 CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp
@@ -21,14 +20,14 @@ SRCS    = 	./src/webserv.cpp \
 
 HEADERS =	$(CONFIG:%.cpp=./src/Configuration/%.hpp)\
 			$(SERVER:%.cpp=./src/Networking/%.hpp)\
-			./src/utils/Console.hpp
+			./src/utils/Console.hpp\
+			./src/utils/Logger.hpp
 
 ## rules
 $(NAME): $(SRCS) $(HEADERS)
 	@$(CC) $(FLAGS) $(SRCS) -I $(INCLUDES) -o $(NAME)
 
-
-all: dirs $(NAME)
+all: $(NAME)
 
 clean:
 	@rm -rf *.o .objects/*.o
@@ -38,8 +37,5 @@ fclean: clean
 
 re: fclean all
 
-run: fclean all
+run: $(NAME)
 	@./$(NAME) ./other/sample.conf
-
-# to avoid poluting the root directory with object files
-dirs: .objects
