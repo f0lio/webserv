@@ -1,6 +1,8 @@
 #pragma once
 
 #include <map>
+
+#include <iostream>
 #include <string>
 #include "./Directive.hpp"
 
@@ -21,7 +23,7 @@ namespace parser
 		}
 		void addDirective(const SimpleDirective &dir)
 		{
-			// _simple_directives[dir.getKey()] = dir;
+			
 			_simple_directives_vec.push_back(dir);
 		}
 

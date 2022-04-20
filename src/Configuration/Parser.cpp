@@ -24,10 +24,11 @@ namespace parser
                 if (isContextIdentifier(_currentToken._value))
                     parseContext();
                 else
-                    throw std::runtime_error("invalid identifier");
+                    throw std::runtime_error(
+                        err_invalid_identifier(_currentToken._value));
             }
             else
-                throw std::runtime_error("invalid token");
+                throw std::runtime_error(err_unexpected_token(_currentToken._value));
         }
     }
 
@@ -54,7 +55,8 @@ namespace parser
             else if (_currentToken._type == BLOCK_CLOSE)
                 break;
             else
-                throw std::runtime_error("invalid identifier");
+                throw std::runtime_error(
+                    err_invalid_identifier(_currentToken._value));
         }
 
         if (_currentToken._type != BLOCK_CLOSE)
@@ -197,12 +199,20 @@ namespace parser
         return std::string("line:"); //+ std::string(strtod());
     }
 
+    std::string Parser::err_invalid_identifier(const std::string &identifier) const
+    {
+        std::stringstream ss;
+        ss << "line:" << _currentToken._line << ", "
+           << "invalid identifier: \"" + identifier + "\"";
+        return ss.str();
+    }
+
     std::string Parser::err_directive_not_open(const std::string &dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
            << "directive \"" + dirName + "\" has no opening \""
-           << "}"
+           << TOKEN_BLOCK_CLOSE
            << "\"";
         return ss.str();
     }
@@ -212,7 +222,7 @@ namespace parser
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
            << "directive \"" + dirName + "\" has no closing \""
-           << "}"
+           << TOKEN_BLOCK_CLOSE
            << "\"";
         return ss.str();
     }
@@ -238,7 +248,7 @@ namespace parser
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
            << "directive \"" + dirName + "\" is not terminated by \""
-           << ";"
+           << TOKEN_SDIRECTIVE_CLOSE
            << "\"";
         return ss.str();
     }

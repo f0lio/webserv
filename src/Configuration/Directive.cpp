@@ -28,6 +28,11 @@ namespace parser
         return _args;
     }
 
+    // const SimpleDirective &SimpleDirective::operator=(SimpleDirective const &rhs) const
+    // {
+        
+    // }
+
     const SimpleDirective &SimpleDirective::operator=(SimpleDirective const &rhs)
     {
         if (this != &rhs)
@@ -40,7 +45,7 @@ namespace parser
 
     void SimpleDirective::print() const
     {
-        std::cout << _key;
+        std::cout << _key << "\t:";
         for (auto arg : _args)
         {
             std::cout << " " << arg;
@@ -76,7 +81,7 @@ namespace parser
     }
     void BlockDirective::print() const
     {
-        std::cout << _key << " " << _arg << std::endl;
+        std::cout << _key << ": " << _arg << std::endl;
         for (auto smp : _directives_vec)
             smp.print();
     }

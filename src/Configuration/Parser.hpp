@@ -16,7 +16,7 @@ namespace parser
         "host",
         "port",
         "root",
-        "server_names",
+        "server_name",
         "error_pages",
         "max_body_size",
         "methods",
@@ -61,10 +61,11 @@ namespace parser
         bool hasNext() const;
 
         // error formatting
+        std::string err_invalid_identifier(const std::string &identifier) const;
+        std::string err_unexpected_token(const std::string &dirName) const;
         std::string err_directive_not_open(const std::string &dirName) const;
         std::string err_directive_not_closed(const std::string &dirName) const;
         std::string err_directive_invalid_args(const std::string &dirName) const;
-        std::string err_unexpected_token(const std::string &dirName) const;
         std::string err_directive_not_terminated(const std::string &dirName) const;
         std::string line_num_msg() const; // returns e.g. "line: 4"
     };

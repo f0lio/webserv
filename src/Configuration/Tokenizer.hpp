@@ -8,6 +8,11 @@
 
 #include <stdio.h> //printf
 
+#define TOKEN_BLOCK_OPEN '{'
+#define TOKEN_BLOCK_CLOSE '}'
+#define TOKEN_SDIRECTIVE_CLOSE ';'
+#define TOKEN_COMMENT '#'
+
 namespace parser
 {
     /*

@@ -24,26 +24,22 @@ namespace parser
             if (c == ' ' || c == '\t')
                 continue;
             else if (c == '\n')
-            {
                 _line_number++;
-                has_identifier = false;
-            }
-            else if (c == '#')
+            else if (c == TOKEN_COMMENT)
             {
                 while (_stream.peek() != '\n' && _stream.get(c))
                     value += c;
                 _tokens.push_back(Token(COMMENT, value, _line_number));
                 value.clear();
-                has_identifier = false;
                 continue;
             }
-            else if (c == '{' || c == '}' || c == ';')
+            else if (c == TOKEN_BLOCK_OPEN || c == TOKEN_BLOCK_CLOSE || c == TOKEN_SDIRECTIVE_CLOSE)
             {
-                if (c == '{')
+                if (c == TOKEN_BLOCK_OPEN)
                     _tokens.push_back(Token(BLOCK_OPEN, std::string(1, c), _line_number));
-                else if (c == '}')
+                else if (c == TOKEN_BLOCK_CLOSE)
                     _tokens.push_back(Token(BLOCK_CLOSE, std::string(1, c), _line_number));
-                else if (c == ';')
+                else if (c == TOKEN_SDIRECTIVE_CLOSE)
                     _tokens.push_back(Token(SDIRECTIVE_END, std::string(1, c), _line_number));
                 has_identifier = false;
             }
