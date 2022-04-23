@@ -78,7 +78,6 @@ namespace parser
             else if (_currentToken._type == SDIRECTIVE_END)
                 break;
             else if (_currentToken._type == PARAM_LITERAL)
-
                 dir._args.push_back(_currentToken._value);
 
             else
@@ -114,7 +113,8 @@ namespace parser
             else if (_currentToken._type == PARAM_LITERAL)
             {
                 if (dir._arg.size())
-                    err_directive_invalid_args(dir._key);
+                    throw std::runtime_error(
+                        err_directive_invalid_args(dir._key));
                 dir._arg = _currentToken._value;
             }
             else if (_currentToken._type == BLOCK_OPEN)
@@ -122,6 +122,10 @@ namespace parser
             else
                 err_unexpected_token(dir._key);
         }
+        if (dir._arg.size() == 0)
+            throw std::runtime_error(
+                err_directive_invalid_args(dir._key));
+        
         while (hasNext() && peek()._type != END_OF_FILE)
         {
             next();
@@ -212,7 +216,7 @@ namespace parser
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
            << "directive \"" + dirName + "\" has no opening \""
-           << TOKEN_BLOCK_CLOSE
+           << TOKEN_BLOCK_OPEN
            << "\"";
         return ss.str();
     }

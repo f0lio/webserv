@@ -19,11 +19,11 @@ namespace parser
     {
     }
 
-    std::string SimpleDirective::getKey() const
+    std::string const & SimpleDirective::getKey() const
     {
         return _key;
     }
-    std::vector<std::string> SimpleDirective::getArgs() const
+    std::vector<std::string> const & SimpleDirective::getArgs() const
     {
         return _args;
     }

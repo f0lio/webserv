@@ -4,8 +4,7 @@
 ## variables
 NAME    = webserv
 CC		= clang++
-# FLAGS   = -std=c++98 # -D CONSOLE_OFF  #-Wall -Werror -Wextra
-FLAGS   = -std=c++11 # auto keyword
+FLAGS   = -w -std=c++98 # -D CONSOLE_OFF  #-Wall -Werror -Wextra
 INCLUDES= includes 
 
 UTILS	= helpers.cpp

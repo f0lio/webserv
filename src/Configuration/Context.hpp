@@ -13,8 +13,8 @@ namespace parser
 	class Context
 	{
 	public:
-		Context(){};
-		~Context(){};
+		Context() {};
+		~Context() {};
 		std::string getName() const { return _name; }
 		void setName(std::string &name) { _name = name; }
 		void addDirective(const BlockDirective &dir)
@@ -23,16 +23,26 @@ namespace parser
 		}
 		void addDirective(const SimpleDirective &dir)
 		{
-			
 			_simple_directives_vec.push_back(dir);
 		}
 
-		std::vector<SimpleDirective> getSimpleDirectives() {
+		std::vector<SimpleDirective> getSimpleDirectives()
+		{
 			return _simple_directives_vec;
 		}
-		std::vector<BlockDirective> getBlockDirectives() {
+
+		std::vector<BlockDirective> getBlockDirectives()
+		{
 			return _block_directives_vec;
 		}
+
+		// std::vector<std::string> get(std::string key)
+		// {
+		// 	for (size_t i = 0; i < _simple_directives_vec.size(); i++)
+		// 		if (_simple_directives_vec[i].getKey() == key)
+		// 			return _simple_directives_vec[i].getArgs();
+		// 	return std::vector<std::string>();
+		// }
 
 	private:
 		std::string _name;

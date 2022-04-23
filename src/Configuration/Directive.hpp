@@ -37,8 +37,8 @@ namespace parser
 
         const SimpleDirective &operator=(SimpleDirective const &rhs);
 
-        std::string getKey() const;
-        std::vector<std::string> getArgs() const;
+        std::string const & getKey() const;
+        std::vector<std::string> const & getArgs() const;
         void print() const;
 
     private:

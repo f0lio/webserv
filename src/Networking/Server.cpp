@@ -4,10 +4,12 @@
 
 namespace ws
 {
-    Server::Server(Configuration &config)
+    // Server::Server(parser::Context &serverConfig)
+    Server::Server()
     {
         _fd = -1;
-        _config = &config;
+        // prepare(serverConfig);
+        check_config();
     }
 
     Server::~Server()
@@ -43,6 +45,19 @@ namespace ws
 
         ::close(_fd);
         _fd = -1;
+    }
+
+    // get required data from Configuration and set them in a map<str, str> for easy access
+
+    // void Server::prepare(parser::Context &serverConfig)
+    void Server::prepare()
+    {
+
+    }
+
+    void Server::check_config() const
+    {
+
     }
 
 } // namespace ws

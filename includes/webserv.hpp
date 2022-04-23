@@ -12,7 +12,7 @@
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
 #include "../src/Configuration/Configuration.hpp"
-// #include "../src/Configuration/Directive.hpp"
+#include "../src/Configuration/Directive.hpp"
 #include "../src/Configuration/Context.hpp"
 #include "../src/Networking/Server.hpp"
 

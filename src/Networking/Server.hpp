@@ -12,14 +12,19 @@ namespace ws
     class Server : protected Socket
     {
     public:
-        Server(Configuration &config);
+        // Server(parser::Context &serverConfig);
+        Server();
         ~Server();
 
         void start();
         void stop();
 
     private:
-        Configuration *_config;
+        void check_config() const;
+        
+        void prepare();
+        // void prepare(parser::Context &serverConfig);
+        std::map<std::string, std::string> _config;
     };
 
 } // namespace ws
