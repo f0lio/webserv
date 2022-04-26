@@ -1,17 +1,19 @@
 
 #include "Configuration.hpp"
+#include "VServer.hpp"
 
 namespace ws
 {
-
     Configuration::Configuration(const std::string &path) : _path(path)
     {
-        ;
     }
 
     Configuration::~Configuration()
     {
-
+        for (size_t i = 0; i < _vservers.size(); i++)
+        {
+            delete _vservers[i];
+        }
     }
 
     void Configuration::parse()
@@ -24,8 +26,34 @@ namespace ws
         parser::Parser parser(tokenizer);
 
         parser.parse();
-        parser.print();
+        // parser.print();
+        _contexts = parser.getContexts();
         file.close();
+    }
+
+    void Configuration::setup()
+    {
+        for (size_t i = 0; i < _contexts.size(); i++)
+        {
+            VServer *vserver = new VServer(_contexts[i]);
+            _vservers.push_back(vserver);
+        }
+
+        std::map<port_t, struct ServerName> serverNamesMap;
+
+        for (size_t i = 0; i < _vservers.size(); i++)
+        {
+            std::vector<std::string> const &serverNames = _vservers[i]->get("server_name");
+            port_t port = std::stoi(_vservers[i]->get("listen")[0]);
+            for (size_t j = 0; j < serverNames.size(); j++)
+            {
+                if (serverNamesMap[port].vservers.find(serverNames[j]) != serverNamesMap[port].vservers.end())
+                    throw std::runtime_error("Duplicate server_name: " + serverNames[j]);
+                serverNamesMap[port].vservers[serverNames[j]] = _vservers[i];
+                if (serverNamesMap[port].vservers.find(DEFAULT_SERVER_KEY) == serverNamesMap[port].vservers.end())
+                    serverNamesMap[port].vservers[DEFAULT_SERVER_KEY] = _vservers[i];
+            }
+        }
     }
 
     void Configuration::print() const
@@ -33,8 +61,8 @@ namespace ws
         std::cout << "Printing.." << std::endl;
     }
 
-    std::vector<parser::Context> Configuration::getContexts() const
+    std::vector<VServer *> const &Configuration::getVServers() const
     {
-        return _servers;
+        return _vservers;
     }
 } // namespace ws

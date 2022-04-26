@@ -13,25 +13,42 @@ namespace parser
 	class Context
 	{
 	public:
-		Context() {};
-		~Context() {};
+		Context(){};
+		~Context(){};
+
 		std::string getName() const { return _name; }
-		void setName(std::string &name) { _name = name; }
+
+		void setName(std::string &name)
+		{
+			_name = name;
+		}
+
+		void setIndex(size_t index) // used for setting default_server
+		{
+			_index = index;
+		}
+
+		size_t getIndex() const
+		{
+			return _index;
+		}
+
 		void addDirective(const BlockDirective &dir)
 		{
 			_block_directives_vec.push_back(dir);
 		}
+
 		void addDirective(const SimpleDirective &dir)
 		{
 			_simple_directives_vec.push_back(dir);
 		}
 
-		std::vector<SimpleDirective> getSimpleDirectives()
+		std::vector<SimpleDirective> const &getSimpleDirectives() const
 		{
 			return _simple_directives_vec;
 		}
 
-		std::vector<BlockDirective> getBlockDirectives()
+		std::vector<BlockDirective> const &getBlockDirectives() const
 		{
 			return _block_directives_vec;
 		}
@@ -46,6 +63,7 @@ namespace parser
 
 	private:
 		std::string _name;
+		size_t _index;
 		std::map<std::string, SimpleDirective> _simple_directives;
 		std::map<std::string, BlockDirective> _block_directives;
 

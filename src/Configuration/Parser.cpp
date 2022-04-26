@@ -14,6 +14,7 @@ namespace parser
 
     void Parser::parse()
     {
+        size_t contextIndex = 0;
         while (hasNext() && peek()._type != END_OF_FILE)
         {
             next();
@@ -22,7 +23,10 @@ namespace parser
             else if (_currentToken._type == IDENTIFIER)
             {
                 if (isContextIdentifier(_currentToken._value))
-                    parseContext();
+                {
+                    parseContext(contextIndex);
+                    contextIndex++;
+                }
                 else
                     throw std::runtime_error(
                         err_invalid_identifier(_currentToken._value));
@@ -32,7 +36,7 @@ namespace parser
         }
     }
 
-    void Parser::parseContext()
+    void Parser::parseContext(size_t &contextIndex)
     {
         Context ctx;
 
@@ -62,6 +66,7 @@ namespace parser
         if (_currentToken._type != BLOCK_CLOSE)
             throw std::runtime_error(
                 err_directive_not_closed(ctx.getName()));
+        ctx.setIndex(contextIndex);
         _contexts.push_back(ctx);
     }
 
@@ -269,5 +274,10 @@ namespace parser
             for (auto dir : ctx.getBlockDirectives())
                 dir.print();
         }
+    }
+
+    std::vector<Context> const & Parser::getContexts() const
+    {
+        return _contexts;
     }
 } // namespace parser

@@ -16,7 +16,6 @@ typedef unsigned short port_t;
 
 namespace ws
 {
-
     class Socket
     {
     public:
@@ -26,15 +25,16 @@ namespace ws
 
         void set_fd(int fd);
         int get_fd() const;
-
+        
         void bind(const std::string &addr, port_t port);
-        void connect(const std::string &addr, port_t port);
-        Socket accept();
         void listen(int backlog);
-        void send(const std::string &data);
+        Socket accept();
+        void connect(const std::string &addr, port_t port);
+        
         std::string recv(size_t size);
+        void send(const std::string &data);
+        
         void shutdown(int how);
-
         void close();
 
     protected:

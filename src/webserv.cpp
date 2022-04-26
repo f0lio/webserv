@@ -11,6 +11,14 @@ int main(int argc, char *argv[])
     {
         ws::Configuration config(argv[1]);
         config.parse();
+        config.setup();
+        
+        std::vector<ws::VServer *> const & vservers = config.getVServers();
+
+        for (size_t i = 0; i < vservers.size(); i++)
+        {
+            vservers[i]->print();
+        }
 
 #ifdef DEBUG
         config.print();

@@ -19,18 +19,18 @@ namespace parser
     {
     }
 
-    std::string const & SimpleDirective::getKey() const
+    std::string const &SimpleDirective::getKey() const
     {
         return _key;
     }
-    std::vector<std::string> const & SimpleDirective::getArgs() const
+    std::vector<std::string> const &SimpleDirective::getArgs() const
     {
         return _args;
     }
 
     // const SimpleDirective &SimpleDirective::operator=(SimpleDirective const &rhs) const
     // {
-        
+
     // }
 
     const SimpleDirective &SimpleDirective::operator=(SimpleDirective const &rhs)
@@ -71,13 +71,17 @@ namespace parser
     {
         return _key;
     }
-    std::string BlockDirective::getArgs() const
+    std::string BlockDirective::getArg() const
     {
         return _arg;
     }
-    std::map<std::string, SimpleDirective> BlockDirective::getDirectives() const
+    // std::map<std::string, SimpleDirective> const &  BlockDirective::getDirectives() const
+    // {
+    //     return _directives;
+    // }
+    std::vector<SimpleDirective> const &BlockDirective::getDirectives() const
     {
-        return _directives;
+        return _directives_vec;
     }
     void BlockDirective::print() const
     {

@@ -12,9 +12,8 @@ namespace parser
         "server"};
 
     static const char *_simple_identifiers[] = {
-        "host",
-        "port",
-        "root",
+        "listen",
+        "root", 
         "server_name",
         "error_pages",
         "max_body_size",
@@ -31,7 +30,8 @@ namespace parser
         "cgi",
     };
 
-    // class Context;
+    class SimpleDirective;
+    class BlockDirective;
     class Parser
     {
     public:
@@ -40,7 +40,7 @@ namespace parser
 
         void parse();
         void print() const;
-        std::vector<Context> getContexts() const;
+        std::vector<Context> const & getContexts() const;
 
     private:
         Tokenizer &_tokenizer;
@@ -48,7 +48,7 @@ namespace parser
         std::vector<Context> _contexts;
 
         // parser utils
-        void parseContext();
+        void parseContext(size_t &contextIndex);
         SimpleDirective parseSimpleDirective(Context &ctx);
         BlockDirective parseBlockDirective(Context &ctx);
         bool isSimpleIdentifier(const std::string &identifier) const;

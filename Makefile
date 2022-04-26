@@ -8,7 +8,7 @@ FLAGS   = -w -std=c++98 # -D CONSOLE_OFF  #-Wall -Werror -Wextra
 INCLUDES= includes 
 
 UTILS	= helpers.cpp
-CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp
+CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp VServer.cpp 
 REQ		= 
 RES		= 
 SERVER	= Server.cpp Socket.cpp

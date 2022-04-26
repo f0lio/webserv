@@ -56,8 +56,10 @@ namespace parser
         ~BlockDirective();
 
         std::string getKey() const;
-        std::string getArgs() const;
-        std::map<std::string, SimpleDirective> getDirectives() const;
+        std::string getArg() const;
+        
+        // std::map<std::string, SimpleDirective> const & getDirectives() const;
+        std::vector<SimpleDirective> const & getDirectives() const;
 
         void addDirective(const SimpleDirective &dir)
         {
