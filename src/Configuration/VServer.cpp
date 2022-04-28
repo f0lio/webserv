@@ -11,7 +11,6 @@ namespace ws
         for (size_t i = 0; i < dirs.size(); i++)
             _config[dirs[i].getKey()] = dirs[i].getArgs();
 
-
         for (size_t i = 0; i < locs.size(); i++)
         {
             struct Location loc;
@@ -19,7 +18,7 @@ namespace ws
             for (size_t j = 0; j < dirs.size(); j++)
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
             
-            loc.path = locs[i].getArg();
+            loc.path = locs[i].getArgs()[0];
 
             if (loc.config.find("root") == loc.config.end())
                 loc.config["root"] = _config["root"];

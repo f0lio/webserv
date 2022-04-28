@@ -43,6 +43,12 @@ namespace parser
         return *this;
     }
 
+    void SimpleDirective::check() const
+    {
+        // if (_args.size() < DirectiveRules[_key].min_args)
+        //     throw std::runtime_error("Directive " + _key + " has too few arguments");
+    }
+
     void SimpleDirective::print() const
     {
         std::cout << _key << "\t:";
@@ -67,13 +73,13 @@ namespace parser
     {
     }
 
-    std::string BlockDirective::getKey() const
+    std::string const &BlockDirective::getKey() const
     {
         return _key;
     }
-    std::string BlockDirective::getArg() const
+    std::vector<std::string> const &BlockDirective::getArgs() const
     {
-        return _arg;
+        return _args;
     }
     // std::map<std::string, SimpleDirective> const &  BlockDirective::getDirectives() const
     // {
@@ -83,9 +89,19 @@ namespace parser
     {
         return _directives_vec;
     }
+
+    void BlockDirective::check() const
+    {
+    }
+
     void BlockDirective::print() const
     {
-        std::cout << _key << ": " << _arg << std::endl;
+        std::cout << _key << ":";
+        for (auto arg : _args)
+        {
+            std::cout << " " << arg;
+        }
+        std::cout << std::endl;
         for (auto smp : _directives_vec)
             smp.print();
     }

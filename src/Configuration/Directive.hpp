@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <string>
 #include "webserv.hpp"
 
 /*
@@ -37,8 +39,9 @@ namespace parser
 
         const SimpleDirective &operator=(SimpleDirective const &rhs);
 
-        std::string const & getKey() const;
-        std::vector<std::string> const & getArgs() const;
+        std::string const &getKey() const;
+        std::vector<std::string> const &getArgs() const;
+        void check() const;
         void print() const;
 
     private:
@@ -55,22 +58,23 @@ namespace parser
         BlockDirective(const std::string &key, const std::vector<std::string> &_params);
         ~BlockDirective();
 
-        std::string getKey() const;
-        std::string getArg() const;
-        
+        std::string const &getKey() const;
+        std::vector<std::string> const &getArgs() const;
+
         // std::map<std::string, SimpleDirective> const & getDirectives() const;
-        std::vector<SimpleDirective> const & getDirectives() const;
+        std::vector<SimpleDirective> const &getDirectives() const;
 
         void addDirective(const SimpleDirective &dir)
         {
             // std::map<std::string, SimpleDirective> _directives;
             _directives_vec.push_back(dir);
         }
+        void check() const;
         void print() const;
 
     private:
         std::string _key;
-        std::string _arg;
+        std::vector<std::string> _args;
         std::map<std::string, SimpleDirective> _directives;
         std::vector<SimpleDirective> _directives_vec;
     };

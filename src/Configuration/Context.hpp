@@ -61,6 +61,15 @@ namespace parser
 		// 	return std::vector<std::string>();
 		// }
 
+		void prepare() {
+			// for (size_t i = 0; i < _simple_directives_vec.size(); i++)
+			// 	_simple_directives_vec[i].check();
+			// for (size_t i = 0; i < _block_directives_vec.size(); i++)
+			// 	_block_directives_vec[i].getDirectives();
+			
+
+		}
+
 	private:
 		std::string _name;
 		size_t _index;

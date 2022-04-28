@@ -1,0 +1,124 @@
+#pragma once
+
+#include <map>
+#include <string>
+
+// each identifier must have a corresponding rule in directiveRulesMap<> 
+
+#define DIRECTIVE_ARG_TYPE_STRING "STRING"
+#define DIRECTIVE_ARG_TYPE_NUMBER "NUMBER"
+#define DIRECTIVE_ARG_TYPE_ANY "ANY"
+
+namespace parser
+{
+    struct DirectiveRules
+    {
+        char *name;
+        char *arg_type; // NUMBER | STRING | ANY
+        size_t min_args;
+        size_t max_args;
+        int occurrence; // if -1 then unlimited
+        bool is_required;
+    };
+
+    static const char *_context_identifiers[] = {
+        "server"};
+
+    static const char *_simple_identifiers[] = {
+        "listen",
+        "root",
+        "server_name",
+        "error_pages",
+        "max_body_size",
+        "methods",
+    };
+
+    static const char *_block_identifiers[] = {
+        "location"};
+
+    static const char *_location_identifiers[] = {
+        "methods",
+        "root",
+        "index",
+        "cgi",
+    };
+
+    static std::map<std::string, DirectiveRules>
+        directiveRulesMap;
+
+    static void initDirectiveRules()
+    {
+
+        directiveRulesMap["listen"] = (DirectiveRules){
+            .name = "listen",
+            .arg_type = DIRECTIVE_ARG_TYPE_ANY,
+            .min_args = 1,
+            .max_args = 2,
+            .occurrence = -1,
+            .is_required = true};
+
+        directiveRulesMap["root"] = (DirectiveRules){
+            .name = "root",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 1,
+            .occurrence = 1,
+            .is_required = true};
+
+        directiveRulesMap["server_name"] = (DirectiveRules){
+            .name = "server_name",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 64, // monte carlo
+            .occurrence = 1,
+            .is_required = false};
+
+        directiveRulesMap["error_pages"] = (DirectiveRules){
+            .name = "error_pages",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 1,
+            .occurrence = 1,
+            .is_required = false};
+
+        directiveRulesMap["max_body_size"] = (DirectiveRules){
+            .name = "max_body_size",
+            .arg_type = DIRECTIVE_ARG_TYPE_NUMBER,
+            .min_args = 1,
+            .max_args = 1,
+            .occurrence = 1,
+            .is_required = false};
+
+        directiveRulesMap["methods"] = (DirectiveRules){
+            .name = "methods",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 3,
+            .occurrence = 1,
+            .is_required = true};
+
+        directiveRulesMap["location"] = (DirectiveRules){
+            .name = "location",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 1,
+            .occurrence = 1024,
+            .is_required = false};
+
+        directiveRulesMap["index"] = (DirectiveRules){
+            .name = "index",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 24, // monte carlo
+            .occurrence = 1,
+            .is_required = false};
+
+        directiveRulesMap["cgi"] = (DirectiveRules){
+            .name = "cgi",
+            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .min_args = 1,
+            .max_args = 32, // monte carlo
+            .occurrence = 1,
+            .is_required = false};
+    }
+}
