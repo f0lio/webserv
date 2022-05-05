@@ -14,7 +14,7 @@ namespace parser
     struct DirectiveRules
     {
         char *name;
-        char *arg_type; // NUMBER | STRING | ANY
+        char *args_type; // NUMBER | STRING | ANY
         size_t min_args;
         size_t max_args;
         int occurrence; // if -1 then unlimited
@@ -51,7 +51,7 @@ namespace parser
 
         directiveRulesMap["listen"] = (DirectiveRules){
             .name = "listen",
-            .arg_type = DIRECTIVE_ARG_TYPE_ANY,
+            .args_type = DIRECTIVE_ARG_TYPE_ANY,
             .min_args = 1,
             .max_args = 2,
             .occurrence = -1,
@@ -59,7 +59,7 @@ namespace parser
 
         directiveRulesMap["root"] = (DirectiveRules){
             .name = "root",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 1,
             .occurrence = 1,
@@ -67,7 +67,7 @@ namespace parser
 
         directiveRulesMap["server_name"] = (DirectiveRules){
             .name = "server_name",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 64, // monte carlo
             .occurrence = 1,
@@ -75,7 +75,7 @@ namespace parser
 
         directiveRulesMap["error_pages"] = (DirectiveRules){
             .name = "error_pages",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 1,
             .occurrence = 1,
@@ -83,7 +83,7 @@ namespace parser
 
         directiveRulesMap["max_body_size"] = (DirectiveRules){
             .name = "max_body_size",
-            .arg_type = DIRECTIVE_ARG_TYPE_NUMBER,
+            .args_type = DIRECTIVE_ARG_TYPE_NUMBER,
             .min_args = 1,
             .max_args = 1,
             .occurrence = 1,
@@ -91,7 +91,7 @@ namespace parser
 
         directiveRulesMap["methods"] = (DirectiveRules){
             .name = "methods",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 3,
             .occurrence = 1,
@@ -99,7 +99,7 @@ namespace parser
 
         directiveRulesMap["location"] = (DirectiveRules){
             .name = "location",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 1,
             .occurrence = 1024,
@@ -107,7 +107,7 @@ namespace parser
 
         directiveRulesMap["index"] = (DirectiveRules){
             .name = "index",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 24, // monte carlo
             .occurrence = 1,
@@ -115,7 +115,7 @@ namespace parser
 
         directiveRulesMap["cgi"] = (DirectiveRules){
             .name = "cgi",
-            .arg_type = DIRECTIVE_ARG_TYPE_STRING,
+            .args_type = DIRECTIVE_ARG_TYPE_STRING,
             .min_args = 1,
             .max_args = 32, // monte carlo
             .occurrence = 1,

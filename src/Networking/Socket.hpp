@@ -23,14 +23,12 @@ namespace ws
         Socket(int fd);
         ~Socket();
 
-        void set_fd(int fd);
-        int get_fd() const;
-        
-        void bind(const std::string &addr, port_t port);
-        void listen(int backlog);
+        void setFd(int fd);
+        int getFd() const;
+
+        void setup(const std::string &addr, port_t port);
+
         Socket accept();
-        void connect(const std::string &addr, port_t port);
-        
         std::string recv(size_t size);
         void send(const std::string &data);
         
@@ -38,6 +36,8 @@ namespace ws
         void close();
 
     protected:
+        void bind(const std::string &addr, port_t port);
+        void listen(int backlog);
         int _fd;
     };
 

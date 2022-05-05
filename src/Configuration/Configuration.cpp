@@ -9,9 +9,7 @@ namespace ws
     Configuration::~Configuration()
     {
         for (size_t i = 0; i < _vservers.size(); i++)
-        {
             delete _vservers[i];
-        }
     }
 
     void Configuration::parse()
@@ -43,29 +41,44 @@ namespace ws
 
         this->parse();
         this->prepare();
+        std::cout << _contexts.size() << " contexts" << std::endl;
         for (size_t i = 0; i < _contexts.size(); i++)
-        {
-            VServer *vserver = new VServer(_contexts[i]);
-            _vservers.push_back(vserver);
-        }
+            _vservers.push_back(new VServer(_contexts[i]));
 
         for (size_t i = 0; i < _vservers.size(); i++)
-        {
+        {       
             std::vector<std::string> const &serverNames = _vservers[i]->get("server_name");
-            port_t port = std::stoi(_vservers[i]->get("listen")[0]);
+
+            port_t port;
+            std::string host;
+            
+
+            // std::vector<Listen> const &listens = _vservers[i]->getListens();
+
+            // for (size_t j = 0; j < listens.size(); j++)
+            // {
+            //     port = listens[j].port;
+            //     host = listens[j].host;
+            // }
+
             for (size_t j = 0; j < serverNames.size(); j++)
             {
-                if (_serverNamesMap[port].vservers.find(serverNames[j]) != _serverNamesMap[port].vservers.end())
+                if (this->_serverNamesMap[port].vservers.find(serverNames[j]) != this->_serverNamesMap[port].vservers.end())
                     throw std::runtime_error("Duplicate server_name: " + serverNames[j]);
-                _serverNamesMap[port].vservers[serverNames[j]] = _vservers[i];
-                if (default_is_set == false && _serverNamesMap[port].vservers.find(DEFAULT_SERVER_KEY) == _serverNamesMap[port].vservers.end())
+                this->_serverNamesMap[port].vservers[serverNames[j]] = _vservers[i];
+                if (
+                    default_is_set == false &&
+                    this->_serverNamesMap[port].vservers.find(DEFAULT_SERVER_KEY) == this->_serverNamesMap[port].vservers.end()
+                )
                 {
                     default_is_set = true;
-                    _serverNamesMap[port].vservers[DEFAULT_SERVER_KEY] = _vservers[i];
+                    this->_serverNamesMap[port].vservers[DEFAULT_SERVER_KEY] = _vservers[i];
                 }
             }
         }
 
+        console.log("Configuration loaded");
+        std::cout << _vservers.size() << " vservers loaded" << std::endl;
         for (size_t i = 0; i < _vservers.size(); i++)
         {
             _vservers[i]->print();
@@ -84,7 +97,7 @@ namespace ws
 
     std::map<port_t, struct ServerName> const &Configuration::getServerNamesMap() const
     {
-        return _serverNamesMap;
+        return this->_serverNamesMap;
     }
 
 } // namespace ws

@@ -5,13 +5,14 @@
 NAME    = webserv
 CC		= clang++
 FLAGS   = -w -std=c++98 # -D CONSOLE_OFF  #-Wall -Werror -Wextra
+
 INCLUDES= includes 
 
 UTILS	= helpers.cpp
 CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp VServer.cpp
 REQ		= 
 RES		= 
-SERVER	= Server.cpp Socket.cpp 
+SERVER	= Cluster.cpp Server.cpp Socket.cpp 
 
 SRCS    = 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\

@@ -2,6 +2,7 @@
 
 int main(int argc, char *argv[])
 {
+    
     if (argc != 2)
     {
         console.err("Usage: ./webserv <config-file>");
@@ -15,10 +16,9 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
         config.print();
 #endif
-        // ws::Cluster cluster(config);
-        // cluster.setup();
-        // cluster.run();
-
+        ws::Cluster cluster(config);
+        cluster.setup();
+        cluster.run();
     }
     catch (const std::exception &e)
     {

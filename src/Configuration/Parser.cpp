@@ -182,7 +182,7 @@ namespace parser
         else if ((args.size() < directiveRulesMap[key].min_args) || (args.size() > directiveRulesMap[key].max_args))
             throw std::runtime_error(
                 err_directive_invalid_args_count(key));
-        std::string type = directiveRulesMap[key].arg_type;
+        std::string type = directiveRulesMap[key].args_type;
         for (std::vector<std::string>::const_iterator it = args.begin();
                 it != args.end(); ++it)
         {

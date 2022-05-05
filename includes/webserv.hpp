@@ -15,7 +15,7 @@
 #include "../src/Configuration/Context.hpp"
 #include "../src/Configuration/VServer.hpp"
 #include "../src/Networking/Server.hpp"
-// #include "../src/Networking/Cluster.hpp"
+#include "../src/Networking/Cluster.hpp"
 
 // space in between makes it a special key (2 tokens),
 //  thus avoid collision with server_name named (e.g. "default_server")")
@@ -24,9 +24,15 @@
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
 
+struct Listen
+{
+    std::string host;
+    port_t port;
+};
+
 struct ServerName
 {
-    std::map<std::string, ws::VServer *> vservers;
+    std::map<std::string, ws::VServer*> vservers;
 };
 
 struct Location
@@ -35,8 +41,8 @@ struct Location
     std::map<std::string, t_vec_str> config;
 };
 
-bool  is_included(char c, char *str);
-bool is_number(const std::string &s);
-bool is_number(const char *s);
+bool  is_included(char c, char* str);
+bool is_number(const std::string& s);
+bool is_number(const char* s);
 
 static Console console;

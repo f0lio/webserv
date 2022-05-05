@@ -7,7 +7,7 @@ namespace parser
     Token::Token(TokenType type, std::string value, size_t line) : _type(type), _value(value), _line(line) {}
     Token::~Token() {}
 
-    Tokenizer::Tokenizer(std::istream &stream) : _stream(stream), _line_number(0) {}
+    Tokenizer::Tokenizer(std::istream &stream) : _stream(stream), _line_number(0), _index(0) {}
     Tokenizer::~Tokenizer() {}
 
     std::vector<Token> Tokenizer::getTokens() { return _tokens; };

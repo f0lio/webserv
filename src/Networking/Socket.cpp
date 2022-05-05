@@ -18,12 +18,12 @@ namespace ws
             ::close(_fd);
     }
 
-    void Socket::set_fd(int fd)
+    void Socket::setFd(int fd)
     {
         _fd = fd;
     }
 
-    int Socket::get_fd() const
+    int Socket::getFd() const
     {
         return _fd;
     }
@@ -52,15 +52,6 @@ namespace ws
             throw std::runtime_error("listen() failed");
     }
 
-    void Socket::connect(const std::string &addr, port_t port)
-    {
-        struct sockaddr_in addr_in;
-        addr_in.sin_family = AF_INET;
-        addr_in.sin_port = htons(port);
-        addr_in.sin_addr.s_addr = inet_addr(addr.c_str());
-        if (::connect(_fd, (struct sockaddr *)&addr_in, sizeof(addr_in)) == -1)
-            throw std::runtime_error("connect() failed");
-    }
 
     void Socket::send(const std::string &data)
     {

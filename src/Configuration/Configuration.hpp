@@ -5,11 +5,15 @@
 #include "Context.hpp"
 #include "Parser.hpp"
 #include "VServer.hpp"
+#include "webserv.hpp"
+
+#include <stdlib.h>
 
 typedef unsigned short port_t;
 
 namespace ws
 {
+    // struct Listen;
     class VServer;
     class Configuration
     {
