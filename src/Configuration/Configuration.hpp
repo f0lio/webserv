@@ -4,7 +4,7 @@
 
 #include "Context.hpp"
 #include "Parser.hpp"
-#include "VServer.hpp"
+#include "../Networking/VServer.hpp"
 #include "webserv.hpp"
 
 #include <stdlib.h>

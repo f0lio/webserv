@@ -62,31 +62,50 @@ namespace ws
 
     void Cluster::setup()
     {
-        std::vector<VServer*> const& servers = _config.getVServers();
-
+        std::vector<VServer *> const & servers = _config.getVServers();
         for (std::vector<VServer *>::const_iterator it = servers.begin(); it != servers.end(); it++)
         {
-            // t_vec_str const &listens = it->getListens();
+            (*it)->start();
         }
+
+
     }
 
     void Cluster::run()
     {
         std::map<port_t, struct ServerName> const& serverNamesMap = _config.getServerNamesMap();
-
-        // console.log("Cluster running...");
+        std::vector<VServer *> const & servers = _config.getVServers();
+        
+        _nfds = 0;
+        
+        for (size_t i = 0; i < servers.size(); i++)
+        {
+            (_pollfds + i)->fd = servers[i]->getFd();
+            (_pollfds + i)->events = POLLIN;
+            (_pollfds + i)->revents = 0;
+            _nfds++;
+        }
+        console.log("Cluster started");
         // while (1)
         // {
-            
+        //     // call poll.
+        //     if (poll(_pollfds, _nfds, -1) < 0)
+        //         throw std::runtime_error("poll() failed");
+        //     for (size_t i = 0; i < _nfds; i++)
+        //     {
+        //         if (_pollfds[i].revents & POLLIN)
+        //         {
+        //             if (_pollfds[i].fd == _listen_fd)
+        //             {
+        //                 // new connection.
+        //             }
+
+        //         }
+        //         else if (_pollfds[i].revents & POLLOUT)
+        //         {
+
+        //         }
+        //     }   
         // }
-        // 80: google.com : VServer0
-        //     google.io : VServer1
-        //     google.ma : VServer2
-        //     google.fr : VServer3
-
-        // 80: google.io
-
-        // 90: google.io
-        // 90: google.io
     }
 }

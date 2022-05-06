@@ -1,5 +1,4 @@
 #include "VServer.hpp"
-#include "Context.hpp"
 
 namespace ws
 {
@@ -77,6 +76,38 @@ namespace ws
         return _listens;
     }
 
+    int VServer::getFd() const
+    {
+        return _fd;
+    }
+    void VServer::start()
+    {
+        // for (size_t i = 0; i < _listens.size(); i++)    
+        // {
+            this->addr.sin_family = AF_INET;
+            this->addr.sin_addr.s_addr = INADDR_ANY;
+            this->addr.sin_port = htons(_listens[0].port);
+            
+            int sock_len = sizeof(this->addr);
+            
+            if ((this->_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+            {
+                throw std::runtime_error("Could not create socket");
+            }
+
+            if (::bind(
+                this->_fd,
+                (struct sockaddr *)&this->addr,
+                (socklen_t)sock_len) == -1)
+                throw std::runtime_error("Could not bind socket");
+
+            if (::listen(this->_fd, BACK_LOG) == -1)
+            {
+                throw std::runtime_error("Could not listen on socket");
+            }
+        // }
+
+    }
 
     void VServer::print() const
     {
