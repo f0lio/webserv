@@ -1,12 +1,12 @@
 
 #include "Parser.hpp"
-
 #include "Utils.hpp"
 
 namespace parser
 {
     Parser::Parser(Tokenizer &tokenizer) : _tokenizer(tokenizer)
     {
+        initDirectiveRules();
         _tokenizer.tokenize();
     }
 
@@ -95,11 +95,7 @@ namespace parser
         if (_currentToken._type != SDIRECTIVE_END)
             throw std::runtime_error(
                 err_directive_not_terminated(dir._key));
-        else if (dir._args.size() == 0)
-        {
-            throw std::runtime_error(
-                err_directive_invalid_args(ctx.getName())); // hadi
-        }
+        checkArgs(dir._key, dir._args);
         return dir;
     }
 
@@ -116,21 +112,13 @@ namespace parser
             if (_currentToken._type == COMMENT)
                 continue;
             else if (_currentToken._type == PARAM_LITERAL)
-            {
-                if (dir._arg.size())
-                    throw std::runtime_error(
-                        err_directive_invalid_args(dir._key));
-                dir._arg = _currentToken._value;
-            }
+                dir._args.push_back(_currentToken._value);
             else if (_currentToken._type == BLOCK_OPEN)
                 break;
             else
                 err_unexpected_token(dir._key);
         }
-        if (dir._arg.size() == 0)
-            throw std::runtime_error(
-                err_directive_invalid_args(dir._key));
-        
+        checkArgs(dir._key, dir._args); //checks args count and types based on directive rules
         while (hasNext() && peek()._type != END_OF_FILE)
         {
             next();
@@ -187,6 +175,28 @@ namespace parser
         return false;
     }
 
+    void Parser::checkArgs(const std::string &key, const std::vector<std::string> &args) const
+    {
+        if (directiveRulesMap.find(key) == directiveRulesMap.end())
+            throw std::runtime_error("Directive" + key + "has no rules");
+        else if ((args.size() < directiveRulesMap[key].min_args) || (args.size() > directiveRulesMap[key].max_args))
+            throw std::runtime_error(
+                err_directive_invalid_args_count(key));
+        std::string type = directiveRulesMap[key].args_type;
+        for (std::vector<std::string>::const_iterator it = args.begin();
+                it != args.end(); ++it)
+        {
+            if (type == DIRECTIVE_ARG_TYPE_ANY)
+                continue;
+            else if (type == DIRECTIVE_ARG_TYPE_NUMBER)
+            {
+                if (is_number(*it) == false)
+                    throw std::runtime_error(
+                        err_directive_invalid_arg_type(key));
+            }
+        }
+    }
+
     bool Parser::hasNext() const
     {
         return _tokenizer.hasNext();
@@ -236,11 +246,19 @@ namespace parser
         return ss.str();
     }
 
-    std::string Parser::err_directive_invalid_args(const std::string &dirName) const
+    std::string Parser::err_directive_invalid_args_count(const std::string &dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
            << "invalid number of arguments in \"" + dirName + "\" directive";
+        return ss.str();
+    }
+    
+    std::string Parser::err_directive_invalid_arg_type(const std::string &dirName) const
+    {
+        std::stringstream ss;
+        ss << "line:" << _currentToken._line << ", "
+           << "invalid argument type in \"" + dirName + "\" directive";
         return ss.str();
     }
 
@@ -276,7 +294,7 @@ namespace parser
         }
     }
 
-    std::vector<Context> const & Parser::getContexts() const
+    std::vector<Context> const &Parser::getContexts() const
     {
         return _contexts;
     }

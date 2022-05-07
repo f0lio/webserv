@@ -58,6 +58,12 @@ public:
 		err_count++;
 	}
 
+	// static Logger &getInstance()
+	// {
+	// 	static Logger instance("log.txt", true);
+	// 	return instance;
+	// }
+
 private:
 	std::ofstream _outputFile;
 	size_t write_count;

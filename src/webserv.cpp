@@ -2,6 +2,7 @@
 
 int main(int argc, char *argv[])
 {
+    
     if (argc != 2)
     {
         console.err("Usage: ./webserv <config-file>");
@@ -10,21 +11,14 @@ int main(int argc, char *argv[])
     try
     {
         ws::Configuration config(argv[1]);
-        config.parse();
         config.setup();
-        
-        std::vector<ws::VServer *> const & vservers = config.getVServers();
-
-        for (size_t i = 0; i < vservers.size(); i++)
-        {
-            vservers[i]->print();
-        }
 
 #ifdef DEBUG
         config.print();
 #endif
-        // ws::Server server(config);
-        // server.start();
+        ws::Cluster cluster(config);
+        cluster.setup();
+        cluster.run();
     }
     catch (const std::exception &e)
     {
