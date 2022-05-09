@@ -28,6 +28,7 @@
 *.out
 *.app
 *.pdf
+*.dSYM
 
 .vscode
 *.log

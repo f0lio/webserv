@@ -16,6 +16,9 @@
 #include "../src/Networking/VServer.hpp"
 #include "../src/Networking/Cluster.hpp"
 
+#include "../src/CGI/CGI.hpp"
+#include "../src/CGI/CGI_utils.hpp"
+
 // space in between makes it a special key (2 tokens),
 //  thus avoid collision with server_name named (e.g. "default_server")")
 #define DEFAULT_SERVER_KEY "default server"

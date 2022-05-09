@@ -4,7 +4,7 @@
 ## variables
 NAME    = webserv
 CC		= clang++
-FLAGS   = -w -std=c++98 # -D CONSOLE_OFF  #-Wall -Werror -Wextra
+FLAGS   = -g -w -std=c++98 # -D CONSOLE_OFF  #-Wall -Werror -Wextra
 
 INCLUDES= includes 
 
@@ -13,12 +13,14 @@ CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp
 REQ		= 
 RES		= 
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp 
+CGI		= CGI.cpp CGI_utils.cpp
 
 SRCS    = 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\
 			$(CONFIG:%.cpp=./src/Configuration/%.cpp)\
-			$(SERVER:%.cpp=./src/Networking/%.cpp)
-
+			$(SERVER:%.cpp=./src/Networking/%.cpp)\
+			$(CGI:%.cpp=./src/CGI/%.cpp)
+			
 HEADERS =	$(CONFIG:%.cpp=./src/Configuration/%.hpp)\
 			$(SERVER:%.cpp=./src/Networking/%.hpp)\
 			./src/utils/Console.hpp\
