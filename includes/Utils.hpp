@@ -7,8 +7,6 @@
 
 #define ARRAY_SIZE(X_X) (sizeof(X_X) / sizeof(X_X[0]))
 
-
-
 #define SSTR( x )       static_cast< std::ostringstream & >( \
                         ( std::ostringstream() << std::dec << x  ) ).str()
 

@@ -11,6 +11,7 @@
 #include <set>
 #include <map>
 #include <stdexcept>
+#include <signal.h>
 
 typedef unsigned short port_t;
 
