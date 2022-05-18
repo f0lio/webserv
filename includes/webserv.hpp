@@ -26,6 +26,7 @@ typedef std::vector<std::string> t_vec_str;
 
 struct Listen
 {
+    in_addr_t addr; // converted to network byte order for fast comparison
     std::string host;
     port_t port;
 };
@@ -33,6 +34,13 @@ struct Listen
 struct ServerName
 {
     std::map<std::string, ws::VServer*> vservers;
+    ws::VServer* get(const std::string& name) const
+    {
+        std::map<std::string, ws::VServer*>::const_iterator it = vservers.find(name);
+        if (it == vservers.end())
+            return NULL;
+        return it->second;
+    }
 };
 
 struct Location

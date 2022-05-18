@@ -1,8 +1,12 @@
 #include "Configuration.hpp"
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 namespace ws
 {
-    Configuration::Configuration(const std::string &path) : _path(path)
+    Configuration::Configuration(const std::string& path) : _path(path)
     {
     }
 
@@ -30,74 +34,86 @@ namespace ws
     {
         for (size_t i = 0; i < _contexts.size(); i++)
         {
-            parser::Context &ctx = _contexts[i];
+            parser::Context& ctx = _contexts[i];
             ctx.prepare();
         }
     }
 
     void Configuration::setup()
     {
-        bool default_is_set = false; // to avoid running find() more than once
-
         this->parse();
         this->prepare();
-        std::cout << _contexts.size() << " contexts" << std::endl;
+
         for (size_t i = 0; i < _contexts.size(); i++)
             _vservers.push_back(new VServer(_contexts[i]));
 
-        for (size_t i = 0; i < _vservers.size(); i++)
-        {       
-            std::vector<std::string> const &serverNames = _vservers[i]->get("server_name");
+        struct sockaddr_in addr;
 
-            port_t port;
-            std::string host;
-            
-
-            // std::vector<Listen> const &listens = _vservers[i]->getListens();
-
-            // for (size_t j = 0; j < listens.size(); j++)
-            // {
-            //     port = listens[j].port;
-            //     host = listens[j].host;
-            // }
-
-            for (size_t j = 0; j < serverNames.size(); j++)
-            {
-                if (this->_serverNamesMap[port].vservers.find(serverNames[j]) != this->_serverNamesMap[port].vservers.end())
-                    throw std::runtime_error("Duplicate server_name: " + serverNames[j]);
-                this->_serverNamesMap[port].vservers[serverNames[j]] = _vservers[i];
-                if (
-                    default_is_set == false &&
-                    this->_serverNamesMap[port].vservers.find(DEFAULT_SERVER_KEY) == this->_serverNamesMap[port].vservers.end()
-                )
-                {
-                    default_is_set = true;
-                    this->_serverNamesMap[port].vservers[DEFAULT_SERVER_KEY] = _vservers[i];
-                }
-            }
-        }
-
-        console.log("Configuration loaded");
-        std::cout << _vservers.size() << " vservers loaded" << std::endl;
         for (size_t i = 0; i < _vservers.size(); i++)
         {
-            _vservers[i]->print();
+            std::vector<std::string> const& serverNames = _vservers[i]->get("server_name");
+
+            std::vector<struct Listen>::const_iterator it = _vservers[i]->getListens().begin();
+            for (; it != _vservers[i]->getListens().end(); it++)
+            {
+                // TODO: handle ANY_ADDRESS
+
+                // no need to check as it is already checked in VServer
+                inet_aton(it->host.c_str(), &addr.sin_addr);
+
+                for (size_t j = 0; j < serverNames.size(); j++)
+                {
+                    if (_serversTree[addr.sin_addr.s_addr][it->port].vservers[serverNames[j]] != NULL)
+                        throw std::runtime_error( "server block " + SSTR(i)
+                            + ": server_name \"" + serverNames[j] + "\" already exists");
+                    else if (_serversTree[addr.sin_addr.s_addr][it->port].vservers[DEFAULT_SERVER_KEY] == NULL)
+                        _serversTree[addr.sin_addr.s_addr][it->port].vservers[DEFAULT_SERVER_KEY] = _vservers[i];
+                    _serversTree[addr.sin_addr.s_addr][it->port].vservers[serverNames[j]] = _vservers[i];
+                }
+                
+                // DEBUG: tmp_map is used to find hostname by ip
+                _tmp_map[addr.sin_addr.s_addr] = it->host;
+            }
         }
     }
 
     void Configuration::print() const
     {
-        std::cout << "Printing.." << std::endl;
+        std::cout << "Resolver tree:" << std::endl;
+
+        std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it;
+        for (it = _serversTree.begin(); it != _serversTree.end(); it++)
+        {
+            std::cout << "IP: " << _tmp_map.find(it->first)->second << std::endl;
+
+
+            std::cout << "Ports:" << std::endl;
+            std::map<port_t, struct ServerName>::const_iterator it2;
+            for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
+            {
+                std::cout << "Port: " << it2->first << std::endl;
+                std::cout << "ServerNames:" << std::endl;
+                std::map<std::string, VServer*>::const_iterator it3;
+                for (it3 = it2->second.vservers.begin(); it3 != it2->second.vservers.end(); it3++)
+                {
+                    std::cout << "ServerName: " << it3->first;
+                    std::cout << ": " << it3->second->getIndex();
+                    if (it3->second->hasName())
+                        std::cout << " (" << it3->second->getName() << ")";
+                    std::cout << std::endl;
+                }
+            }
+            std::cout << std::endl;
+        }
     }
 
-    std::vector<VServer *> const &Configuration::getVServers() const
+    std::vector<VServer*> const& Configuration::getVServers() const
     {
         return _vservers;
     }
 
-    std::map<port_t, struct ServerName> const &Configuration::getServerNamesMap() const
+    std::map<port_t, struct ServerName> const& Configuration::getServerNamesMap() const
     {
         return this->_serverNamesMap;
     }
-
 } // namespace ws
