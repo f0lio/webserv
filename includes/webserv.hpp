@@ -26,9 +26,10 @@ typedef std::vector<std::string> t_vec_str;
 
 struct Listen
 {
-    in_addr_t addr; // converted to network byte order for fast comparison
+    struct sockaddr_in addr_in;
     std::string host;
     port_t port;
+    int fd;
 };
 
 struct ServerName

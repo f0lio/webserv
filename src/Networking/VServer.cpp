@@ -54,11 +54,6 @@ namespace ws
     {
         return _locations;
     }
-    
-    std::vector<int> const& VServer::getListenFds() const
-    {
-        return _listen_fds;
-    }
 
     const  std::vector<struct Listen>& VServer::getListens() const
     {
@@ -98,6 +93,7 @@ namespace ws
     void VServer::setupListen(t_vec_str const& args)
     {
         struct Listen listen;
+        listen.fd = -1; // -1 means not binded yet
         if (args.size() == 1)
         {
             listen.host = "0.0.0.0";
@@ -121,6 +117,7 @@ namespace ws
                 "server block " + SSTR(_ctx_index)
                 + ": invalid port number: " + SSTR(listen.port)
             );
+
         if (_hostPortMap[listen.host] == listen.port)
             throw std::runtime_error(
                 "server block " + SSTR(_ctx_index)
@@ -132,59 +129,49 @@ namespace ws
                 "server block " + SSTR(_ctx_index)
                 + ": invalid host: " + listen.host
             );
-        listen.addr = addr.sin_addr.s_addr;
+        listen.addr_in.sin_addr.s_addr = addr.sin_addr.s_addr;
         _listens.push_back(listen);
     }
 
     void VServer::start(std::map<in_addr_t, std::vector<port_t> >& _binded_listens)
     {
-        std::cout << "Starting server " << getName() << std::endl;
         for (size_t i = 0; i < _listens.size(); i++)
-        {
+        {   
             if (isAlreadyBinded(_listens[i], _binded_listens))
                 continue;
-            else
-                _binded_listens[_listens[i].addr].push_back(_listens[i].port);
+            _binded_listens[_listens[i].addr_in.sin_addr.s_addr].push_back(_listens[i].port);
 
-            this->addr.sin_family = AF_INET;
+            _listens[i].addr_in.sin_family = AF_INET;
             if (_listens[i].host == "0.0.0.0")
-            {
-                std::cout << this->getIndex() << " is listening on all interfaces" << std::endl;
-                this->addr.sin_addr.s_addr = INADDR_ANY;
-            }
+                _listens[i].addr_in.sin_addr.s_addr = INADDR_ANY;
             else
-                this->addr.sin_addr.s_addr = inet_addr(_listens[i].host.c_str());
+                _listens[i].addr_in.sin_addr.s_addr = inet_addr(_listens[i].host.c_str());
 
-            this->addr.sin_port = htons(_listens[i].port);
+            _listens[i].addr_in.sin_port = htons(_listens[i].port);
 
-            int sock_len = sizeof(this->addr);
+            int sock_len = sizeof(_listens[i].addr_in);
 
+            std::string formated_listen = _listens[i].host + ":" + SSTR(_listens[i].port);
+
+            // signal(SIGPIPE, SIG_IGN);
             if ((this->_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
             {
-                throw std::runtime_error("Could not create socket");
+                throw std::runtime_error("Could not create socket for " + formated_listen);
             }
-            _listen_fds.push_back(this->_fd);
-
+            _listens[i].fd = this->_fd;
             if (::bind(
                 this->_fd,
-                (struct sockaddr*)&this->addr,
+                (struct sockaddr*)&_listens[i].addr_in,
                 (socklen_t)sock_len) == -1)
-                throw std::runtime_error("Could not bind socket");
+                throw std::runtime_error(
+                    "Could not bind socket to address " + formated_listen);
 
             if (::listen(this->_fd, BACK_LOG) == -1)
             {
-                throw std::runtime_error("Could not listen on socket");
+                throw std::runtime_error("Could not listen on socket for " + formated_listen);
             }
-            _started = true;
         }
-
-        // std::cout << "Server " << this->getIndex() << " started on" << std::endl;
-        //print listens
-        // for (size_t i = 0; i < _listens.size(); i++)
-        // {
-        //     std::cout << _listens[i].host << ":" << _listens[i].port << std::endl;
-        // }
-
+        _started = true;
     }
 
     void VServer::print() const
@@ -223,11 +210,39 @@ namespace ws
         }
         std::cout << std::endl;
     } // print
+    
+    void VServer::handleConnection(int client_fd)
+    {
+        //send response
+        char buffer[1024];
+        int n = ::read(client_fd, buffer, 1024);
+        if (n == -1)
+        {
+            std::cerr << "Could not read from client" << std::endl;
+            return;
+        }
+        buffer[n] = '\0';
+        std::cout << "Read " << n << " bytes from client" << std::endl;
+        std::cout << "Client sent: " << buffer << std::endl;
+        std::cout << "############" << std::endl;
+
+        //send response
+        std::string response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello World\r\n";
+        n = ::write(client_fd, response.c_str(), response.size());
+        if (n == -1)
+        {
+            std::cerr << "Could not write to client" << std::endl;
+            return;
+        }
+        std::cout << "Wrote " << n << " bytes to client" << std::endl;
+        std::cout << "############" << std::endl;
+        ::close(client_fd);
+    }
 
     // helper function(s?)
     bool isAlreadyBinded(struct Listen const& listen, std::map<in_addr_t, std::vector<port_t> >& _binded_listens)
     {
-        std::map<in_addr_t, std::vector<port_t> >::iterator it3 = _binded_listens.find(listen.addr);
+        std::map<in_addr_t, std::vector<port_t> >::iterator it3 = _binded_listens.find(listen.addr_in.sin_addr.s_addr);
         if (it3 != _binded_listens.end())
             return std::find(it3->second.begin(), it3->second.end(), listen.port) != it3->second.end();
         return false;
