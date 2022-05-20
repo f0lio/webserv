@@ -10,4 +10,4 @@ done
 for f in $(cat .gitignore | grep -v "#"); do
 	rm -Rvf $f 2>/dev/null
 done
-echo "\nmchaaaw\n"
+echo "\nmchaaaw"
