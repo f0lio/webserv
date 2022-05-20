@@ -15,9 +15,12 @@ REQ		=
 RES		= 
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp# Request.cpp Response.cpp 
 
+CGI		= CGI.cpp CGI_utils.cpp
+
 SRCS    = 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\
 			$(CONFIG:%.cpp=./src/Configuration/%.cpp)\
+			$(CGI:%.cpp=./src/CGI/%.cpp)\
 			$(SERVER:%.cpp=./src/Networking/%.cpp)
 
 HEADERS =	$(CONFIG:%.cpp=./src/Configuration/%.hpp)\

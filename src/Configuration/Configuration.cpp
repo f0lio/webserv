@@ -84,19 +84,19 @@ namespace ws
         std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it;
         for (it = _serversTree.begin(); it != _serversTree.end(); it++)
         {
-            std::cout << "IP: " << _tmp_map.find(it->first)->second << std::endl;
+            std::cout << "	IP: " << _tmp_map.find(it->first)->second << std::endl;
 
 
-            std::cout << "Ports:" << std::endl;
+            std::cout << "	Ports:" << std::endl;
             std::map<port_t, struct ServerName>::const_iterator it2;
             for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
             {
-                std::cout << "Port: " << it2->first << std::endl;
-                std::cout << "ServerNames:" << std::endl;
+                std::cout << "		Port: " << it2->first << std::endl;
+                std::cout << "		ServerNames:" << std::endl;
                 std::map<std::string, VServer*>::const_iterator it3;
                 for (it3 = it2->second.vservers.begin(); it3 != it2->second.vservers.end(); it3++)
                 {
-                    std::cout << "ServerName: " << it3->first;
+                    std::cout << "			ServerName: " << it3->first;
                     std::cout << ": " << it3->second->getIndex();
                     if (it3->second->hasName())
                         std::cout << " (" << it3->second->getName() << ")";

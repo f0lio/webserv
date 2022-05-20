@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
         config.print();
+		// std::cout << "testing" << std::endl;
 #endif
         ws::Cluster cluster(config);
         cluster.setup();
