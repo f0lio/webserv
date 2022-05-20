@@ -11,6 +11,7 @@
 #include <set>
 #include <map>
 #include <stdexcept>
+#include <signal.h>
 
 typedef unsigned short port_t;
 
@@ -39,6 +40,7 @@ namespace ws
         void bind(const std::string &addr, port_t port);
         void listen(int backlog);
         int _fd;
+        struct sockaddr_in addr;
     };
 
 } // namespace ws

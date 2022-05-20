@@ -25,6 +25,7 @@ namespace parser
         "server"};
 
     static const char *_simple_identifiers[] = {
+        "name",
         "listen",
         "root",
         "server_name",
@@ -48,6 +49,13 @@ namespace parser
 
     static void initDirectiveRules()
     {
+        directiveRulesMap["name"] = (DirectiveRules){
+            .name = "name",
+            .args_type = DIRECTIVE_ARG_TYPE_ANY,
+            .min_args = 1,
+            .max_args = 1,
+            .occurrence = 1,
+            .is_required = false};
 
         directiveRulesMap["listen"] = (DirectiveRules){
             .name = "listen",

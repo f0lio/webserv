@@ -16,9 +16,6 @@
 #include "../src/Networking/VServer.hpp"
 #include "../src/Networking/Cluster.hpp"
 
-#include "../src/CGI/CGI.hpp"
-#include "../src/CGI/CGI_utils.hpp"
-
 // space in between makes it a special key (2 tokens),
 //  thus avoid collision with server_name named (e.g. "default_server")")
 #define DEFAULT_SERVER_KEY "default server"
@@ -29,13 +26,22 @@ typedef std::vector<std::string> t_vec_str;
 
 struct Listen
 {
+    struct sockaddr_in addr_in;
     std::string host;
     port_t port;
+    int fd;
 };
 
 struct ServerName
 {
     std::map<std::string, ws::VServer*> vservers;
+    ws::VServer* get(const std::string& name) const
+    {
+        std::map<std::string, ws::VServer*>::const_iterator it = vservers.find(name);
+        if (it == vservers.end())
+            return NULL;
+        return it->second;
+    }
 };
 
 struct Location
