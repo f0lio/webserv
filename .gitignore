@@ -26,10 +26,11 @@
 # Executables
 *.exe
 *.out
+*webserv*
 *.app
 
 .vscode
-*.log
+*log*
 
 *.ignore.*
 
