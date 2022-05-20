@@ -1,4 +1,4 @@
-while [$1 != "-y"]; do
+while [ "$1" != "-y" ]; do
 	read -p "Do you wish to rm files specified in .gitignore? " yn
 	case $yn in
 		[Yy]* ) break;;
