@@ -24,6 +24,67 @@ namespace ws
         _setup = true;
     }
 
+    /// helper functions ///
+    inline bool Cluster::isServerFd(int fd)
+    {
+        return _server_fds.find(fd) != _server_fds.end();
+    }
+
+    /// Event handlers ///
+    void Cluster::connectionHandler(int fd_index)
+    {
+        _client_fd = accept(_pollfds[fd_index].fd, (struct sockaddr*)&_client_addr, &_client_addr_len);
+        fcntl(_client_fd, F_SETFL, O_NONBLOCK);
+        if (_client_fd == -1)
+            throw std::runtime_error("Cluster::run() : accept() failed");
+        else
+        {
+            _pollfds[_nfds].fd = _client_fd;
+            _pollfds[_nfds].events = POLLIN;
+            _pollfds[_nfds].revents = 0;
+            _nfds++;
+        }
+    }
+
+    void Cluster::requestHandler(int fd_index)
+    {
+        if (_fd_to_request.find(_client_fd) == _fd_to_request.end())
+        {
+            Request request(_client_fd);
+            _fd_to_request[_client_fd] = &request;
+        }
+
+        _fd_to_request[_client_fd]->process();
+
+        if (_fd_to_request[_client_fd]->isComplete())
+        {
+            if (_fd_to_response.find(_client_fd) == _fd_to_response.end())
+            {
+                Response response(*_fd_to_request[_client_fd]);
+                _fd_to_response[_client_fd] = &response;
+            }
+            _fd_to_response[_client_fd]->setup();
+        }
+        _pollfds[fd_index].events = POLLOUT;
+        _pollfds[fd_index].revents = 0;
+    }
+
+    void Cluster::responseHandler(int fd_index)
+    {
+        //
+        std::string responseBody = "Hello World\r\n";
+        size_t      responseBodySize = responseBody.length();
+        std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + SSTR(responseBodySize) + "\r\n\r\n";
+        std::string response = responseHeader + responseBody;
+        if (send((_pollfds[fd_index].fd), response.c_str(), response.length(), 0) < 0)
+        {
+            perror("failed to send data");
+            exit(1);
+        }
+        close(_pollfds[fd_index].fd);
+        _pollfds[fd_index].fd = -1;
+    }
+
     void Cluster::initPollFds()
     {
         std::vector<VServer*> const& servers = _config.getVServers();
@@ -47,6 +108,7 @@ namespace ws
         }
     }
 
+    /// Main loop ///
     void Cluster::run()
     {
         if (_setup == false)
@@ -54,12 +116,7 @@ namespace ws
 
         initPollFds();
 
-        struct sockaddr_in client_addr;
-        socklen_t client_addr_len = sizeof(client_addr);
-        int client_fd;
-
         console.log("Cluster started");
-
         _running = true;
         while (_running)
         {
@@ -74,65 +131,15 @@ namespace ws
             {
                 if (_pollfds[i].revents & POLLIN)
                 {
-                    if (_server_fds.find(_pollfds[i].fd) != _server_fds.end()) // fd is for server?
-                    {
-                        client_fd = accept(_pollfds[i].fd, (struct sockaddr*)&client_addr, &client_addr_len);
-                        fcntl(client_fd, F_SETFL, O_NONBLOCK);
-                        if (client_fd == -1)
-                            throw std::runtime_error("Cluster::run() : accept() failed");
-                        else
-                        {
-                            _pollfds[_nfds].fd = client_fd;
-                            _pollfds[_nfds].events = POLLIN;
-                            _pollfds[_nfds].revents = 0;
-                            _nfds++;
-                        }
-                    }
-                    else //  handle request
-                    {
-                        std::cout << "Reading..." << std::endl;
-                        char buf[1024];
-                        int ret = read(_pollfds[i].fd, buf, sizeof(buf));
-                        if (ret == -1)
-                        {
-                            if (errno == EAGAIN || errno == EWOULDBLOCK)
-                                continue;
-                            else
-                                throw std::runtime_error("Cluster::run() : read() failed");
-                        }
-                        else if (ret == 0)
-                        {
-                            std::cout << "Client disconnected" << std::endl;
-                            close(_pollfds[i].fd);
-                        }
-                        else
-                        {
-                            
-                            std::cout << "REQ: " << ret << "\n-------------------------" << std::endl;
-                            std::cout << buf << std::endl;
-                            std::cout << "-------------------------" <<std::endl;
-                            _pollfds[i].events = POLLOUT;
-                            _pollfds[i].revents = 0;
-                        }
-                    }
-
+                    if (isServerFd(_pollfds[i].fd))
+                        connectionHandler(i);
+                    else
+                        requestHandler(i);
                 }
                 else if (_pollfds[i].revents & POLLOUT)
-                {
-                    std::string responseBody = "Hello World\r\n";
-                    size_t      responseBodySize = responseBody.length();
-                    std::string responseHeader = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + SSTR(responseBodySize) + "\r\n\r\n";
-                    std::string response = responseHeader + responseBody;
-                    if (send((_pollfds[i].fd), response.c_str(), response.length(), 0) < 0)
-                    {
-                        perror("failed to send data");
-                        exit(1);
-                    }
-                    close(_pollfds[i].fd);
-                    _pollfds[i].fd = -1;
-                }
-            } //for
+                    responseHandler(i);
+            }
         } // while
-    } // void Cluster::run()
+    }
 
 } // namespace ws
