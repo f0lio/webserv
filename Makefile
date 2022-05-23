@@ -13,7 +13,7 @@ UTILS	= helpers.cpp
 CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp
 REQ		= 
 RES		= 
-SERVER	= Cluster.cpp VServer.cpp Socket.cpp# Request.cpp Response.cpp 
+SERVER	= Cluster.cpp VServer.cpp Socket.cpp Request.cpp Response.cpp 
 
 CGI		= CGI.cpp CGI_utils.cpp
 
@@ -44,3 +44,7 @@ re: fclean all
 
 run: $(NAME)
 	@./$(NAME) ./other/sample.conf
+
+TRACE=network
+strace: $(NAME)
+	@strace -o .strace/$(shell date +"%d-%m-%y-[%H:%M:%S]").log -f -e trace=${TRACE} ./$(NAME) ./other/sample.conf
