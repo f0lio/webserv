@@ -9,31 +9,33 @@ namespace	ws
 		std::string path;
 		std::map<std::string, t_vec_str> config;
 	};
+
+	// only one per binary (php, python, ruby, etc.) from which run() is called with the script directory? not sure
 	class CGI
 	{
 
 		private:
-			Location const						location;
 			std::map<std::string, std::string>	envp;
+			std::string							name;
+			std::string							binPath;
 
 		public:
-			CGI(Location const &location) : location(location) {}
+			CGI() {}
 			~CGI() {}
 
-			int	run(std::string binPath)
+			int	run(std::string cgiPath)
 			{
-				binPath = location.path + "/" + binPath;
 
-				if (!file_exists(binPath))
+				if (!file_exists(cgiPath))
 					return 1; // file not found?
 
 				// setup the environment variables
 
-				return this->exec(binPath);
+				return this->exec(cgiPath);
 			}
 
 		private:
-			int	exec(std::string path)
+			int	exec(std::string cgiPath)
 			{
 				pid_t	pid = fork();
 
@@ -41,7 +43,7 @@ namespace	ws
 					return 1;
 				if (!pid)
 				{
-					int	ret = execve(path.c_str(), paths(path), map_to_envp(envp));
+					int	ret = execle(binPath.c_str(), binPath.c_str(), cgiPath.c_str(), NULL, map_to_envp(envp));
 					exit(1); // execve failed
 				}
 				int	status;
