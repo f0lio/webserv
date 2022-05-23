@@ -5,14 +5,18 @@
 #include <string.h>
 #include <fcntl.h>
 
-#include "Client.hpp"
 #include "webserv.hpp"
+#include "Client.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 
 #define MAX_FDS 1024
 
 namespace ws
 {
     class Configuration;
+    class Response;
+    class Request;
     class Cluster
     {
     public:
@@ -20,10 +24,10 @@ namespace ws
         ~Cluster();
 
         void setup();
-        void initPollFds();
         void run();
 
     private:
+        
         std::set<int>       _server_fds;
         struct pollfd       _pollfds[MAX_FDS];
         int                 _nfds;
@@ -32,6 +36,20 @@ namespace ws
         Configuration const& _config;
         std::map<int, VServer*> _fd_to_vserver;
         std::map<in_addr_t, std::vector<port_t> > _binded_listens;
+        std::map<int, Request*> _fd_to_request;
+        std::map<int, Response*> _fd_to_response;
+
+        // 
+        int                 _client_fd; 
+        struct sockaddr_in  _client_addr;
+        socklen_t           _client_addr_len = sizeof(_client_addr);
+        
+        // 
+        void initPollFds();
+        void connectionHandler(int fd_index);
+        void requestHandler(int fd_index);
+        void responseHandler(int fd_index);
+        bool isServerFd(int fd);
     };
 
 } // namespace ws
