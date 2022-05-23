@@ -10,7 +10,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 
-#define MAX_FDS 1024
+#define MAX_FDS 10
 
 namespace ws
 {

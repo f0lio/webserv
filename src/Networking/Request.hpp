@@ -36,6 +36,8 @@ namespace ws
         bool _isHeaderSet;
         bool _isChunked;
         bool _isDone;
+        std::map<std::string, std::string> _headers;
+
         //
         void parseHeader();
         void parseBody();

@@ -51,71 +51,52 @@ namespace ws
     void Request::parseHeader()
     {
         char buffer[REQUEST_BUFFER_SIZE];
-        
+
         while (true)
         {
             int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
-            if (n == 0)
+            if (n == 0 || n == -1)
                 break;
-            if (n == -1)
-            {
-                if (errno == EAGAIN)
-                {
-                    std::cout << "Request::parseHeader() : EAGAIN" << std::endl;
-                    break;
-                }
-                else
-                    throw std::runtime_error("Request::parseHeader() : read() failed");
-                throw std::runtime_error("Request::parseHeader() : read() failed");
-            }
             buffer[n] = '\0';
-            std::cout << "[" << buffer << "]" << std::endl;
             _request.append(buffer, n);
+            if (_request.find("\r\n\r\n") != std::string::npos)
+                break;
         }
-        std::cout << "Request::parseHeader() : " << _request << std::endl;
         std::string::size_type pos = _request.find("\r\n\r\n");
         if (pos == std::string::npos)
             return;
         _header = _request.substr(0, pos);
         _body = _request.substr(pos + 4);
         _isHeaderSet = true;
+        // this->
     }
-    
+
+    void Request::parseBody()
+    {
+        if (_headers.find("Content-Length") == _headers.end())
+            return;
+        // else if (checkHeaderDirective("Content-Length", _headers["Content-Length"])
+        // {
+        //     _body = _request.substr(pos + 4);
+        // }
+
+        char buffer[REQUEST_BUFFER_SIZE];
+        size_t content_length = atoi(_headers["Content-Length"].c_str());
+        while (_body.size() < content_length)
+        {
+            int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
+            if (n == 0 || n == -1)
+                break;
+            buffer[n] = '\0';
+            _body.append(buffer, n);
+        }
+    }
 
     void Request::process()
     {
         if (this->_isHeaderSet == false)
             this->parseHeader();
-        // else
-        // {
-        //     if (this->_isChunked)
-        //     {
-        //         int n = ::read(fd, buffer, REQUEST_BUFFER_SIZE);
-        //         if (n > 0)
-        //         {
-        //             this->_body.append(buffer, n);
-        //             char *delim = "0\r\n\r\n";
-        //             if (this->_body.find(delim) != std::string::npos)
-        //             {
-        //                 this->_isDone = true;
-        //             }
-
-        //         }
-        //         else
-        //         {
-        //             this->_isDone = true;
-        //         }
-        //     }
-        //     else
-        //     {
-        //         this->_isDone = true;
-        //     }
-
-        // }   
-        // _isDone = true;
+        else
+            this->parseBody();
     }
-
-
-    
 } // namespace ws
-
