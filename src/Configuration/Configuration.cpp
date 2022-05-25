@@ -84,7 +84,11 @@ namespace ws
         std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it;
         for (it = _serversTree.begin(); it != _serversTree.end(); it++)
         {
-            std::cout << "IP: " << _tmp_map.find(it->first)->second << std::endl;
+            sockaddr_in addr_;
+            inet_aton(_tmp_map.find(it->first)->second.c_str(), &addr_.sin_addr);
+            
+            std::cout << "IP: " << _tmp_map.find(it->first)->second<< ": " << addr_.sin_addr.s_addr << std::endl;
+            
 
 
             std::cout << "Ports:" << std::endl;
@@ -115,5 +119,29 @@ namespace ws
     std::map<port_t, struct ServerName> const& Configuration::getServerNamesMap() const
     {
         return this->_serverNamesMap;
+    }
+    
+    // const for speed
+    VServer *Configuration::getVServer(const in_addr_t addr, const port_t port, const std::string& server_name) const
+    {
+        std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it = _serversTree.find(addr);
+        if (it == _serversTree.end())
+            return NULL;
+
+        std::map<port_t, struct ServerName>::const_iterator it2 = it->second.find(port);
+        if (it2 == it->second.end())
+            return NULL;
+
+        std::map<std::string, VServer*>::const_iterator it3 = it2->second.vservers.find(server_name);
+        if (it3 == it2->second.vservers.end())
+            return NULL;
+
+        return it3->second;
+    }
+
+    VServer *Configuration::getVServer(const std::string &ip, const port_t port, const std::string& server_name) const
+    {
+        in_addr_t addr = inet_addr(ip.c_str());
+        return this->getVServer(addr, port, server_name);
     }
 } // namespace ws

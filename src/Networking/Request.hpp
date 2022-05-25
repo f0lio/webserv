@@ -12,7 +12,7 @@ namespace ws
     class Request
     {
     public:
-        Request(int client_fd);
+        Request(int client_fd, struct sockaddr_in client_addr);
         ~Request();
 
         std::string const &getHeader() const;
@@ -21,6 +21,7 @@ namespace ws
         std::string const &getPath() const;
         std::string const &getQuery() const;
         int const &getFd() const;
+        const struct sockaddr_in & getClientAddress() const;
 
         void process();
         bool isComplete() const;
@@ -37,6 +38,7 @@ namespace ws
         bool _isChunked;
         bool _isDone;
         std::map<std::string, std::string> _headers;
+        struct sockaddr_in _client_addr;
 
         //
         void parseHeader();

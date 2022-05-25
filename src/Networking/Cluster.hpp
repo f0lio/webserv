@@ -50,6 +50,7 @@ namespace ws
         void requestHandler(int fd_index);
         void responseHandler(int fd_index);
         bool isServerFd(int fd);
+        VServer &getClientVServer(int client_fd);
     };
 
 } // namespace ws

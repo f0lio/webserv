@@ -33,6 +33,9 @@ namespace ws
         std::vector<ws::VServer*> const& getVServers() const;
         std::map<port_t, struct ServerName> const& getServerNamesMap() const;
 
+        VServer *getVServer(const in_addr_t addr, const port_t port, const std::string& server_name) const;
+        VServer *getVServer(const std::string &ip, const port_t port, const std::string& server_name) const;
+
     private:
         std::vector<parser::Context> _contexts;
         std::vector<VServer*> _vservers;
