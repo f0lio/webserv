@@ -30,4 +30,38 @@ public:
         std::cout << msg << std::endl;
 #endif
     }
+    void log(const char *msg)
+    {
+#ifndef CONSOLE_OFF
+        std::cout << msg << std::endl;
+#endif
+    }
+
+	template <typename T>
+	void superlog(T t) 
+	{
+#ifndef CONSOLE_OFF
+		std::cout << t ;
+#endif
+	}
+
+	template<typename T, typename... Args>
+	void superlog(T t, Args... args)
+	{
+#ifndef CONSOLE_OFF
+		std::cout << t ;
+#endif
+
+		superlog(args...) ;
+	}
+	
+	template<typename T, typename... Args>
+	void log(T t, Args... args)
+	{
+#ifndef CONSOLE_OFF
+		std::cout << t ;
+#endif
+
+		superlog(args...) ;
+	}
 };

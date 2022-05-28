@@ -55,7 +55,7 @@ namespace ws
 	{
 		if (_fd_to_request.find(_pollfds[fd_index].fd) == _fd_to_request.end()) //4
 		{
-			std::cout << "Cluster::run() : new request" << ": " << _pollfds[fd_index].fd << std::endl;
+			console.log("Cluster::run() : new request", ": ", _pollfds[fd_index].fd, "\n");
 			Request *request = new Request(_pollfds[fd_index].fd, _client_addr);
 			_fd_to_request[_pollfds[fd_index].fd] = request;
 		}
@@ -70,7 +70,7 @@ namespace ws
 	void Cluster::responseHandler(int fd_index)
 	{
 		console.log("Response handler");
-		std::cout << "Checking request - fd: " << _pollfds[fd_index].fd << std::endl;
+		console.log("Checking request - fd: ", _pollfds[fd_index].fd, "\n");
 
 		if (_fd_to_request[_pollfds[fd_index].fd]->isComplete())
 		{
@@ -91,7 +91,7 @@ namespace ws
 				console.log("Response handler : checking if response is sent");
 		if (_fd_to_response.find(_pollfds[fd_index].fd)->second->isSent())
 		{
-			std::cout << "Cluster::responseHandler() : response sent" << std::endl;
+			console.log("Cluster::responseHandler() : response sent", "\n");
 
 			delete _fd_to_request[_pollfds[fd_index].fd];
 			_fd_to_request.erase(_pollfds[fd_index].fd);
@@ -109,9 +109,9 @@ namespace ws
 		else
 		{
 			console.log("Response handler : sending response");
-			std::cout << "Cluster::responseHandler() : processing response" << std::endl;
+			console.log("Cluster::responseHandler() : processing response", "\n");
 			_fd_to_response[_pollfds[fd_index].fd]->process();
-			std::cout << "Cluster::responseHandler() : sending response" << std::endl;
+			console.log("Cluster::responseHandler() : sending response", "\n");
 			_fd_to_response[_pollfds[fd_index].fd]->send();
 		}
 	}
@@ -134,7 +134,7 @@ namespace ws
 				_pollfds[_nfds].revents = 0;
 				_nfds++;
 				_server_fds.insert(it->fd);
-				std::cout << "fd: " << it->fd << " " << it->host << ":" << it->port << std::endl;
+				console.log("fd: ", it->fd, " ", it->host, ":", it->port, "\n");
 			}
 		}
 	}
@@ -151,7 +151,7 @@ namespace ws
 		while (_running)
 		{
 
-			std::cout << "polling..." << std::endl;
+			console.log("polling...");
 			sleep(1);
 			int ret = poll(_pollfds, _nfds, -1);
 			if (ret == -1)
@@ -160,7 +160,7 @@ namespace ws
 				continue;
 			for (size_t i = 0; i < _nfds; i++)
 			{
-				std::cout << "i: " << i << " fd: " << _pollfds[i].fd << " " << _pollfds[i].revents << std::endl;
+				console.log("i: ", i, " fd: ", _pollfds[i].fd, " ", _pollfds[i].revents, "\n");
 				if (_pollfds[i].revents & POLLIN)
 				{
 					if (isServerFd(_pollfds[i].fd))
