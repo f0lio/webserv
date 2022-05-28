@@ -27,6 +27,7 @@
 *.exe
 *.out
 *webserv*
+*test*
 *.app
 
 .vscode

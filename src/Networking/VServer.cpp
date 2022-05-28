@@ -9,7 +9,7 @@ namespace ws
         std::vector<parser::SimpleDirective> const& dirs = context.getSimpleDirectives();
         std::vector<parser::BlockDirective> const& locs = context.getBlockDirectives();
         _ctx_index = context.getIndex();
-// asdsdxvzc
+
         struct sockaddr_in addr;
         for (size_t i = 0; i < dirs.size(); i++)
         {
