@@ -79,8 +79,7 @@ namespace ws
 
     void Configuration::print() const
     {
-		std::ostringstream	ss;
-        ss << "Resolver tree:" << std::endl;
+        std::cout << "Resolver tree:" << std::endl;
 
         std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it;
         for (it = _serversTree.begin(); it != _serversTree.end(); it++)
@@ -88,29 +87,28 @@ namespace ws
             sockaddr_in addr_;
             inet_aton(_tmp_map.find(it->first)->second.c_str(), &addr_.sin_addr);
             
-            ss << "	IP: " << _tmp_map.find(it->first)->second<< ": " << addr_.sin_addr.s_addr << std::endl;
+            std::cout << "IP: " << _tmp_map.find(it->first)->second<< ": " << addr_.sin_addr.s_addr << std::endl;
             
 
 
-            ss << "		Ports:" << std::endl;
+            std::cout << "Ports:" << std::endl;
             std::map<port_t, struct ServerName>::const_iterator it2;
             for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
             {
-                ss << "			Port: " << it2->first << std::endl;
-                ss << "			ServerNames:" << std::endl;
+                std::cout << "Port: " << it2->first << std::endl;
+                std::cout << "ServerNames:" << std::endl;
                 std::map<std::string, VServer*>::const_iterator it3;
                 for (it3 = it2->second.vservers.begin(); it3 != it2->second.vservers.end(); it3++)
                 {
-                    ss << "				ServerName: " << it3->first;
-                    ss << ": " << it3->second->getIndex();
+                    std::cout << "ServerName: " << it3->first;
+                    std::cout << ": " << it3->second->getIndex();
                     if (it3->second->hasName())
-                        ss << " (" << it3->second->getName() << ")";
-                    ss << std::endl;
+                        std::cout << " (" << it3->second->getName() << ")";
+                    std::cout << std::endl;
                 }
             }
-            ss << std::endl;
+            std::cout << std::endl;
         }
-		console.log(ss.str());
     }
 
     std::vector<VServer*> const& Configuration::getVServers() const
