@@ -26,12 +26,14 @@
 # Executables
 *.exe
 *.out
+*webserv*
+*test*
 *.app
 
 .vscode
-*.log
+*log*
 
-*.ignore.*
+*.ignore*
 
 .docker
 *.tldr
