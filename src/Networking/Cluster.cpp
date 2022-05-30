@@ -38,6 +38,7 @@ namespace ws
 	/// Event handlers ///
 	void Cluster::connectionHandler(int fd_index)
 	{
+		
 		_client_fd = accept(_pollfds[fd_index].fd, (struct sockaddr*)&_client_addr, &_client_addr_len);
 		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
 		if (_client_fd == -1)
@@ -151,7 +152,7 @@ namespace ws
 		while (_running)
 		{
 
-			console.log("polling...");
+			std::cout << "polling..." << std::endl;
 			sleep(1);
 			int ret = poll(_pollfds, _nfds, -1);
 			if (ret == -1)

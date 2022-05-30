@@ -41,7 +41,8 @@ namespace ws
         // VServer *Configuration::getVServer(const in_addr_t addr, const port_t port, const std::string& server_name)
         
          std::cout << client_addr.sin_addr.s_addr << " "
-             << ntohs(client_addr.sin_port)
+             << ntohs(client_addr.sin_port) << " "
+             << client_addr.sin_port
              << " bx.com" << std::endl;
 
         const VServer * vserver = _config.getVServer(
