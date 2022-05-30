@@ -61,7 +61,7 @@ namespace ws
     void Request::parseHeader()
     {
         char buffer[REQUEST_BUFFER_SIZE];
-        console.log("Parsing header");
+        // console.log("Parsing header");
         while (true)
         {
             int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
@@ -79,7 +79,7 @@ namespace ws
         _header = _request.substr(0, pos);
         _body = _request.substr(pos + 4);
         _isHeaderSet = true;
-        console.log("Header is set");
+        // console.log("Header is set");
         sleep(1);
         // this->
     }
@@ -92,7 +92,7 @@ namespace ws
         // {
         //     _body = _request.substr(pos + 4);
         // }
-        console.log("Parsing body");
+        // console.log("Parsing body");
         char buffer[REQUEST_BUFFER_SIZE];
         // size_t content_length = atoi(_headers["Content-Length"].c_str());
         // while (_body.size() < content_length)
@@ -113,7 +113,7 @@ namespace ws
             this->parseHeader();
         else
             this->parseBody();
-        console.log("### processed! ###");
+        // console.log("### processed! ###");
         this->_isDone = true;
     }
 } // namespace ws
