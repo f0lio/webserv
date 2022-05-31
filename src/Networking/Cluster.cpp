@@ -155,7 +155,7 @@ namespace ws
 		{
 
 			std::cout << "polling..." << std::endl;
-			sleep(1);
+			usleep(100);
 			int ret = poll(_pollfds, _nfds, -1);
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : poll() failed");

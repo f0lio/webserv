@@ -23,6 +23,7 @@
 #define DEFAULT_SERVER_KEY "default server"
 #define BACK_LOG 10
 #define REQUEST_BUFFER_SIZE 1024
+#define VALID_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./"
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;

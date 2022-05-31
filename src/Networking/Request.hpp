@@ -6,9 +6,11 @@
 #include <fstream>
 #include <stdlib.h>
 #include <unistd.h>
+#include <set>
 
 namespace ws
 {
+
     class Request
     {
     public:
@@ -34,6 +36,7 @@ namespace ws
         std::string _query;
         std::string _header;
         std::string _body;
+		int			_content_length;
         bool _isHeaderSet;
         bool _isChunked;
         bool _isDone;

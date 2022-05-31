@@ -129,10 +129,14 @@ namespace ws
             return NULL;
 
         std::map<port_t, struct ServerName>::const_iterator it2 = it->second.find(port);
+
+
         if (it2 == it->second.end())
             return NULL;
 
         std::map<std::string, VServer*>::const_iterator it3 = it2->second.vservers.find(server_name);
+		std::map<std::string, VServer*> m(it2->second.vservers);
+		// console.log(port, " +++++++++++++++++++++++++ ", (it3 == it2->second.vservers.end() ? "not found" : "found"), "\n");
         if (it3 == it2->second.vservers.end())
             return NULL;
 

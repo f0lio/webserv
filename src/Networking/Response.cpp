@@ -41,14 +41,13 @@ namespace ws
         // VServer *Configuration::getVServer(const in_addr_t addr, const port_t port, const std::string& server_name)
         
          std::cout << client_addr.sin_addr.s_addr << " "
-             << ntohs(client_addr.sin_port) << " "
-             << client_addr.sin_port
-             << " bx.com" << std::endl;
+             << 6001
+             << " ax.com" << std::endl;
 
         const VServer * vserver = _config.getVServer(
             client_addr.sin_addr.s_addr,
-            ntohs(client_addr.sin_port),
-            "bx.com"
+            6001,
+            "ax.com"
         );
         // console.log("Resolver is done");
 
@@ -70,8 +69,9 @@ namespace ws
         {
             // console.log("Found vserver");
             _status = "200 OK";
+			
             if (vserver->hasName())
-                _body = vserver->getName();
+                _body = vserver->getName() + "\r\n";
             else
                 _body = SSTR(vserver->getIndex());
             _header = "HTTP/1.1 200 OK\r\n";
@@ -80,6 +80,8 @@ namespace ws
             _header += "Connection: close\r\n";
             _header += "\r\n";
             _response = _header + _body;
+
+			console.log("############################\nresponse: ", _response, "\n");
         }
         _isProcessed = true;
     }

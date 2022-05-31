@@ -72,15 +72,78 @@ namespace ws
             if (_request.find("\r\n\r\n") != std::string::npos)
                 break;
         }
-        sleep(1);
+        usleep(100);
         std::string::size_type pos = _request.find("\r\n\r\n");
         if (pos == std::string::npos)
             return;
         _header = _request.substr(0, pos);
         _body = _request.substr(pos + 4);
         _isHeaderSet = true;
+
+		static std::set<std::string> methods;
+		methods.insert("GET");
+		methods.insert("POST");
+		methods.insert("DELETE");
+
+		_method = _header.substr(0, _header.find(' '));
+		if (methods.find(_method) == methods.end())
+		{
+			console.err("Invalid method: " + _method);
+			return;
+		}
+		std::cout << "Method: " << _method << std::endl;
+		if (_header.find(" HTTP/1.1") == std::string::npos)
+		{
+			console.err("Invalid header: " + _header);
+			return;
+		}
+		_path = _header.substr(_header.find(' ') + 1, _header.find(" H") - _header.find(' ') - 1);
+		if (_path.find_first_not_of(VALID_CHARS) != std::string::npos)
+		{
+			console.err("Invalid path: " + _path);
+			return;
+		}
+		if (_path.find('?') != std::string::npos)
+		{
+			_query = _path.substr(_path.find('?') + 1);
+			_path = _path.substr(0, _path.find('?'));
+		}
+		std::cout << "Path: " << _path << std::endl;
+		std::cout << "Query: " << _query << std::endl;
+		for (std::string::size_type i = _header.find('\n') + 1; i < _header.size(); i = _header.find('\n', i) + 1)
+		{
+
+			std::string line = _header.substr(i, _header.find('\n', i) - i);
+			std::cout << "numbers* " << i << "----------" << _header.find('\n', i) << std::endl;
+			// std::cout << "line: " << line << std::endl;
+			int colon = line.find(':');
+			if (colon == std::string::npos)
+			{
+				console.err("Invalid header: " + line);
+				return;
+			}
+			std::string key = line.substr(0, colon);
+			std::string value = line.substr(colon + 2);
+			_headers[key] = value;
+
+			
+
+			if (key == "Content-Length")
+			{
+				_content_length = std::stoi(value);
+			}
+			else if (key == "Transfer-Encoding" && value == "chunked")
+			{
+				_isChunked = true;
+			}
+
+			std::cout << "Header: " << key << "==" << value << std::endl;
+			if (_header.find('\n', i) == std::string::npos)
+				break;
+		}
+
         // console.log("Header is set");
-        sleep(1);
+        usleep(100);
         // this->
     }
 
@@ -104,7 +167,7 @@ namespace ws
             buffer[n] = '\0';
             _body.append(buffer, n);
         }
-        sleep(1);
+        usleep(100);
     }
 
     void Request::process()
@@ -115,5 +178,6 @@ namespace ws
             this->parseBody();
         // console.log("### processed! ###");
         this->_isDone = true;
+		// std::cout << "thisisHeader: \n" << getHeader() << "\nthisisbody: \n" << getBody() << "\nthisisfd: \n" << getFd() << "\n";
     }
 } // namespace ws
