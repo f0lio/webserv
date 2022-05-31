@@ -29,6 +29,7 @@
 *webserv*
 *test*
 *.app
+.editorconfig
 
 .vscode
 *log*

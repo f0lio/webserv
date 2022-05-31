@@ -5,14 +5,14 @@
 
 namespace ws
 {
-    class Client : protected Socket
-    {
-    public:
-        Client();
-        ~Client();
+	class Client : protected Socket
+	{
+	public:
+		Client();
+		~Client();
 
-    private:        
-        void prepare();
-    };
+	private:		
+		void prepare();
+	};
 
 } // namespace ws

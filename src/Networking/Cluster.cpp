@@ -84,7 +84,7 @@ namespace ws
 		}
 		else
 		{
-		    // console.log("Response handler : request not complete");
+			// console.log("Response handler : request not complete");
 			return ;
 		}
 		// console.log("Response handler : request complete");

@@ -2,7 +2,7 @@
 .PHONEY : all clean fclean re bonus run
 
 ## variables
-NAME    = webserv
+NAME	= webserv
 CC		= clang++
 FLAGS   = -w -std=c++98 -D DEBUG -D CONSOLE_ON  
 #-Wall -Werror -Wextra
@@ -15,7 +15,7 @@ REQ		=
 RES		= 
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp Request.cpp Response.cpp 
 
-SRCS    = 	./src/webserv.cpp \
+SRCS	= 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\
 			$(CONFIG:%.cpp=./src/Configuration/%.cpp)\
 			$(SERVER:%.cpp=./src/Networking/%.cpp)
