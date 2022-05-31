@@ -91,7 +91,6 @@ namespace ws
 			console.err("Invalid method: " + _method);
 			return;
 		}
-		std::cout << "Method: " << _method << std::endl;
 		if (_header.find(" HTTP/1.1") == std::string::npos)
 		{
 			console.err("Invalid header: " + _header);
@@ -108,13 +107,10 @@ namespace ws
 			_query = _path.substr(_path.find('?') + 1);
 			_path = _path.substr(0, _path.find('?'));
 		}
-		std::cout << "Path: " << _path << std::endl;
-		std::cout << "Query: " << _query << std::endl;
 		for (std::string::size_type i = _header.find('\n') + 1; i < _header.size(); i = _header.find('\n', i) + 1)
 		{
 
 			std::string line = _header.substr(i, _header.find('\n', i) - i);
-			std::cout << "numbers* " << i << "----------" << _header.find('\n', i) << std::endl;
 			// std::cout << "line: " << line << std::endl;
 			int colon = line.find(':');
 			if (colon == std::string::npos)
@@ -137,7 +133,6 @@ namespace ws
 				_isChunked = true;
 			}
 
-			std::cout << "Header: " << key << "==" << value << std::endl;
 			if (_header.find('\n', i) == std::string::npos)
 				break;
 		}
@@ -178,6 +173,5 @@ namespace ws
             this->parseBody();
         // console.log("### processed! ###");
         this->_isDone = true;
-		// std::cout << "thisisHeader: \n" << getHeader() << "\nthisisbody: \n" << getBody() << "\nthisisfd: \n" << getFd() << "\n";
     }
 } // namespace ws
