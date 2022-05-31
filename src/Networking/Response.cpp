@@ -36,12 +36,13 @@ namespace ws
         if (isProcessed())
             return;
 
-        console.log("Processing response");
+        // console.log("Processing response");
         const struct sockaddr_in& client_addr = _request.getClientAddress();
         // VServer *Configuration::getVServer(const in_addr_t addr, const port_t port, const std::string& server_name)
         
          std::cout << client_addr.sin_addr.s_addr << " "
-             << ntohs(client_addr.sin_port)
+             << ntohs(client_addr.sin_port) << " "
+             << client_addr.sin_port
              << " bx.com" << std::endl;
 
         const VServer * vserver = _config.getVServer(
@@ -49,12 +50,13 @@ namespace ws
             ntohs(client_addr.sin_port),
             "bx.com"
         );
-        console.log("Resolver is done");
+        // console.log("Resolver is done");
+
 
 
         if (vserver == NULL)
         {
-            console.log("No vserver found");
+            // console.log("No vserver found");
             _status = "404 Not Found";
             _body = "<html><body><h1>404 Not Found</h1></body></html>";
             _header = "HTTP/1.1 404 Not Found\r\n";
@@ -66,7 +68,7 @@ namespace ws
         }
         else
         {
-            console.log("Found vserver");
+            // console.log("Found vserver");
             _status = "200 OK";
             if (vserver->hasName())
                 _body = vserver->getName();
