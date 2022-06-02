@@ -63,6 +63,66 @@ namespace ws
 		return _isDone;
 	}
 
+	int Request::processHeader()
+	{
+		static std::set<std::string> methods;
+		if (methods.empty())
+		{
+			methods.insert("GET");
+			methods.insert("POST");
+			methods.insert("DELETE");
+		}
+		_method = _header.substr(0, _header.find(' '));
+		if (methods.find(_method) == methods.end())
+		{
+			console.err("Invalid method: " + _method);
+			return 1;
+		}
+		if (_header.find(" HTTP/1.1") == std::string::npos)
+		{
+			console.err("Invalid header: protocol not supported");
+			return 1;
+		}
+		_path = _header.substr(_header.find(' ') + 1, _header.find(" H") - _header.find(' ') - 1);
+		if (_path.find('?') != std::string::npos)
+		{
+			_query = _path.substr(_path.find('?') + 1);
+			_path = _path.substr(0, _path.find('?'));
+		}
+		if (_path.find_first_not_of(PATH_VALID_CHARS) != std::string::npos)
+		{
+			console.err("Invalid path: " + _path);
+			return 1;
+		}
+
+		for (std::string::size_type i = _header.find('\n') + 1; i < _header.size(); i = _header.find('\n', i) + 1)
+		{
+			std::string line = _header.substr(i, _header.find('\n', i) - i);
+			int colon = line.find(':');
+			if (colon == std::string::npos)
+			{
+				console.err("Invalid header: " + line);
+				return 1;
+			}
+			std::string key = line.substr(0, colon);
+			std::string value = line.substr(colon + 2);
+			_headers[key] = value;
+
+			if (key == "Content-Length")
+			{
+				_content_length = std::stoi(value);
+			}
+			else if (key == "Transfer-Encoding" && value == "chunked")
+			{
+				_isChunked = true;
+			}
+
+			if (_header.find('\n', i) == std::string::npos)
+				break;
+		}
+		return 0;
+	}
+
 	void Request::parseHeader()
 	{
 		char buffer[REQUEST_BUFFER_SIZE];
@@ -85,66 +145,10 @@ namespace ws
 		_body = _request.substr(pos + 4);
 		_isHeaderSet = true;
 
-		static std::set<std::string> methods;
-		methods.insert("GET");
-		methods.insert("POST");
-		methods.insert("DELETE");
-
-		_method = _header.substr(0, _header.find(' '));
-		if (methods.find(_method) == methods.end())
-		{
-			console.err("Invalid method: " + _method);
+		if (processHeader())
 			return;
-		}
-		if (_header.find(" HTTP/1.1") == std::string::npos)
-		{
-			console.err("Invalid header: " + _header);
-			return;
-		}
-		_path = _header.substr(_header.find(' ') + 1, _header.find(" H") - _header.find(' ') - 1);
-		if (_path.find_first_not_of(VALID_CHARS) != std::string::npos)
-		{
-			console.err("Invalid path: " + _path);
-			return;
-		}
-		if (_path.find('?') != std::string::npos)
-		{
-			_query = _path.substr(_path.find('?') + 1);
-			_path = _path.substr(0, _path.find('?'));
-		}
-		for (std::string::size_type i = _header.find('\n') + 1; i < _header.size(); i = _header.find('\n', i) + 1)
-		{
-
-			std::string line = _header.substr(i, _header.find('\n', i) - i);
-			// std::cout << "line: " << line << std::endl;
-			int colon = line.find(':');
-			if (colon == std::string::npos)
-			{
-				console.err("Invalid header: " + line);
-				return;
-			}
-			std::string key = line.substr(0, colon);
-			std::string value = line.substr(colon + 2);
-			_headers[key] = value;
-
-			
-
-			if (key == "Content-Length")
-			{
-				_content_length = std::stoi(value);
-			}
-			else if (key == "Transfer-Encoding" && value == "chunked")
-			{
-				_isChunked = true;
-			}
-
-			if (_header.find('\n', i) == std::string::npos)
-				break;
-		}
-
 		// console.log("Header is set");
 		usleep(100);
-		// this->
 	}
 
 	void Request::parseBody()
@@ -157,9 +161,8 @@ namespace ws
 		// }
 		// console.log("Parsing body");
 		char buffer[REQUEST_BUFFER_SIZE];
-		// size_t content_length = atoi(_headers["Content-Length"].c_str());
-		// while (_body.size() < content_length)
-		while (1)
+		size_t content_length = atoi(_headers["Content-Length"].c_str());
+		while (_body.size() < content_length)
 		{
 			int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
 			if (n == 0 || n == -1)

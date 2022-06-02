@@ -23,7 +23,7 @@
 #define DEFAULT_SERVER_KEY "default server"
 #define BACK_LOG 10
 #define REQUEST_BUFFER_SIZE 1024
-#define VALID_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./"
+#define PATH_VALID_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./"
 #define ROOT "./other"
 
 typedef unsigned short port_t;
@@ -31,28 +31,28 @@ typedef std::vector<std::string> t_vec_str;
 
 struct Listen
 {
-	struct sockaddr_in addr_in;
-	std::string host;
-	port_t port;
-	int fd;
+    struct sockaddr_in addr_in;
+    std::string host;
+    port_t port;
+    int fd;
 };
 
 struct ServerName
 {
-	std::map<std::string, ws::VServer*> vservers;
-	ws::VServer* get(const std::string& name) const
-	{
-		std::map<std::string, ws::VServer*>::const_iterator it = vservers.find(name);
-		if (it == vservers.end())
-			return NULL;
-		return it->second;
-	}
+    std::map<std::string, ws::VServer*> vservers;
+    ws::VServer* get(const std::string& name) const
+    {
+        std::map<std::string, ws::VServer*>::const_iterator it = vservers.find(name);
+        if (it == vservers.end())
+            return NULL;
+        return it->second;
+    }
 };
 
 struct Location
 {
-	std::string path;
-	std::map<std::string, t_vec_str> config;
+    std::string path;
+    std::map<std::string, t_vec_str> config;
 };
 
 bool  is_included(char c, char* str);

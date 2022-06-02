@@ -37,7 +37,7 @@ namespace ws
 		std::string _query;
 		std::string _header;
 		std::string _body;
-		int			_content_length;
+		int _content_length = -1;
 		bool _isHeaderSet;
 		bool _isChunked;
 		bool _isDone;
@@ -46,6 +46,7 @@ namespace ws
 
 		//
 		void parseHeader();
+		int processHeader();
 		void parseBody();
 	};
 
