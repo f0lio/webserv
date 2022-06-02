@@ -12,7 +12,7 @@ namespace ws
     class Request
     {
     public:
-        Request(int client_fd, struct sockaddr_in client_addr);
+        Request(int client_fd, std::vector<VServer*> & vservers);
         ~Request();
 
         std::string const &getHeader() const;
@@ -20,14 +20,15 @@ namespace ws
         std::string const &getMethod() const;
         std::string const &getPath() const;
         std::string const &getQuery() const;
-        int const &getFd() const;
-        const struct sockaddr_in & getClientAddress() const;
+        int const& getClientFd() const;
+
+        std::vector<VServer*> & getVServers() const;
 
         void process();
         bool isComplete() const;
 
     private:
-        int _fd;
+        int _client_fd;
         std::string _request;
         std::string _method;
         std::string _path;
@@ -38,7 +39,7 @@ namespace ws
         bool _isChunked;
         bool _isDone;
         std::map<std::string, std::string> _headers;
-        struct sockaddr_in _client_addr;
+        std::vector<VServer*> & _vservers;
 
         //
         void parseHeader();

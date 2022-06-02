@@ -4,53 +4,53 @@
 namespace ws
 {
 
-    Request::Request(int client_fd, struct sockaddr_in client_addr)
-        : _fd(client_fd)
-        , _client_addr(client_addr)
+    Request::Request(int client_fd, std::vector<VServer*> & vservers)
+        : _client_fd(client_fd)
         , _isHeaderSet(false)
         , _isChunked(false)
         , _isDone(false)
+        , _vservers(vservers)
     {
     }
-    
+
     Request::~Request()
     {
     }
 
-    
-    std::string const &Request::getHeader() const
+
+    std::string const& Request::getHeader() const
     {
         return _header;
     }
 
-    std::string const &Request::getBody() const
+    std::string const& Request::getBody() const
     {
         return _body;
     }
 
-    std::string const &Request::getMethod() const
+    std::string const& Request::getMethod() const
     {
         return _method;
     }
 
-    std::string const &Request::getPath() const
+    std::string const& Request::getPath() const
     {
         return _path;
     }
 
-    std::string const &Request::getQuery() const
+    std::string const& Request::getQuery() const
     {
         return _query;
     }
 
-    int const &Request::getFd() const
+    int const& Request::getClientFd() const
     {
-        return _fd;
+        return _client_fd;
     }
 
-    const struct sockaddr_in & Request::getClientAddress() const
+    std::vector<VServer*> & Request::getVServers() const
     {
-        return _client_addr;
+        return _vservers;
     }
 
     bool Request::isComplete() const
@@ -64,7 +64,7 @@ namespace ws
         // console.log("Parsing header");
         while (true)
         {
-            int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
+            int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
             if (n == 0 || n == -1)
                 break;
             buffer[n] = '\0';
@@ -72,16 +72,12 @@ namespace ws
             if (_request.find("\r\n\r\n") != std::string::npos)
                 break;
         }
-        sleep(1);
         std::string::size_type pos = _request.find("\r\n\r\n");
         if (pos == std::string::npos)
             return;
         _header = _request.substr(0, pos);
         _body = _request.substr(pos + 4);
         _isHeaderSet = true;
-        // console.log("Header is set");
-        sleep(1);
-        // this->
     }
 
     void Request::parseBody()
@@ -98,13 +94,12 @@ namespace ws
         // while (_body.size() < content_length)
         while (1)
         {
-            int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
+            int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
             if (n == 0 || n == -1)
                 break;
             buffer[n] = '\0';
             _body.append(buffer, n);
         }
-        sleep(1);
     }
 
     void Request::process()

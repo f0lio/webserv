@@ -53,8 +53,8 @@ struct Location
     std::map<std::string, t_vec_str> config;
 };
 
-bool  is_included(char c, char* str);
-bool is_number(const std::string& s);
-bool is_number(const char* s);
+bool    is_included(char c, char* str);
+bool    is_number(const std::string& s);
+bool    is_number(const char* s);
 
 static Console console;

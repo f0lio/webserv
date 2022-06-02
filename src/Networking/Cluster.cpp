@@ -18,8 +18,9 @@ namespace ws
 		for (; it != servers.end(); it++)
 		{
 			(*it)->start(_binded_listens);
-			// _fd_to_vserver[(*it)->getFd()] = *it;
-			_server_fds.insert((*it)->getFd());
+			std::set <int>::const_iterator it3 = (*it)->getFds().begin();
+			for (; it3 != (*it)->getFds().end(); it3++)
+				_fd_to_vserver[*it3].push_back(*it);
 		}
 		_setup = true;
 	}
@@ -32,7 +33,6 @@ namespace ws
 
 	VServer &Cluster::getClientVServer(int client_fd)
 	{
-		
 	}
 
 	/// Event handlers ///
@@ -41,6 +41,9 @@ namespace ws
 		_client_fd = accept(_pollfds[fd_index].fd, (struct sockaddr*)&_client_addr, &_client_addr_len);
 
 		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
+
+		_client_to_server[_client_fd] = _pollfds[fd_index].fd;
+		
 		if (_client_fd == -1)
 			throw std::runtime_error("Cluster::run() : accept() failed");
 		else
@@ -54,10 +57,13 @@ namespace ws
 
 	void Cluster::requestHandler(int fd_index)
 	{
-		if (_fd_to_request.find(_pollfds[fd_index].fd) == _fd_to_request.end()) //4
+		if (_fd_to_request.find(_pollfds[fd_index].fd) == _fd_to_request.end())
 		{
 			console.log("Cluster::run() : new request", ": ", _pollfds[fd_index].fd, "\n");
-			Request *request = new Request(_pollfds[fd_index].fd, _client_addr);
+
+			Request *request = new Request(
+				_pollfds[fd_index].fd, _fd_to_vserver[_client_to_server[_pollfds[fd_index].fd]]
+	);
 			_fd_to_request[_pollfds[fd_index].fd] = request;
 		}
 		// console.log("Request handler");
@@ -71,13 +77,11 @@ namespace ws
 	void Cluster::responseHandler(int fd_index)
 	{
 		// console.log("Response handler");
-		// console.log("Checking request - fd: ", _pollfds[fd_index].fd, "\n");
 
 		if (_fd_to_request[_pollfds[fd_index].fd]->isComplete())
 		{
 			if (_fd_to_response.find(_pollfds[fd_index].fd) == _fd_to_response.end())
 			{
-				// console.log("Cluster::run() : new response");
 				Response *response = new Response (*_fd_to_request[_pollfds[fd_index].fd], this->_config);
 				_fd_to_response[_pollfds[fd_index].fd] = response;
 			}
@@ -97,7 +101,6 @@ namespace ws
 			delete _fd_to_request[_pollfds[fd_index].fd];
 			_fd_to_request.erase(_pollfds[fd_index].fd);
 			
-
 			delete _fd_to_response[_pollfds[fd_index].fd];
 			_fd_to_response.erase(_pollfds[fd_index].fd);
 			
@@ -109,10 +112,7 @@ namespace ws
 		}
 		else
 		{
-			// console.log("Response handler : sending response");
-			// console.log("Cluster::responseHandler() : processing response", "\n");
 			_fd_to_response[_pollfds[fd_index].fd]->process();
-			// console.log("Cluster::responseHandler() : sending response", "\n");
 			_fd_to_response[_pollfds[fd_index].fd]->send();
 		}
 	}
@@ -123,11 +123,9 @@ namespace ws
 
 		_nfds = 0;
 		memset(&_pollfds, 0, sizeof(_pollfds));
-		// console.log("ssssiisize: ", servers.size(), "\n");
 		for (size_t i = 0; i < servers.size(); i++)
 		{
 			std::vector<struct Listen>::const_iterator it = servers[i]->getListens().begin();
-			// console.log("listens ssssiisize: ", servers[i]->getListens().size(), "nfds: ", _nfds, "\n");
 			for (; it != servers[i]->getListens().end(); it++)
 			{
 				if (it->fd == -1)
@@ -137,7 +135,6 @@ namespace ws
 				_pollfds[_nfds].revents = 0;
 				_nfds++;
 				_server_fds.insert(it->fd);
-				// console.log("fd: ", it->fd, " ", it->host, ":", it->port, "\n");
 			}
 		}
 	}
@@ -149,13 +146,11 @@ namespace ws
 			throw std::runtime_error("Cluster::run() : setup() must be called before run()");
 
 		initPollFds();
-		// console.log("Cluster started");
+
 		_running = true;
 		while (_running)
 		{
-
 			std::cout << "polling..." << std::endl;
-			sleep(1);
 			int ret = poll(_pollfds, _nfds, -1);
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : poll() failed");
@@ -163,7 +158,7 @@ namespace ws
 				continue;
 			for (size_t i = 0; i < _nfds; i++)
 			{
-				console.log("i: ", i, " fd: ", _pollfds[i].fd, " ", _pollfds[i].revents, "\n");
+				// console.log("i: ", i, " fd: ", _pollfds[i].fd, " ", _pollfds[i].revents, "\n");
 				if (_pollfds[i].revents & POLLIN)
 				{
 					if (isServerFd(_pollfds[i].fd))
