@@ -4,64 +4,59 @@
 namespace ws
 {
 
-	Request::Request(int client_fd, struct sockaddr_in client_addr)
-		: _fd(client_fd)
-		, _client_addr(client_addr)
-		, _isHeaderSet(false)
-		, _isChunked(false)
-		, _isDone(false)
-	{
-	}
-	
-	Request::~Request()
-	{
-	}
+    Request::Request(int client_fd, std::vector<VServer*> & vservers)
+        : _client_fd(client_fd)
+        , _isHeaderSet(false)
+        , _isChunked(false)
+        , _isDone(false)
+        , _vservers(vservers)
+    {
+    }
 
-	
-	std::string const &Request::getHeader() const
-	{
-		return _header;
-	}
+    Request::~Request()
+    {
+    }
 
-	std::map<std::string, std::string> const &Request::getHeaders() const
-	{
-		return _headers;
-	}
 
-	std::string const &Request::getBody() const
-	{
-		return _body;
-	}
+    std::string const& Request::getHeader() const
+    {
+        return _header;
+    }
 
-	std::string const &Request::getMethod() const
-	{
-		return _method;
-	}
+    std::string const& Request::getBody() const
+    {
+        return _body;
+    }
 
-	std::string const &Request::getPath() const
-	{
-		return _path;
-	}
+    std::string const& Request::getMethod() const
+    {
+        return _method;
+    }
 
-	std::string const &Request::getQuery() const
-	{
-		return _query;
-	}
+    std::string const& Request::getPath() const
+    {
+        return _path;
+    }
 
-	int const &Request::getFd() const
-	{
-		return _fd;
-	}
+    std::string const& Request::getQuery() const
+    {
+        return _query;
+    }
 
-	const struct sockaddr_in & Request::getClientAddress() const
-	{
-		return _client_addr;
-	}
+    int const& Request::getClientFd() const
+    {
+        return _client_fd;
+    }
 
-	bool Request::isComplete() const
-	{
-		return _isDone;
-	}
+    std::vector<VServer*> & Request::getVServers() const
+    {
+        return _vservers;
+    }
+
+    bool Request::isComplete() const
+    {
+        return _isDone;
+    }
 
 	int Request::processHeader()
 	{
@@ -131,7 +126,7 @@ namespace ws
 		// console.log("Parsing header");
 		while (true)
 		{
-			int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
+			int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
 			if (n == 0 || n == -1)
 				break;
 			buffer[n] = '\0';
@@ -166,7 +161,7 @@ namespace ws
 		size_t content_length = atoi(_headers["Content-Length"].c_str());
 		while (_body.size() < content_length)
 		{
-			int n = read(_fd, buffer, REQUEST_BUFFER_SIZE);
+			int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
 			if (n == 0 || n == -1)
 				break;
 			buffer[n] = '\0';
@@ -185,3 +180,4 @@ namespace ws
 		this->_isDone = true;
 	}
 } // namespace ws
+

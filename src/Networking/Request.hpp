@@ -9,44 +9,44 @@
 
 namespace ws
 {
+    class Request
+    {
+    public:
+        Request(int client_fd, std::vector<VServer*> & vservers);
+        ~Request();
 
-	class Request
-	{
-	public:
-		Request(int client_fd, struct sockaddr_in client_addr);
-		~Request();
+        std::string const &getHeader() const;
+        std::string const &getBody() const;
+        std::string const &getMethod() const;
+        std::string const &getPath() const;
+        std::string const &getQuery() const;
+        int const& getClientFd() const;
 
-		std::string const &getHeader() const;
-		std::map<std::string, std::string> const &getHeaders() const;
-		std::string const &getBody() const;
-		std::string const &getMethod() const;
-		std::string const &getPath() const;
-		std::string const &getQuery() const;
-		int const &getFd() const;
-		const struct sockaddr_in & getClientAddress() const;
+        std::vector<VServer*> & getVServers() const;
 
-		void process();
-		bool isComplete() const;
+        void process();
+        bool isComplete() const;
 
-	private:
-		int _fd;
-		std::string _request;
-		std::string _method;
-		std::string _path;
-		std::string _query;
-		std::string _header;
-		std::string _body;
-		int _content_length = -1;
-		bool _isHeaderSet;
-		bool _isChunked;
-		bool _isDone;
-		std::map<std::string, std::string> _headers;
-		struct sockaddr_in _client_addr;
+    private:
+        int _client_fd;
+        std::string _request;
+        std::string _method;
+        std::string _path;
+        std::string _query;
+        std::string _header;
+        std::string _body;
+        bool _isHeaderSet;
+        bool _isChunked;
+        bool _isDone;
+        std::map<std::string, std::string> _headers;
+        std::vector<VServer*> & _vservers;
+        int _content_length = -1;
 
-		//
-		void parseHeader();
-		int processHeader();
-		void parseBody();
-	};
+        //
+        void parseHeader();
+        int processHeader();
+
+        void parseBody();
+    };
 
 } // namespace ws
