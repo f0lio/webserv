@@ -16,10 +16,11 @@ namespace ws
 {
     struct Listen // compiler doesn't like my design, so I'm making it worse
     {
-        struct sockaddr_in addr_in;
-        std::string host;
-        port_t port;
-        int fd;
+        struct
+        sockaddr_in     addr_in;
+        std::string     host;
+        port_t          port;
+        int             fd;
     };
     class VServer;
     class Configuration

@@ -52,6 +52,9 @@ namespace ws
         for (size_t i = 0; i < _vservers.size(); i++)
         {
             std::vector<std::string> const& serverNames = _vservers[i]->get("server_name");
+            if (serverNames.size() == 0)
+                throw std::runtime_error("server block " + SSTR(_vservers[i]->getIndex())
+                    + " doesn't have any server_name directive");
 
             std::vector<struct Listen>::const_iterator it = _vservers[i]->getListens().begin();
             for (; it != _vservers[i]->getListens().end(); it++)
@@ -120,8 +123,8 @@ namespace ws
     {
         return this->_serverNamesMap;
     }
-    
-    // const for speed
+
+    // const for speed (is it?)
     VServer *Configuration::getVServer(const in_addr_t addr, const port_t port, const std::string& server_name) const
     {
         std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it = _serversTree.find(addr);
