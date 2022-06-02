@@ -83,11 +83,13 @@ namespace ws
 			console.err("Invalid header: protocol not supported");
 			return 1;
 		}
-		_path = _header.substr(_header.find(' ') + 1, _header.find(" H") - _header.find(' ') - 1);
-		if (_path.find('?') != std::string::npos)
+		int pathStart = _header.find(' ') + 1;
+		_path = _header.substr(pathStart, _header.find(" H") - pathStart);
+		int	queryStart = _path.find('?');
+		if (queryStart != std::string::npos)
 		{
-			_query = _path.substr(_path.find('?') + 1);
-			_path = _path.substr(0, _path.find('?'));
+			_query = _path.substr(queryStart + 1);
+			_path = _path.substr(0, queryStart);
 		}
 		if (_path.find_first_not_of(PATH_VALID_CHARS) != std::string::npos)
 		{

@@ -39,7 +39,6 @@ namespace ws
 	void Cluster::connectionHandler(int fd_index)
 	{
 		_client_fd = accept(_pollfds[fd_index].fd, (struct sockaddr*)&_client_addr, &_client_addr_len);
-
 		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
 		if (_client_fd == -1)
 			throw std::runtime_error("Cluster::run() : accept() failed");
@@ -56,13 +55,13 @@ namespace ws
 	{
 		if (_fd_to_request.find(_pollfds[fd_index].fd) == _fd_to_request.end()) //4
 		{
-			console.log("Cluster::run() : new request", ": ", _pollfds[fd_index].fd, "\n");
+			std::cout << "Cluster::run() : new request" << ": " << _pollfds[fd_index].fd << std::endl;
 			Request *request = new Request(_pollfds[fd_index].fd, _client_addr);
 			_fd_to_request[_pollfds[fd_index].fd] = request;
 		}
-		// console.log("Request handler");
+		console.log("Request handler");
 		_fd_to_request[_pollfds[fd_index].fd]->process();
-		// console.log("Request processed");
+		console.log("Request processed");
 
 		_pollfds[fd_index].events = POLLOUT;
 		_pollfds[fd_index].revents = 0;
@@ -70,29 +69,33 @@ namespace ws
 
 	void Cluster::responseHandler(int fd_index)
 	{
-		// console.log("Response handler");
-		// console.log("Checking request - fd: ", _pollfds[fd_index].fd, "\n");
+		console.log("Response handler");
+		std::cout << "Checking request - fd: " << _pollfds[fd_index].fd << std::endl;
 
 		if (_fd_to_request[_pollfds[fd_index].fd]->isComplete())
 		{
 			if (_fd_to_response.find(_pollfds[fd_index].fd) == _fd_to_response.end())
 			{
-				// console.log("Cluster::run() : new response");
+				console.log("Cluster::run() : new response");
 				Response *response = new Response (*_fd_to_request[_pollfds[fd_index].fd], this->_config);
 				_fd_to_response[_pollfds[fd_index].fd] = response;
 			}
 		}
 		else
 		{
-			// console.log("Response handler : request not complete");
+		    console.log("Response handler : request not complete");
 			return ;
 		}
-		// console.log("Response handler : request complete");
+		console.log("Response handler : request complete");
 		
-				// console.log("Response handler : checking if response is sent");
+				console.log("Response handler : checking if response is sent");
 		if (_fd_to_response.find(_pollfds[fd_index].fd)->second->isSent())
 		{
-			// console.log("Cluster::responseHandler() : response sent", "\n");
+			std::cout << "Cluster::responseHandler() : response sent" << std::endl;
+			close(_pollfds[fd_index].fd);
+			_pollfds[fd_index].events = 0;
+			_pollfds[fd_index].revents = 0;
+			_pollfds[fd_index].fd = -1;
 
 			delete _fd_to_request[_pollfds[fd_index].fd];
 			_fd_to_request.erase(_pollfds[fd_index].fd);
@@ -101,18 +104,14 @@ namespace ws
 			delete _fd_to_response[_pollfds[fd_index].fd];
 			_fd_to_response.erase(_pollfds[fd_index].fd);
 			
-			close(_pollfds[fd_index].fd);
-			_pollfds[fd_index].events = 0;
-			_pollfds[fd_index].revents = 0;
-			_pollfds[fd_index].fd = -1;
 			_nfds--;
 		}
 		else
 		{
-			// console.log("Response handler : sending response");
-			// console.log("Cluster::responseHandler() : processing response", "\n");
+			console.log("Response handler : sending response");
+			std::cout << "Cluster::responseHandler() : processing response" << std::endl;
 			_fd_to_response[_pollfds[fd_index].fd]->process();
-			// console.log("Cluster::responseHandler() : sending response", "\n");
+			std::cout << "Cluster::responseHandler() : sending response" << std::endl;
 			_fd_to_response[_pollfds[fd_index].fd]->send();
 		}
 	}
@@ -123,11 +122,9 @@ namespace ws
 
 		_nfds = 0;
 		memset(&_pollfds, 0, sizeof(_pollfds));
-		// console.log("ssssiisize: ", servers.size(), "\n");
 		for (size_t i = 0; i < servers.size(); i++)
 		{
 			std::vector<struct Listen>::const_iterator it = servers[i]->getListens().begin();
-			// console.log("listens ssssiisize: ", servers[i]->getListens().size(), "nfds: ", _nfds, "\n");
 			for (; it != servers[i]->getListens().end(); it++)
 			{
 				if (it->fd == -1)
@@ -137,7 +134,7 @@ namespace ws
 				_pollfds[_nfds].revents = 0;
 				_nfds++;
 				_server_fds.insert(it->fd);
-				// console.log("fd: ", it->fd, " ", it->host, ":", it->port, "\n");
+				std::cout << "fd: " << it->fd << " " << it->host << ":" << it->port << std::endl;
 			}
 		}
 	}
@@ -149,13 +146,13 @@ namespace ws
 			throw std::runtime_error("Cluster::run() : setup() must be called before run()");
 
 		initPollFds();
-		// console.log("Cluster started");
+		console.log("Cluster started");
 		_running = true;
 		while (_running)
 		{
 
 			std::cout << "polling..." << std::endl;
-			usleep(100);
+			sleep(1);
 			int ret = poll(_pollfds, _nfds, -1);
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : poll() failed");
@@ -163,7 +160,7 @@ namespace ws
 				continue;
 			for (size_t i = 0; i < _nfds; i++)
 			{
-				console.log("i: ", i, " fd: ", _pollfds[i].fd, " ", _pollfds[i].revents, "\n");
+				std::cout << "i: " << i << " fd: " << _pollfds[i].fd << " " << _pollfds[i].revents << std::endl;
 				if (_pollfds[i].revents & POLLIN)
 				{
 					if (isServerFd(_pollfds[i].fd))

@@ -6,7 +6,6 @@
 #include <fstream>
 #include <stdlib.h>
 #include <unistd.h>
-#include <set>
 
 namespace ws
 {

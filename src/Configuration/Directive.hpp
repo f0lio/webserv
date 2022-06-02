@@ -13,70 +13,70 @@ The file consists of a series of sections.
 <context>: name=param(s) and a block of <block>s
 
 example:
-	<context name="server">
-		<simple name="listen" params="8080">
-		<simple name="error_page" params="404 /404.html">
-		<block name="location" params="/">
-			<simple name="root" value="/"/>
-			<simple name="server_names" value="localhost"/>
-			<simple name="methods" value="GET POST"/>
-		</block>
-	</context>
+    <context name="server">
+        <simple name="listen" params="8080">
+        <simple name="error_page" params="404 /404.html">
+        <block name="location" params="/">
+            <simple name="root" value="/"/>
+            <simple name="server_names" value="localhost"/>
+            <simple name="methods" value="GET POST"/>
+        </block>
+    </context>
 
 **/
 
 namespace parser
 {
-	class Context;
-	class SimpleDirective
-	{
-		friend class Parser;
+    class Context;
+    class SimpleDirective
+    {
+        friend class Parser;
 
-	public:
-		SimpleDirective();
-		SimpleDirective(const std::string &key, const std::vector<std::string> &params);
-		~SimpleDirective();
+    public:
+        SimpleDirective();
+        SimpleDirective(const std::string &key, const std::vector<std::string> &params);
+        ~SimpleDirective();
 
-		const SimpleDirective &operator=(SimpleDirective const &rhs);
+        const SimpleDirective &operator=(SimpleDirective const &rhs);
 
-		std::string const &getKey() const;
-		std::vector<std::string> const &getArgs() const;
-		void check() const;
-		void print() const;
+        std::string const &getKey() const;
+        std::vector<std::string> const &getArgs() const;
+        void check() const;
+        void print() const;
 
-	private:
-		std::string _key;
-		std::vector<std::string> _args;
-	};
+    private:
+        std::string _key;
+        std::vector<std::string> _args;
+    };
 
-	class BlockDirective
-	{
-		friend class Parser;
+    class BlockDirective
+    {
+        friend class Parser;
 
-	public:
-		BlockDirective();
-		BlockDirective(const std::string &key, const std::vector<std::string> &_params);
-		~BlockDirective();
+    public:
+        BlockDirective();
+        BlockDirective(const std::string &key, const std::vector<std::string> &_params);
+        ~BlockDirective();
 
-		std::string const &getKey() const;
-		std::vector<std::string> const &getArgs() const;
+        std::string const &getKey() const;
+        std::vector<std::string> const &getArgs() const;
 
-		// std::map<std::string, SimpleDirective> const & getDirectives() const;
-		std::vector<SimpleDirective> const &getDirectives() const;
+        // std::map<std::string, SimpleDirective> const & getDirectives() const;
+        std::vector<SimpleDirective> const &getDirectives() const;
 
-		void addDirective(const SimpleDirective &dir)
-		{
-			// std::map<std::string, SimpleDirective> _directives;
-			_directives_vec.push_back(dir);
-		}
-		void check() const;
-		void print() const;
+        void addDirective(const SimpleDirective &dir)
+        {
+            // std::map<std::string, SimpleDirective> _directives;
+            _directives_vec.push_back(dir);
+        }
+        void check() const;
+        void print() const;
 
-	private:
-		std::string _key;
-		std::vector<std::string> _args;
-		std::map<std::string, SimpleDirective> _directives;
-		std::vector<SimpleDirective> _directives_vec;
-	};
+    private:
+        std::string _key;
+        std::vector<std::string> _args;
+        std::map<std::string, SimpleDirective> _directives;
+        std::vector<SimpleDirective> _directives_vec;
+    };
 
 } // namespace parser
