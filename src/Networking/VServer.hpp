@@ -15,16 +15,18 @@ namespace ws
         VServer(parser::Context const &context);
         ~VServer();
 
-        t_vec_str const &get(const std::string &key) const;
         std::vector<struct Listen> const & getListens() const;
 
         std::map<std::string, struct Location> const& getLocations() const;
-        int getFd() const;
         bool hasName() const;
         std::string getName() const;
         int getIndex() const;
+        std::set<int> const& getFds() const;
 
-        void start(std::map<in_addr_t, std::vector<port_t> > &_binded_listens);
+        t_vec_str const &get(const std::string &key) const;
+
+        // void start(std::map<in_addr_t, std::vector<port_t> > &_binded_listens);
+        void start(std::vector<struct Listen> & _binded_listens);
         void print() const;
 
         void handleConnection(int client_fd);
@@ -37,6 +39,8 @@ namespace ws
         std::map<std::string, struct Location> _locations;
         struct sockaddr_in addr;
         bool            _started;
+
+        std::set<int> _server_fds;
 
         void            _checkConfig(parser::Context const& context) const;
         void            setupListen(t_vec_str const& args);

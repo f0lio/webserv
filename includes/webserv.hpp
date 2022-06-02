@@ -23,8 +23,6 @@
 #define DEFAULT_SERVER_KEY "default server"
 #define BACK_LOG 10
 #define REQUEST_BUFFER_SIZE 1024
-#define PATH_VALID_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_./"
-#define ROOT "./other"
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
@@ -55,8 +53,8 @@ struct Location
     std::map<std::string, t_vec_str> config;
 };
 
-bool  is_included(char c, char* str);
-bool is_number(const std::string& s);
-bool is_number(const char* s);
+bool    is_included(char c, char* str);
+bool    is_number(const std::string& s);
+bool    is_number(const char* s);
 
 static Console console;
