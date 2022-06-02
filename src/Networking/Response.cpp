@@ -3,7 +3,6 @@
 
 namespace ws
 {
-
     Response::Response(Request const& request, const Configuration& config)
         : _request(request)
         , _config(config)
@@ -31,62 +30,54 @@ namespace ws
         return _status;
     }
 
+    const VServer* Response::resolveVServer() const 
+    {
+        std::vector<VServer*>::iterator it = _request.getVServers().begin();
+
+        std::string host =  "ax.com";//this->_request.getHeaderField("Host");
+
+        for (; it != _request.getVServers().end(); ++it)
+        {
+            if (std::find((*it)->get("server_name").begin(),
+                (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
+                return *it;
+        }
+        return *_request.getVServers().begin();
+    }
+
+// #define MAX_PATH_LENGTH 256
+// _statusMessage
+// _errorMessage
+
     void Response::process()
     {
         if (isProcessed())
             return;
+  
+        const VServer* vserver = resolveVServer();
 
-        // console.log("Processing response");
-        const struct sockaddr_in& client_addr = _request.getClientAddress();
-        // VServer *Configuration::getVServer(const in_addr_t addr, const port_t port, const std::string& server_name)
-        
-         std::cout << client_addr.sin_addr.s_addr << " "
-             << ntohs(client_addr.sin_port) << " "
-             << client_addr.sin_port
-             << " bx.com" << std::endl;
+        console.log("Resolver is done");
 
-        const VServer * vserver = _config.getVServer(
-            client_addr.sin_addr.s_addr,
-            ntohs(client_addr.sin_port),
-            "bx.com"
-        );
-        // console.log("Resolver is done");
+        std::cout << vserver->getName() << std::endl;
 
+        // if (_request.status != -1)
+        // {
+        //     _status = "HTTP/1.1 " + std::to_string(_request.status) + " " + _statusMessage[_status];
+        //     _body = _errorMessage[_request.status];
 
+        // }
 
-        if (vserver == NULL)
-        {
-            // console.log("No vserver found");
-            _status = "404 Not Found";
-            _body = "<html><body><h1>404 Not Found</h1></body></html>";
-            _header = "HTTP/1.1 404 Not Found\r\n";
-            _header += "Content-Type: text/html\r\n";
-            _header += "Content-Length: " + SSTR(_body.size()) + "\r\n";
-            _header += "Connection: close\r\n";
-            _header += "\r\n";
-            _response = _header + _body;
-        }
-        else
-        {
-            // console.log("Found vserver");
-            _status = "200 OK";
-            if (vserver->hasName())
-                _body = vserver->getName();
-            else
-                _body = SSTR(vserver->getIndex());
-            _header = "HTTP/1.1 200 OK\r\n";
-            _header += "Content-Type: text/html\r\n";
-            _header += "Content-Length: " + SSTR(_body.size()) + "\r\n";
-            _header += "Connection: close\r\n";
-            _header += "\r\n";
-            _response = _header + _body;
-        }
+        this->_status = "HTTP/1.1 200 OK";
+        this->_header = "Content-Type: text/html; charset=UTF-8";
+        this->_body = "<h1>Hello World!</h1>";
+
+        _response = _status + "\r\n" + _header + "\r\n\r\n" + _body;
         _isProcessed = true;
     }
 
     void Response::send()
     {
-        ::send(_request.getFd(), _response.c_str(), _response.size(), 0);
+        ::send(_request.getClientFd(), _response.c_str(), _response.size(), 0);
         _isSent = true;
     }
 
@@ -100,4 +91,3 @@ namespace ws
         return _isProcessed;
     }
 }
-

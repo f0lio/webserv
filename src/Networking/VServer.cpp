@@ -2,7 +2,7 @@
 
 namespace ws
 {
-    bool isAlreadyBinded(struct Listen const& listen, std::map<in_addr_t, std::vector<port_t> >& _binded_listens);
+    bool isAlreadyBinded(struct Listen const& listen, std::vector<struct Listen> &_binded_listens, int * _fd);
 
     VServer::VServer(parser::Context const& context) : _started(false)
     {
@@ -18,6 +18,7 @@ namespace ws
             else
                 _config[dirs[i].getKey()] = dirs[i].getArgs();
         }
+
         for (size_t i = 0; i < locs.size(); i++)
         {
             struct Location loc;
@@ -43,6 +44,7 @@ namespace ws
     }
 
     t_vec_str const& VServer::get(const std::string& key) const
+
     {
         if (_config.find(key) != _config.end())
             return _config.find(key)->second;
@@ -60,10 +62,11 @@ namespace ws
         return _listens;
     }
 
-    int VServer::getFd() const
+    std::set<int> const& VServer::getFds() const
     {
-        return _fd;
+        return _server_fds;
     }
+
 
     std::string VServer::getName() const
     {
@@ -133,14 +136,17 @@ namespace ws
         _listens.push_back(listen);
     }
 
-    void VServer::start(std::map<in_addr_t, std::vector<port_t> >& _binded_listens)
+    // void VServer::start(std::map<in_addr_t, std::vector<port_t> >& _binded_listens)
+    void VServer::start(std::vector<struct Listen>& _binded_listens)
     {
         for (size_t i = 0; i < _listens.size(); i++)
         {   
-            if (isAlreadyBinded(_listens[i], _binded_listens))
+            int binded_fd;
+            if (isAlreadyBinded(_listens[i], _binded_listens, &binded_fd))
+            {
+                _server_fds.insert(binded_fd);
                 continue;
-            _binded_listens[_listens[i].addr_in.sin_addr.s_addr].push_back(_listens[i].port);
-
+            }
             _listens[i].addr_in.sin_family = AF_INET;
             if (_listens[i].host == "0.0.0.0")
                 _listens[i].addr_in.sin_addr.s_addr = INADDR_ANY;
@@ -155,9 +161,8 @@ namespace ws
 
             // signal(SIGPIPE, SIG_IGN);
             if ((this->_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-            {
                 throw std::runtime_error("Could not create socket for " + formated_listen);
-            }
+
             _listens[i].fd = this->_fd;
             if (::bind(
                 this->_fd,
@@ -167,9 +172,11 @@ namespace ws
                     "Could not bind socket to address " + formated_listen);
 
             if (::listen(this->_fd, BACK_LOG) == -1)
-            {
                 throw std::runtime_error("Could not listen on socket for " + formated_listen);
-            }
+            
+            _server_fds.insert(_listens[i].fd);
+            _binded_listens.push_back(_listens[i]);
+
         }
         _started = true;
     }
@@ -240,11 +247,20 @@ namespace ws
     }
 
     // helper function(s?)
-    bool isAlreadyBinded(struct Listen const& listen, std::map<in_addr_t, std::vector<port_t> >& _binded_listens)
+    bool isAlreadyBinded(
+        struct Listen const& listen,
+        std::vector<struct Listen> & _binded_listens,
+        int * _fd)
     {
-        std::map<in_addr_t, std::vector<port_t> >::iterator it3 = _binded_listens.find(listen.addr_in.sin_addr.s_addr);
-        if (it3 != _binded_listens.end())
-            return std::find(it3->second.begin(), it3->second.end(), listen.port) != it3->second.end();
+        for (size_t i = 0; i < _binded_listens.size(); i++)
+        {
+            if (_binded_listens[i].addr_in.sin_addr.s_addr == listen.addr_in.sin_addr.s_addr
+                && _binded_listens[i].port == listen.port)
+            {
+                *_fd = _binded_listens[i].fd;
+                return true;
+            }
+        }
         return false;
     }
 } // namespace ws

@@ -34,16 +34,21 @@ namespace ws
         bool                _running;
         bool                _setup;
         Configuration const& _config;
-        std::map<int, VServer*> _fd_to_vserver;
-        std::map<in_addr_t, std::vector<port_t> > _binded_listens;
+        // std::map<in_addr_t, std::vector<port_t> > _binded_listens;
+        std::vector<struct Listen> _binded_listens;
         std::map<int, Request*> _fd_to_request;
         std::map<int, Response*> _fd_to_response;
+        
+        // each fd is associated to a vector of VServer, which are listening on the same address
+        std::map<int, std::vector<VServer*> > _fd_to_vserver;   
+
+        std::map<int, int> _client_to_server;
 
         // 
         int                 _client_fd; 
         struct sockaddr_in  _client_addr;
         socklen_t           _client_addr_len = sizeof(_client_addr);
-        
+
         // 
         void initPollFds();
         void connectionHandler(int fd_index);
