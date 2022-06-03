@@ -23,7 +23,9 @@
 #define DEFAULT_SERVER_KEY "default server"
 #define BACK_LOG 10
 #define REQUEST_BUFFER_SIZE 1024
-#define PATH_VALID_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-/"
+#define PATH_VALID_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="
+#define MAX_PATH_LENGTH 256
+#define MAX_HEADER_SIZE 8192
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
