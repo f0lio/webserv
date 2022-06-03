@@ -20,6 +20,7 @@ namespace ws
         std::string const &getMethod() const;
         std::string const &getPath() const;
         std::string const &getQuery() const;
+        int const &getStatus() const;
         int const& getClientFd() const;
 
         std::vector<VServer*> & getVServers() const;
@@ -35,18 +36,18 @@ namespace ws
         std::string _query;
         std::string _header;
         std::string _body;
-        bool _isHeaderSet;
-        bool _isChunked;
-        bool _isDone;
+        bool _isChunked = 0;
+        bool _isDone = 0;
+        size_t _content_length = -1;
+		int	_status = 0;
         std::map<std::string, std::string> _headers;
         std::vector<VServer*> & _vservers;
-        int _content_length = -1;
 
         //
-        void parseHeader();
+        int parseHeader();
         int processHeader();
 
-        void parseBody();
+        int parseBody();
     };
 
 } // namespace ws
