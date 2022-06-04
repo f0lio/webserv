@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Client.hpp"
-#include "Request.hpp"
 #include "Response.hpp"
+#include "../Configuration/Configuration.hpp"
 
 #define MAX_FDS 10
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Request.hpp"
+#include "Constants.hpp"
 
 namespace ws
 {
