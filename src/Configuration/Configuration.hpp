@@ -1,11 +1,6 @@
 #pragma once
 
-#include <stdlib.h>
-#include <arpa/inet.h>
-
-#include <map>
-
-#include "webserv.hpp"
+#include "Utils.hpp"
 #include "Context.hpp"
 #include "Parser.hpp"
 #include "../Networking/VServer.hpp"

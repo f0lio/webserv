@@ -1,19 +1,7 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <vector>
-#include <map>
-
 #include "Utils.hpp"
-#include "../src/utils/Console.hpp"
-#include "../src/utils/Logger.hpp"
 #include "../src/Configuration/Configuration.hpp"
-#include "../src/Configuration/Directive.hpp"
-#include "../src/Configuration/Context.hpp"
-#include "../src/Networking/VServer.hpp"
 #include "../src/Networking/Request.hpp"
 #include "../src/Networking/Response.hpp"
 #include "../src/Networking/Cluster.hpp"

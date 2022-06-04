@@ -1,9 +1,29 @@
 #pragma once
 
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/poll.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <stdio.h> //printf
+#include <netdb.h>
 
-#include <string>
+#include <stdexcept>
+#include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+
+#include "../src/utils/Console.hpp"
+#include "../src/utils/Logger.hpp"
 
 #define ARRAY_SIZE(X_X) (sizeof(X_X) / sizeof(X_X[0]))
 

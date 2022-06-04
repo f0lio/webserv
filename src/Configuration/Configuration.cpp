@@ -1,9 +1,5 @@
 #include "Configuration.hpp"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 namespace ws
 {
     Configuration::Configuration(const std::string& path) : _path(path)

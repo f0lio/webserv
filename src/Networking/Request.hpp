@@ -1,11 +1,7 @@
 #pragma once
 
-#include "webserv.hpp"
+#include "Vserver.hpp"
 
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
-#include <unistd.h>
 
 namespace ws
 {

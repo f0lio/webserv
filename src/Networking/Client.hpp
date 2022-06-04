@@ -1,7 +1,6 @@
 #pragma once
 
-#include "webserv.hpp"
-#include "./Socket.hpp"
+#include "Socket.hpp"
 
 namespace ws
 {

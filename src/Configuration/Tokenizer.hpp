@@ -1,12 +1,7 @@
 
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <set>
-
-#include <stdio.h> //printf
+#include "Utils.hpp"
 
 #define TOKEN_BLOCK_OPEN '{'
 #define TOKEN_BLOCK_CLOSE '}'

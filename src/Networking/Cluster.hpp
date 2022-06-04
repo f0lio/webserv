@@ -1,11 +1,5 @@
 #pragma once
 
-#include <sys/poll.h>
-#include <algorithm>
-#include <string.h>
-#include <fcntl.h>
-
-#include "webserv.hpp"
 #include "Client.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
