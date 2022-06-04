@@ -34,57 +34,55 @@ namespace ws
     {
         std::vector<VServer*>::iterator it = _request.getVServers().begin();
 
-        std::string host = this->_request.getHeaderField("Host");
-
+        std::string host =  _request.getHeaderField("Host");
 
         for (; it != _request.getVServers().end(); ++it)
         {
-			for (auto itt = (*it)->get("server_name").begin(); itt != (*it)->get("server_name").end(); ++itt)
-			{
-				std::cout << "Server name: " << "\"" << *itt << "\"" << std::endl;
-			}
             if (std::find((*it)->get("server_name").begin(),
                 (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
                 return *it;
         }
-
-		std::cout << "Host: " << "\"" << host << "\"" << std::endl;
         return *_request.getVServers().begin();
     }
-
-// #define MAX_PATH_LENGTH 256
-// _statusMessage
-// _errorMessage
 
     void Response::process()
     {
         if (isProcessed())
             return;
-  
-        const VServer* vserver = resolveVServer();
+                
+        console.log("Formating response...");
 
-        console.log("Resolver is done");
+        if (_request.getStatus() != 200)
+        {
+            _status = "HTTP/1.1 " + std::to_string(_request.getStatus()) + " " + g_statusMessages[_request.getStatus()];
+            _header = "Content-Type: text/html\r\n";
+            _body = g_errorPages[_request.getStatus()];
+        }
+        else
+        {
+            const VServer* vs = resolveVServer();
+            std::cout << vs->getName() << std::endl;
 
-        std::cout << vserver->getName() << std::endl;
-
-        // if (_request.status != -1)
-        // {
-        //     _status = "HTTP/1.1 " + std::to_string(_request.status) + " " + _statusMessage[_status];
-        //     _body = _errorMessage[_request.status];
-
-        // }
-
-        this->_status = "HTTP/1.1 200 OK";
-        this->_header = "Content-Type: text/html; charset=UTF-8";
-        this->_body = "<h1>Hello World!</h1>";
+            this->_status = "HTTP/1.1 200 OK";
+            this->_header = "Content-Type: text/html; charset=UTF-8";
+            //styled html with css
+            this->_body = 
+            "<!DOCTYPE html><html><head><title>"
+            + vs->getName()
+            + "</title><style>body{background-color: #ddd;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>"
+            + "</head><body><h1>"+ vs->getName() + " : " + SSTR(vs->getIndex()) + "</h1></body></html>";
+        }
 
         _response = _status + "\r\n" + _header + "\r\n\r\n" + _body;
         _isProcessed = true;
+
+        console.log("Response formated.");
     }
 
     void Response::send()
     {
         ::send(_request.getClientFd(), _response.c_str(), _response.size(), 0);
+        console.log("Response sent.");
         _isSent = true;
     }
 
