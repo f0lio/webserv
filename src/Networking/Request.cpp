@@ -20,6 +20,13 @@ namespace ws
         return _header;
     }
 
+    std::string const& Request::getHeaderField(std::string const &key) const
+    {
+		if (_headers.find(key) != _headers.end())
+			return _headers.at(key);
+		throw std::runtime_error("Header field not found");
+    }
+
     std::string const& Request::getBody() const
     {
         return _body;
@@ -98,6 +105,7 @@ namespace ws
 				return 400; // Bad request
 			
 			std::string line = _header.substr(0, lineEnd);
+			_header.erase(0, lineEnd + 1);
 
 			size_t	space = line.find(' ');
 			if (space == std::string::npos)
@@ -168,6 +176,11 @@ namespace ws
 
 			if (lineEnd == std::string::npos)
 				break;
+		}
+		if (_headers.find("Host") == _headers.end())
+		{
+			console.err("Invalid header: Host not found");
+			return 400; // Bad request
 		}
 		return 200; // OK
 	}
