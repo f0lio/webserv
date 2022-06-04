@@ -82,7 +82,7 @@ namespace ws
 				return 400; // Bad request
 			
 			std::string line = _header.substr(0, lineEnd);
-			_header.erase(0, lineEnd + 2);
+			_header.erase(0, lineEnd + delim.size());
 
 			size_t	space = line.find(' ');
 			if (space == std::string::npos)
