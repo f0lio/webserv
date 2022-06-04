@@ -24,6 +24,7 @@
 #define BACK_LOG 10
 #define REQUEST_BUFFER_SIZE 1024
 #define PATH_VALID_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="
+#define CI_HEX "1234567890abcdefABCDEF"
 #define MAX_PATH_LENGTH 256
 #define MAX_HEADER_SIZE 8192
 

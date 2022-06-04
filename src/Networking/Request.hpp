@@ -48,6 +48,7 @@ namespace ws
         int processHeader();
 
         int parseBody();
+        int chunkedBody();
     };
 
 } // namespace ws
