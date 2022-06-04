@@ -56,6 +56,12 @@ bool    is_number(const char* s);
 
 static Console console;
 
+const std::map<int, std::string> initStatusMessages();
+const std::map<int, std::string> initErrorPages();
+
+static const std::map<int, std::string> statusMessages = initStatusMessages();
+static const std::map<int, std::string> errorPages = initErrorPages();
+
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
 

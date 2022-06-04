@@ -54,9 +54,9 @@ namespace ws
 
         if (_request.getStatus() != 200)
         {
-            _status = "HTTP/1.1 " + std::to_string(_request.getStatus()) + " " + g_statusMessages[_request.getStatus()];
+            _status = "HTTP/1.1 " + std::to_string(_request.getStatus()) + " " + statusMessages.at(_request.getStatus());
             _header = "Content-Type: text/html\r\n";
-            _body = g_errorPages[_request.getStatus()];
+            _body = errorPages.at(_request.getStatus());
         }
         else
         {
