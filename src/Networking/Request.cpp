@@ -65,7 +65,6 @@ namespace ws
 			// size_t const pathStart = _header.find(' ') + 1;
 			
 			// {
-			// 	// console.log(_header);
 
 			// 	if (!(pathStart - 1) || ((pathStart - 1) == std::string::npos))
 			// 		return 400; // Bad Request
@@ -86,6 +85,7 @@ namespace ws
 
 			// _path = _header.substr(pathStart, _header.find(" H") - pathStart);
 
+			// std::cout << "\n" << "\n" << _header << "\n" << "\n";
 			static std::set<std::string> methods;
 			if (methods.empty())
 			{
@@ -117,14 +117,11 @@ namespace ws
 				return 400; // Bad request
 
 			if (pathEnd - pathStart > MAX_PATH_LENGTH)
-				return 414; // Request-URI Too Long
+				return 414; // Request-URI Too Long //prob not accurate path is not URI
+			
+			_path = line.substr(pathStart, pathEnd - pathStart);
 		}
 
-		if (_path.length() > MAX_PATH_LENGTH) // path + query
-		{
-			console.err("Invalid header: path too long"); 
-			return 414; // Request-URI Too Long
-		}
 		{
 			size_t const queryStart = _path.find('?');
 
@@ -137,12 +134,12 @@ namespace ws
 
 		if (_path.find_first_not_of(PATH_VALID_CHARS) != std::string::npos)
 		{
-			console.err("Invalid path: " + _path + " " + _path[_path.find_first_of(PATH_VALID_CHARS)]);
+			console.err("Invalid path: " + _path + " " + _path[_path.find_first_not_of(PATH_VALID_CHARS)]);
 			return 400; // Bad request
 		}
 
-		size_t	lineEnd;
-		for (size_t i = _header.find('\n') + 1; i < _header.size(); i = lineEnd + 1)
+		size_t	i = 0;
+		for (size_t lineEnd = _header.find('\n', i); i < _header.size(); i = lineEnd + 1)
 		{
 			lineEnd = _header.find('\n', i); // fine if npos
 			std::string line = _header.substr(i, lineEnd - i);
@@ -161,6 +158,8 @@ namespace ws
 			if (key == "Content-Length")
 			{
 				_content_length = std::atoi(value.c_str()); // stoi is c++11
+				if (line.find_first_not_of("1234567890", colon) != std::string::npos)
+					return 400; // Bad request
 			}
 			else if (key == "Transfer-Encoding" && value == "chunked")
 			{
@@ -176,28 +175,96 @@ namespace ws
 	int Request::parseHeader()
 	{
 		char buffer[REQUEST_BUFFER_SIZE];
+
+		static const std::string delim = "\r\n\r\n";
+		static const size_t potentialMiss = delim.size() - 1;
+
+		size_t prevSize = 0;
 		while (true)
 		{
 			int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
 			if (n == 0 || n == -1)
-				break;
+				return 0;
 			buffer[n] = '\0';
 			_request.append(buffer, n);
-			if (_request.find("\r\n\r\n") != std::string::npos)
+			if (_request.find(delim, prevSize) != std::string::npos)
 				break;
-			if (_request.size() > MAX_HEADER_SIZE)
+			prevSize = _request.size();
+			prevSize = prevSize >= potentialMiss ? prevSize - potentialMiss : 0; // if we buffer half delim, we can miss it ?
+
+			if (prevSize > MAX_HEADER_SIZE)
 			{
 				console.err("Request too long");
 				return 431; // Request Header Fields Too Large
 			}
 		}
-		std::string::size_type pos = _request.find("\r\n\r\n");
-		if (pos == std::string::npos)
-			return 0;
+		size_t pos = _request.find(delim, prevSize);
+
 		_header = _request.substr(0, pos);
 		_body = _request.substr(pos + 4);
 
-		return processHeader();
+		_status = processHeader();
+		return _status;
+	}
+
+	int Request::chunkedBody() //overcomplicated mess
+	{
+		char buffer[REQUEST_BUFFER_SIZE];
+
+		static const std::string delim = "\r\n";
+		static const size_t potentialMiss = delim.size() - 1;
+
+		size_t prevSize = 0;
+
+		// an alternative is chunk = _body if !_body.empty()
+		while (true)
+		{
+			if (_body.find(delim, prevSize) != std::string::npos)
+				break;
+			int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
+			if (n == 0 || n == -1)
+				return 0;
+			buffer[n] = '\0';
+
+			prevSize = _body.size(); // only search in new bytes ?
+			prevSize = prevSize >= potentialMiss ? prevSize - potentialMiss : 0; // if we buffer half delim, we can miss it ?
+			_body.append(buffer, n);
+		}
+
+		size_t cl_end = _body.find(delim, prevSize);
+
+		if (_body.find_first_not_of(CI_HEX) != cl_end)
+			return 400;
+
+		size_t chunk_length = strtol(_body.c_str(), NULL, 16);
+
+		if (chunk_length == 0) // or is eof TODO
+			return 400; // Bad request
+
+		std::string	chunk = _body.substr(cl_end + 2); // from after \r\n to end of buffered _body
+		_body.erase(cl_end); // _body should only have raw content
+
+		prevSize = 0;
+		while (chunk.size() < chunk_length)
+		{
+			if (chunk.find(delim, prevSize) != std::string::npos) // chunk.size() < chunk_length and delim found
+				return 400;
+			int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
+			if (n == 0 || n == -1)
+				break ; //experimenting
+			buffer[n] = '\0';
+
+			prevSize = chunk.size(); // only search in new bytes ?
+			prevSize = prevSize >= potentialMiss ? prevSize - potentialMiss : 0; // if we buffer half delim, we can miss it ?
+			chunk.append(buffer, n);
+		}
+		if (chunk.size() >= chunk_length)
+		{
+			if (chunk.find(delim, prevSize) != chunk_length) // chunk.size() > chunk_length and delim found || delim not found
+				return 400;
+		}
+		// else read() break and everything fine 
+		_body += chunk;
 	}
 
 	int Request::parseBody()
@@ -205,8 +272,7 @@ namespace ws
 		char buffer[REQUEST_BUFFER_SIZE];
 		if (!_isChunked)
 		{
-			size_t content_length = atoi(_headers["Content-Length"].c_str());
-			while (_body.size() < content_length)
+			while (_content_length < 0 || _body.size() < _content_length)
 			{
 				int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
 				if (n == 0 || n == -1)
@@ -217,51 +283,7 @@ namespace ws
 		}
 		else
 		{
-			size_t prevSize = 0;
-
-			// an alternative is chunk = _body if !_body.empty()
-			while (true)
-			{
-				if (_body.find("\r\n", prevSize) != std::string::npos)
-					break;
-				int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
-				if (n == 0 || n == -1)
-					return 0;
-				buffer[n] = '\0';
-
-				prevSize = _body.size(); // only search in new bytes ?
-				_body.append(buffer, n);
-
-			}
-
-			size_t cl_end = _body.find("\r\n");
-
-			if (_body.find_first_not_of("1234567890") != cl_end)
-				return 400;
-
-			size_t chunk_length = atoi(_body.c_str());
-
-			if (chunk_length == 0)
-				return 400; // Bad request
-
-			std::string	chunk = _body.substr(cl_end + 2, std::string::npos); // from \r\n to end of buffered _body
-			_body.clear(); // _body should only have raw content
-
-			prevSize = 0;
-			while (chunk.size() < chunk_length)
-			{
-				if (chunk.find("\r\n", prevSize) != std::string::npos) // chunk.size() < chunk_length and "\r\n" found
-					return 400;
-				int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
-				if (n == 0 || n == -1)
-					return 0;
-				buffer[n] = '\0';
-
-				prevSize = chunk.size(); // only search in new bytes ?
-				chunk.append(buffer, n);
-			}
-			if (chunk.find("\r\n", prevSize) == std::string::npos) // chunk.size() >= chunk_length and "\r\n" not found
-				return 400;
+			return chunkedBody();
 		}
 	}
 
@@ -271,8 +293,11 @@ namespace ws
 			_status = this->parseHeader();
 		else if (this->_status == 200)
 			_status = this->parseBody();
-		console.err("Error: " + SSTR(_status));
 		// else go to error page
+
+		if (_status && _status != 200)
+			console.err("Error: " + SSTR(_status));
+
 		this->_isDone = true; // this is wrong!!! change it
 	}
 } // namespace ws

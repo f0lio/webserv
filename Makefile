@@ -4,7 +4,8 @@
 ## variables
 NAME    = webserv
 CC		= clang++
-FLAGS   = -w -std=c++98 -D DEBUG -D CONSOLE_ON
+FLAGS   = -w -std=c++98 -D DEBUG 
+#-D CONSOLE_ON
 #-Wall -Werror -Wextra
 
 INCLUDES= includes 
