@@ -34,14 +34,21 @@ namespace ws
     {
         std::vector<VServer*>::iterator it = _request.getVServers().begin();
 
-        std::string host =  "ax.com";//this->_request.getHeaderField("Host");
+        std::string host = this->_request.getHeaderField("Host");
+
 
         for (; it != _request.getVServers().end(); ++it)
         {
+			for (auto itt = (*it)->get("server_name").begin(); itt != (*it)->get("server_name").end(); ++itt)
+			{
+				std::cout << "Server name: " << "\"" << *itt << "\"" << std::endl;
+			}
             if (std::find((*it)->get("server_name").begin(),
                 (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
                 return *it;
         }
+
+		std::cout << "Host: " << "\"" << host << "\"" << std::endl;
         return *_request.getVServers().begin();
     }
 
