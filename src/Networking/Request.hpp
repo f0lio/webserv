@@ -16,6 +16,7 @@ namespace ws
         ~Request();
 
         std::string const &getHeader() const;
+		std::string const &getHeaderField(std::string const &key) const;
         std::string const &getBody() const;
         std::string const &getMethod() const;
         std::string const &getPath() const;
