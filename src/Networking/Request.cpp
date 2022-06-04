@@ -68,31 +68,8 @@ namespace ws
 
 	int Request::processHeader()
 	{
+		static const std::string delim = "\r\n"; // potential problems
 		{
-			// size_t const pathStart = _header.find(' ') + 1;
-			
-			// {
-
-			// 	if (!(pathStart - 1) || ((pathStart - 1) == std::string::npos))
-			// 		return 400; // Bad Request
-
-			// 	_method = _header.substr(0, pathStart - 1);
-			// 	if (methods.find(_method) == methods.end())
-			// 	{
-			// 		console.err("Invalid method: " + _method);
-			// 		return 400; // Bad request
-			// 	}
-			// }
-
-			// if (_header.find(" HTTP/1.1") == std::string::npos)
-			// {
-			// 	console.err("Invalid header: protocol not supported");
-			// 	return 400; // Bad request
-			// }
-
-			// _path = _header.substr(pathStart, _header.find(" H") - pathStart);
-
-			// std::cout << "\n" << "\n" << _header << "\n" << "\n";
 			static std::set<std::string> methods;
 			if (methods.empty())
 			{
@@ -100,12 +77,12 @@ namespace ws
 				methods.insert("POST");
 				methods.insert("DELETE");
 			}
-			size_t	lineEnd = _header.find('\n');
+			size_t	lineEnd = _header.find(delim);
 			if (lineEnd == std::string::npos)
 				return 400; // Bad request
 			
 			std::string line = _header.substr(0, lineEnd);
-			_header.erase(0, lineEnd + 1);
+			_header.erase(0, lineEnd + delim.size());
 
 			size_t	space = line.find(' ');
 			if (space == std::string::npos)
@@ -147,9 +124,9 @@ namespace ws
 		}
 
 		size_t	i = 0;
-		for (size_t lineEnd = _header.find('\n', i); i < _header.size(); i = lineEnd + 1)
+		for (size_t lineEnd = _header.find(delim, i); i < _header.size(); i = lineEnd + 1)
 		{
-			lineEnd = _header.find('\n', i); // fine if npos
+			lineEnd = _header.find(delim, i); // fine if npos
 			std::string line = _header.substr(i, lineEnd - i);
 
 			size_t colon = line.find(':');
