@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../Configuration/Parser.hpp"
-#include "../Configuration/Context.hpp"
 #include "Socket.hpp"
-#include "webserv.hpp"
 
 typedef std::vector<std::string> t_vec_str;
 

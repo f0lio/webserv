@@ -1,27 +1,32 @@
 #pragma once
 
-#include <stdlib.h>
-#include <arpa/inet.h>
-
-#include <map>
-
-#include "webserv.hpp"
+#include "Utils.hpp"
 #include "Context.hpp"
 #include "Parser.hpp"
 #include "../Networking/VServer.hpp"
 
-typedef unsigned short port_t;
+struct ServerName
+{
+    std::map<std::string, ws::VServer*> vservers;
+    ws::VServer* get(const std::string& name) const
+    {
+        std::map<std::string, ws::VServer*>::const_iterator it = vservers.find(name);
+        if (it == vservers.end())
+            return NULL;
+        return it->second;
+    }
+};
 
 namespace ws
 {
-    struct Listen // compiler doesn't like my design, so I'm making it worse
-    {
-        struct
-        sockaddr_in     addr_in;
-        std::string     host;
-        port_t          port;
-        int             fd;
-    };
+    // struct Listen // compiler doesn't like my design, so I'm making it worse
+    // {
+    //     struct
+    //     sockaddr_in     addr_in;
+    //     std::string     host;
+    //     port_t          port;
+    //     int             fd;
+    // };
     class VServer;
     class Configuration
     {

@@ -1,17 +1,7 @@
 
 #pragma once
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <string>
-#include <vector>
-#include <set>
-#include <map>
-#include <stdexcept>
-#include <signal.h>
+#include "Utils.hpp"
 
 typedef unsigned short port_t;
 

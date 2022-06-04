@@ -1,6 +1,6 @@
 
 
-#include "./Directive.hpp"
+#include "Directive.hpp"
 
 namespace parser
 {
