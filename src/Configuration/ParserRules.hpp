@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Utils.hpp"
+#include <map>
+#include <string>
 
-// each identifier must have a corresponding rule in directiveRulesMap<> 
+// each identifier must have a corresponding rule in directiveRulesMap<>
 
 #define DIRECTIVE_ARG_TYPE_STRING "STRING"
 #define DIRECTIVE_ARG_TYPE_NUMBER "NUMBER"
@@ -16,8 +17,15 @@ namespace parser
         char *args_type; // NUMBER | STRING | ANY
         size_t min_args;
         size_t max_args;
-        int occurrence; // if -1 then unlimited
+        int occurrence; 
         bool is_required;
+    };
+
+    enum Occurrence
+    {
+        OCCURENCE_FORBIDDEN = -2,
+        OCCURENCE_MULTIPLE = -1,
+        OCCURENCE_OPTIONAL = 0,
     };
 
     static const char *_context_identifiers[] = {
@@ -28,7 +36,7 @@ namespace parser
         "listen",
         "root",
         "server_name",
-        "error_pages",
+        "error_page",
         "max_body_size",
         "methods",
     };
@@ -61,7 +69,7 @@ namespace parser
             .args_type = DIRECTIVE_ARG_TYPE_ANY,
             .min_args = 1,
             .max_args = 2,
-            .occurrence = -1,
+            .occurrence = OCCURENCE_MULTIPLE,
             .is_required = true};
 
         directiveRulesMap["root"] = (DirectiveRules){
@@ -78,14 +86,14 @@ namespace parser
             .min_args = 1,
             .max_args = 64, // monte carlo
             .occurrence = 1,
-            .is_required = false};
+            .is_required = true};
 
-        directiveRulesMap["error_pages"] = (DirectiveRules){
-            .name = "error_pages",
+        directiveRulesMap["error_page"] = (DirectiveRules){
+            .name = "error_page",
             .args_type = DIRECTIVE_ARG_TYPE_STRING,
-            .min_args = 1,
-            .max_args = 1,
-            .occurrence = 1,
+            .min_args = 2,
+            .max_args = 2,
+            .occurrence = OCCURENCE_MULTIPLE,
             .is_required = false};
 
         directiveRulesMap["max_body_size"] = (DirectiveRules){
@@ -102,7 +110,7 @@ namespace parser
             .min_args = 1,
             .max_args = 3,
             .occurrence = 1,
-            .is_required = true};
+            .is_required = false};
 
         directiveRulesMap["location"] = (DirectiveRules){
             .name = "location",
@@ -118,7 +126,7 @@ namespace parser
             .min_args = 1,
             .max_args = 24, // monte carlo
             .occurrence = 1,
-            .is_required = false};
+            .is_required = true};
 
         directiveRulesMap["cgi"] = (DirectiveRules){
             .name = "cgi",

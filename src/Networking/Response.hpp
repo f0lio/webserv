@@ -22,8 +22,6 @@ namespace ws
         void send();
         bool isProcessed() const;
         bool isSent() const;
-		// static const std::map<int, std::string> statusMessages;
-		// static const std::map<int, std::string> errorPages;
 
     private:
         Request const &_request;

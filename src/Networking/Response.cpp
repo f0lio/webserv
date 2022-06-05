@@ -54,9 +54,9 @@ namespace ws
 
         if (_request.getStatus() != 200)
         {
-            _status = "HTTP/1.1 " + std::to_string(_request.getStatus()) + " " + statusMessages.at(_request.getStatus());
+            _status = "HTTP/1.1 " + std::to_string(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
             _header = "Content-Type: text/html\r\n";
-            _body = errorPages.at(_request.getStatus());
+            _body = g_errorPages.at(_request.getStatus());
         }
         else
         {
@@ -75,7 +75,6 @@ namespace ws
 
         _response = _status + "\r\n" + _header + "\r\n\r\n" + _body;
         _isProcessed = true;
-
         console.log("Response formated.");
     }
 

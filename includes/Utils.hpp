@@ -27,14 +27,14 @@
 
 #define ARRAY_SIZE(X_X) (sizeof(X_X) / sizeof(X_X[0]))
 
-#define SSTR( x )       static_cast< std::ostringstream & >( \
-                        ( std::ostringstream() << std::dec << x  ) ).str()
+#define SSTR(x) static_cast<std::ostringstream &>(           \
+                    (std::ostringstream() << std::dec << x)) \
+                    .str()
 
-
-#define PRINT_TOKEN(TOKEN) printf("%3.zu, %-15s=  [%s]\n",\
-                                TOKEN._line,\
-                                TokenTypeStrings[TOKEN._type],\
-                                TOKEN._value.c_str());
+#define PRINT_TOKEN(TOKEN) printf("%3.zu, %-15s=  [%s]\n",       \
+                                  TOKEN._line,                   \
+                                  TokenTypeStrings[TOKEN._type], \
+                                  TOKEN._value.c_str());
 
 #define PASS 0
 
@@ -50,17 +50,13 @@
 #define PATH_VALID_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="
 #define CRLF "\r\n"
 
-bool    is_included(char c, char* str);
-bool    is_number(const std::string& s);
-bool    is_number(const char* s);
-
 static Console console;
 
 const std::map<int, std::string> initStatusMessages();
 const std::map<int, std::string> initErrorPages();
 
-static const std::map<int, std::string> statusMessages = initStatusMessages();
-static const std::map<int, std::string> errorPages = initErrorPages();
+static const std::map<int, std::string> g_statusMessages = initStatusMessages();
+static const std::map<int, std::string> g_errorPages = initErrorPages();
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
@@ -78,3 +74,8 @@ struct Location
     std::string path;
     std::map<std::string, t_vec_str> config;
 };
+
+// function prototypes
+bool is_included(char c, char *str);
+bool is_number(const std::string &s);
+bool is_number(const char *s);
