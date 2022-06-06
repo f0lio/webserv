@@ -30,21 +30,6 @@ namespace ws
         return _status;
     }
 
-    const VServer* Response::resolveVServer() const 
-    {
-        std::vector<VServer*>::iterator it = _request.getVServers().begin();
-
-        std::string host =  _request.getHeaderField("Host");
-
-        for (; it != _request.getVServers().end(); ++it)
-        {
-            if (std::find((*it)->get("server_name").begin(),
-                (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
-                return *it;
-        }
-        return *_request.getVServers().begin();
-    }
-
     void Response::process()
     {
         if (isProcessed())
@@ -54,13 +39,13 @@ namespace ws
 
         if (_request.getStatus() != 200)
         {
-            _status = "HTTP/1.1 " + std::to_string(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
+            _status = "HTTP/1.1 " + SSTR(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
             _header = "Content-Type: text/html\r\n";
             _body = g_errorPages.at(_request.getStatus());
         }
         else
         {
-            const VServer* vs = resolveVServer();
+            const VServer* vs = _request.resolveVServer();
             std::cout << vs->getName() << std::endl;
 
             this->_status = "HTTP/1.1 200 OK";
@@ -69,7 +54,7 @@ namespace ws
             this->_body = 
             "<!DOCTYPE html><html><head><title>"
             + vs->getName()
-            + "</title><style>body{background-color: #ddd;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>"
+            + "</title><style>body{background-color: #d00;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>"
             + "</head><body><h1>"+ vs->getName() + " : " + SSTR(vs->getIndex()) + "</h1></body></html>";
         }
 

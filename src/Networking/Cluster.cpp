@@ -62,8 +62,7 @@ namespace ws
 			console.log("Cluster::run() : new request", ": ", _pollfds[fd_index].fd, "\n");
 
 			Request *request = new Request(
-				_pollfds[fd_index].fd, _fd_to_vserver[_client_to_server[_pollfds[fd_index].fd]]
-	);
+				_pollfds[fd_index].fd, _fd_to_vserver[_client_to_server[_pollfds[fd_index].fd]]);
 			_fd_to_request[_pollfds[fd_index].fd] = request;
 		}
 		// console.log("Request handler");
