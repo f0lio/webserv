@@ -16,6 +16,7 @@ namespace ws
         std::string const &getHeader() const;
         std::string const &getStatus() const;
         
+        int precheck(Request const& request);
         void setup();
         void process();
         const VServer* resolveVServer() const;
