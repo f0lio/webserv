@@ -18,6 +18,7 @@ namespace ws
         
         void setup();
         void process();
+        const VServer* resolveVServer() const;
         void send();
         bool isProcessed() const;
         bool isSent() const;

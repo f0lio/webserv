@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./VServer.hpp"
+#include "Vserver.hpp"
 
 
 namespace ws
@@ -21,7 +21,6 @@ namespace ws
         int const& getClientFd() const;
 
         std::vector<VServer*> & getVServers() const;
-	    const VServer* resolveVServer() const;
 
         void process();
         bool isComplete() const;
@@ -37,7 +36,6 @@ namespace ws
         bool _isChunked = 0;
         bool _isDone = 0;
         size_t _content_length = -1;
-        size_t max_body_size = -1;
 		int	_status = 0;
         std::map<std::string, std::string> _headers;
         std::vector<VServer*> & _vservers;
