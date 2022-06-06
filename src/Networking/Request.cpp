@@ -60,6 +60,21 @@ namespace ws
     {
         return _vservers;
     }
+	
+    const VServer* Request::resolveVServer() const 
+    {
+        std::vector<VServer*>::iterator it = _vservers.begin();
+
+        std::string host =  _headers.at("Host");
+
+        for (; it != _vservers.end(); ++it)
+        {
+            if (std::find((*it)->get("server_name").begin(),
+                (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
+                return *it;
+        }
+        return *_vservers.begin();
+    }
 
     bool Request::isComplete() const
     {
@@ -124,7 +139,7 @@ namespace ws
 		}
 
 		size_t	i = 0;
-		for (size_t lineEnd = _header.find(delim, i); i < _header.size(); i = lineEnd + 1)
+		for (size_t lineEnd = _header.find(delim, i); i < _header.size(); i = lineEnd + delim.size())
 		{
 			lineEnd = _header.find(delim, i); // fine if npos
 			std::string line = _header.substr(i, lineEnd - i);
@@ -136,7 +151,20 @@ namespace ws
 				return 400; // Bad request
 			}
 			std::string key = line.substr(0, colon);
-			std::string value = line.substr(colon + 2);
+			std::string value = line.substr(colon + 1);
+			if (key.find(' ') != std::string::npos)
+			{
+				console.err("Invalid header key: " + key);
+				return 400; // Bad request
+			}
+
+			value.erase(0, value.find_first_not_of(' '));
+
+			if (_headers.find(key) != _headers.end())
+			{
+				console.err("Duplicate header: " + key);
+				return 400; // Bad request
+			}
 
 			_headers[key] = value;
 

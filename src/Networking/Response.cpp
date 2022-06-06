@@ -27,21 +27,6 @@ namespace ws
         return _status;
     }
 
-    const VServer *Response::resolveVServer() const
-    {
-        std::vector<VServer *>::iterator it = _request.getVServers().begin();
-
-        std::string host = _request.getHeaderField("Host");
-
-        for (; it != _request.getVServers().end(); ++it)
-        {
-            if (std::find((*it)->get("server_name").begin(),
-                          (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
-                return *it;
-        }
-        return *_request.getVServers().begin();
-    }
-
     void Response::process()
     {
         if (isProcessed())
@@ -57,7 +42,7 @@ namespace ws
         }
         else
         {
-            const VServer *vs = resolveVServer();
+            const VServer *vs = _request.resolveVServer();
             std::cout << vs->getName() << std::endl;
 
             this->_status = "HTTP/1.1 200 OK";
