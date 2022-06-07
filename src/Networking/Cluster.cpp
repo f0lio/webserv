@@ -2,7 +2,7 @@
 
 namespace ws
 {
-	Cluster::Cluster(Configuration const& config) : _config(config), _running(false), _setup(false)
+	Cluster::Cluster(Configuration const &config) : _config(config), _running(false), _setup(false)
 	{
 	}
 
@@ -12,13 +12,13 @@ namespace ws
 
 	void Cluster::setup()
 	{
-		std::vector<VServer*> const& servers = _config.getVServers();
+		std::vector<VServer *> const &servers = _config.getVServers();
 
-		std::vector<VServer*>::const_iterator it = servers.begin();
+		std::vector<VServer *>::const_iterator it = servers.begin();
 		for (; it != servers.end(); it++)
 		{
 			(*it)->start(_binded_listens);
-			std::set <int>::const_iterator it3 = (*it)->getFds().begin();
+			std::set<int>::const_iterator it3 = (*it)->getFds().begin();
 			for (; it3 != (*it)->getFds().end(); it3++)
 				_fd_to_vserver[*it3].push_back(*it);
 		}
@@ -38,12 +38,12 @@ namespace ws
 	/// Event handlers ///
 	void Cluster::connectionHandler(int fd_index)
 	{
-		_client_fd = accept(_pollfds[fd_index].fd, (struct sockaddr*)&_client_addr, &_client_addr_len);
+		_client_fd = accept(_pollfds[fd_index].fd, (struct sockaddr *)&_client_addr, &_client_addr_len);
 
 		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
 
 		_client_to_server[_client_fd] = _pollfds[fd_index].fd;
-		
+
 		if (_client_fd == -1)
 			throw std::runtime_error("Cluster::run() : accept() failed");
 		else
@@ -62,8 +62,8 @@ namespace ws
 			console.log("Cluster::run() : new request", ": ", _pollfds[fd_index].fd, "\n");
 
 			Request *request = new Request(
-				_pollfds[fd_index].fd, _fd_to_vserver[_client_to_server[_pollfds[fd_index].fd]]
-	);
+				_pollfds[fd_index].fd, _fd_to_vserver[_client_to_server[_pollfds[fd_index].fd]]);
+			console.log("Cluster::run() : new request", ": ", _pollfds[fd_index].fd, "\n");
 			_fd_to_request[_pollfds[fd_index].fd] = request;
 		}
 		// console.log("Request handler");
@@ -77,33 +77,33 @@ namespace ws
 	void Cluster::responseHandler(int fd_index)
 	{
 		// console.log("Response handler");
-
 		if (_fd_to_request[_pollfds[fd_index].fd]->isComplete())
 		{
+			console.log("Cluster::run() : new response", ": ", _pollfds[fd_index].fd, "\n");
 			if (_fd_to_response.find(_pollfds[fd_index].fd) == _fd_to_response.end())
 			{
-				Response *response = new Response (*_fd_to_request[_pollfds[fd_index].fd], this->_config);
+				Response *response = new Response(*_fd_to_request[_pollfds[fd_index].fd], this->_config);
 				_fd_to_response[_pollfds[fd_index].fd] = response;
 			}
 		}
 		else
 		{
-		    // console.log("Response handler : request not complete");
-			return ;
+			// console.log("Response handler : request not complete");
+			return;
 		}
 		// console.log("Response handler : request complete");
-		
-				// console.log("Response handler : checking if response is sent");
+
+		// console.log("Response handler : checking if response is sent");
 		if (_fd_to_response.find(_pollfds[fd_index].fd)->second->isSent())
 		{
 			// console.log("Cluster::responseHandler() : response sent", "\n");
 
 			delete _fd_to_request[_pollfds[fd_index].fd];
 			_fd_to_request.erase(_pollfds[fd_index].fd);
-			
+
 			delete _fd_to_response[_pollfds[fd_index].fd];
 			_fd_to_response.erase(_pollfds[fd_index].fd);
-			
+
 			close(_pollfds[fd_index].fd);
 			_pollfds[fd_index].events = 0;
 			_pollfds[fd_index].revents = 0;
@@ -119,7 +119,7 @@ namespace ws
 
 	void Cluster::initPollFds()
 	{
-		std::vector<VServer*> const& servers = _config.getVServers();
+		std::vector<VServer *> const &servers = _config.getVServers();
 
 		_nfds = 0;
 		memset(&_pollfds, 0, sizeof(_pollfds));
@@ -168,6 +168,41 @@ namespace ws
 				}
 				else if (_pollfds[i].revents & POLLOUT)
 					responseHandler(i);
+				else
+				{
+#ifdef DEBUG
+
+					if (_pollfds[i].revents & POLLHUP)
+						console.err("Cluster::run() : poll() hang up");
+					else if (_pollfds[i].revents & POLLERR)
+						console.err("Cluster::run() : poll() error");
+					else if (_pollfds[i].revents & POLLNVAL)
+						console.err("Cluster::run() : poll() invalid");
+					else if (_pollfds[i].revents & POLLPRI)
+						console.err("Cluster::run() : poll() priority");
+					else if (_pollfds[i].revents & POLLMSG)
+						console.err("Cluster::run() : poll() message");
+					else if (_pollfds[i].revents & POLLRDHUP)
+						console.err("Cluster::run() : poll() read hang up");
+					else if (_pollfds[i].revents & POLLWRBAND)
+						console.err("Cluster::run() : poll() write band");
+					else if (_pollfds[i].revents & POLLWRNORM)
+						console.err("Cluster::run() : poll() write normal");
+					else if (_pollfds[i].revents & POLLRDBAND)
+						console.err("Cluster::run() : poll() read band");
+					else if (_pollfds[i].revents & POLLRDNORM)
+						console.err("Cluster::run() : poll() read normal");
+					else if (_pollfds[i].revents & POLLMSG)
+						console.err("Cluster::run() : poll() message");
+					else
+#endif
+						console.err("Cluster::run() : poll() unknown");
+
+					// _pollfds[i].revents = 0;
+					// _pollfds[i].events = 0;
+					// _pollfds[i].fd = -1;
+					// _nfds--;
+				}
 			}
 		} // while
 	}

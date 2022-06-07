@@ -4,7 +4,7 @@
 #include "Response.hpp"
 #include "../Configuration/Configuration.hpp"
 
-#define MAX_FDS 10
+#define MAX_FDS 1024
 
 namespace ws
 {
