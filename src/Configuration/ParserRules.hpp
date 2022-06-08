@@ -17,7 +17,7 @@ namespace parser
         char *args_type; // NUMBER | STRING | ANY
         size_t min_args;
         size_t max_args;
-        int occurrence; 
+        int occurrence;
         bool is_required;
     };
 
