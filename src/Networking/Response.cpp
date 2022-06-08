@@ -27,21 +27,6 @@ namespace ws
         return _status;
     }
 
-    const VServer *Response::resolveVServer() const
-    {
-        std::vector<VServer *>::iterator it = _request.getVServers().begin();
-
-        std::string host = _request.getHeaderField("Host");
-
-        for (; it != _request.getVServers().end(); ++it)
-        {
-            if (std::find((*it)->get("server_name").begin(),
-                          (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
-                return *it;
-        }
-        return *_request.getVServers().begin();
-    }
-
     void Response::process()
     {
         if (isProcessed())
@@ -57,7 +42,7 @@ namespace ws
         }
         else
         {
-            const VServer *vs = resolveVServer();
+            const VServer *vs = _request.resolveVServer();
             std::cout << vs->getName() << std::endl;
 
             this->_status = "HTTP/1.1 200 OK";
@@ -98,18 +83,7 @@ namespace ws
     **  otherwise, it returns the coresponding status code
     **/
 
-    static const char *g_validMethods[] = {
-        "GET",
-        "HEAD",
-        "POST",
-        "PUT",
-        "DELETE",
-        "CONNECT",
-        "OPTIONS",
-        "TRACE",
-        "PATCH"};
-
-    int Response::precheck(Request const &req)
+    int Response::precheck(Request const &req) // TODO: WIP: implement functionlity in request
     {
         // const VServer* vs = request.getVServer();
 
@@ -118,12 +92,12 @@ namespace ws
         //  - auth
         //  - resource exists
         // ["OPTIONS","GET","HEAD","PUT","POST","DELETE","PATCH"]
-        int i;
-        for (i = 9; i > -1; i--)
-            if (req.getMethod() != g_validMethods[i])
-                break;
-        if (i != -1)
-            return 405; //
+        // int i;
+        // for (i = 9; i > -1; i--)
+        //     if (req.getMethod() != g_validMethods[i])
+        //         break;
+        // if (i != -1)
+        //     return 405; //
 
         //...
         return 0;
