@@ -2,7 +2,6 @@
 
 #include "VServer.hpp"
 
-
 namespace ws
 {
     class Request
