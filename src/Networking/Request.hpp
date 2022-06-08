@@ -2,6 +2,7 @@
 
 #include "VServer.hpp"
 
+
 namespace ws
 {
     class Request
@@ -16,6 +17,7 @@ namespace ws
         std::string const &getMethod() const;
         std::string const &getPath() const;
         std::string const &getQuery() const;
+        VServer const *getVServer() const;
         int const &getStatus() const;
         int const& getClientFd() const;
 
@@ -40,6 +42,7 @@ namespace ws
 		int	_status = 0;
         std::map<std::string, std::string> _headers;
         std::vector<VServer*> & _vservers;
+        const VServer* _vserver;
 
         //
         int parseHeader();

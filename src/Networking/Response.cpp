@@ -83,18 +83,7 @@ namespace ws
     **  otherwise, it returns the coresponding status code
     **/
 
-    static const char *g_validMethods[] = {
-        "GET",
-        "HEAD",
-        "POST",
-        "PUT",
-        "DELETE",
-        "CONNECT",
-        "OPTIONS",
-        "TRACE",
-        "PATCH"};
-
-    int Response::precheck(Request const &req)
+    int Response::precheck(Request const &req) // TODO: WIP: implement functionlity in request
     {
         // const VServer* vs = request.getVServer();
 
@@ -103,12 +92,12 @@ namespace ws
         //  - auth
         //  - resource exists
         // ["OPTIONS","GET","HEAD","PUT","POST","DELETE","PATCH"]
-        int i;
-        for (i = 9; i > -1; i--)
-            if (req.getMethod() != g_validMethods[i])
-                break;
-        if (i != -1)
-            return 405; //
+        // int i;
+        // for (i = 9; i > -1; i--)
+        //     if (req.getMethod() != g_validMethods[i])
+        //         break;
+        // if (i != -1)
+        //     return 405; //
 
         //...
         return 0;

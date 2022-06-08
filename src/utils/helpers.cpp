@@ -201,3 +201,27 @@ const std::map<int, std::string> initErrorPages()
 	
 	return errorPages;
 }
+
+const std::set<std::string> initAllMethods()
+{
+	std::set<std::string> tmp;
+	tmp.insert("GET");
+	tmp.insert("POST");
+	tmp.insert("DELETE");
+	tmp.insert("HEAD");
+	tmp.insert("PUT");
+	tmp.insert("CONNECT");
+	tmp.insert("OPTIONS");
+	tmp.insert("TRACE");
+	tmp.insert("PATCH");
+	return tmp;
+}
+
+const std::set<std::string> initImplementedMethods()
+{
+	std::set<std::string> tmp;
+	tmp.insert("GET");
+	tmp.insert("POST");
+	tmp.insert("DELETE");
+	return tmp;
+}

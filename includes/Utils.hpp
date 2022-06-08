@@ -54,9 +54,13 @@ static Console console;
 
 const std::map<int, std::string> initStatusMessages();
 const std::map<int, std::string> initErrorPages();
+const std::set<std::string> initAllMethods();
+const std::set<std::string> initImplementedMethods();
 
 static const std::map<int, std::string> g_statusMessages = initStatusMessages();
 static const std::map<int, std::string> g_errorPages = initErrorPages();
+static const std::set<std::string> AllMethods = initAllMethods();
+static const std::set<std::string> ImplementedMethods = initImplementedMethods();
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
