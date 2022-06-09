@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IEventMonitor.hpp"
+#include <vector>
 #include <poll.h>
 
 #define MAX_FDS 1024
@@ -26,7 +27,7 @@ namespace ws
 		virtual int getFd(int index) const;
 		virtual size_t size() const;
 	private:
-		struct pollfd _pollfds[MAX_FDS];
+		std::vector<struct pollfd> _pollfds;
 		int _nfds;
 	};
 } // namespace ws

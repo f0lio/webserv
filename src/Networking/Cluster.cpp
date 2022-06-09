@@ -83,6 +83,7 @@ namespace ws
 		else
 		{
 			// console.log("Response handler : request not complete");
+			// close(_io.getFd(fd_index));
 			return;
 		}
 		// console.log("Response handler : request complete");
@@ -119,18 +120,25 @@ namespace ws
 		_running = true;
 		while (_running)
 		{
-			std::cout << "monitoring..." << std::endl;
-			int ret = _io.monitor();
 
 			/* TODO: 
 			** error handling should be done inside the io class
 			*/
+		
+			int ret = _io.monitor();
+			std::cout << "monitoring..." << std::endl;
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : monitor() failed");
 			else if (ret == 0)
 				continue;
 			for (size_t i = 0; i < _io.size(); i++)
 			{
+				if (_io.isError(i))
+				{
+					close(_io.getFd(i));
+					_io.removeEvent(i);
+					continue;
+				}
 				if (_io.isRead(i))
 				{
 					if (isServerFd(_io.getFd(i)))

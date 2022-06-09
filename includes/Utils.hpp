@@ -43,7 +43,7 @@
 #define REQUEST_BUFFER_SIZE 1024
 #define CI_HEX "0123456789abcdefABCDEF"
 
-#define BACK_LOG 10
+#define BACK_LOG 128
 
 // space in between makes it a special key (2 tokens), thus avoid collision with server_name named (e.g. "default_server")")
 #define DEFAULT_SERVER_KEY "default server"
