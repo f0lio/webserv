@@ -6,6 +6,8 @@
 
 #ifdef WITH_KQUEUE
 #include "../EventMonitors/KQueue.hpp"
+#elif WITH_EPOLL
+#include "../EventMonitors/EPoll.hpp"
 #else
 #include "../EventMonitors/Poll.hpp"
 #endif
@@ -29,9 +31,11 @@ namespace ws
 	private:
 
 #ifdef WITH_KQUEUE
-		KQueue               _io;
+		KQueue				_io;
+#elif WITH_EPOLL
+		EPoll				_io;
 #else
-		Poll                 _io;
+		Poll				_io;
 #endif
 
 		Configuration const& _config;

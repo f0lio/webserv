@@ -6,15 +6,15 @@ NAME    = webserv
 CC		= clang++
 FLAGS   = -w -std=c++98 -D DEBUG -D CONSOLE_ON
 #-Wall -Werror -Wextra
-
 INCLUDES= includes 
 
 UTILS	= helpers.cpp
 CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp 
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp Request.cpp Response.cpp
 
-WITH_POLL	= ./src/EventMonitors/Poll.cpp -D WITH_POLL
-WITH_KQUEUE	= ./src/EventMonitors/KQueue.cpp -D WITH_KQUEUE
+KQUEUE_FLAGS	= ./src/EventMonitors/KQueue.cpp -D WITH_KQUEUE
+EPOLL_FLAGS	= ./src/EventMonitors/EPoll.cpp -D WITH_EPOLL
+POLL_FLAGS	= ./src/EventMonitors/Poll.cpp -D WITH_POLL
 
 SRCS    = 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\
@@ -27,9 +27,10 @@ HEADERS =	$(CONFIG:%.cpp=./src/Configuration/%.hpp)\
 			./src/utils/Console.hpp\
 			./src/utils/Logger.hpp
 
+CONFIG_FILE = ./other/sample.conf
 ## rules
 $(NAME): $(SRCS) $(HEADERS)
-		@$(CC) $(FLAGS) $(SRCS) $(WITH_POLL)\
+		@$(CC) $(FLAGS) $(SRCS) $(POLL_FLAGS)\
 		-I $(INCLUDES) -o $(NAME)
 
 all: $(NAME)
@@ -37,13 +38,18 @@ all: $(NAME)
 with-kqueue:
 ifneq (,$(findstring $(shell uname -s), Darwin BSD))
 	@echo "Building with kqueue..."
-	@$(CC) $(FLAGS) $(SRCS) $(WITH_KQUEUE)\
+	@$(CC) $(FLAGS) $(SRCS) $(KQUEUE_FLAGS) \
 	-I $(INCLUDES) -o $(NAME)
 else
 	@echo "kqueue is not available on this platform."
 	@echo -n "kqueue is only present in BSD (FreeBSD / OpenBSD)"
 	@echo " and Darwin (Mac OS X / iOS) kernels."
 endif
+
+# with-epoll:
+# 	@echo "Building with epoll..."
+# 	@$(CC) $(FLAGS) $(SRCS) $(EPOLL_FLAGS) \
+# 	-I $(INCLUDES) -o $(NAME)
 
 clean:
 	@rm -rf *.o .objects/*.o
@@ -54,9 +60,10 @@ fclean: clean
 re: fclean all
 
 run: $(NAME)
-	@./$(NAME) ./other/sample.conf
+	@./$(NAME) $(CONFIG_FILE)
 
 TRACE=network
 strace: $(NAME)
-	@strace -o .strace/$(shell date +"%d-%m-%y-[%H:%M:%S]").log -f -e trace=${TRACE} ./$(NAME) ./other/sample.conf
-
+	@mkdir -p .strace/$(shell date +"%d-%m-%y")
+	@strace -o .strace/$(shell date +"%d-%m-%y")/$(shell date +"%H:%M:%S").log \
+	-f -e trace=${TRACE} ./$(NAME) $(CONFIG_FILE) \

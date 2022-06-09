@@ -10,21 +10,6 @@ namespace ws
 	{
 	}
 
-	void Cluster::setup()
-	{
-		std::vector<VServer *> const &servers = _config.getVServers();
-
-		std::vector<VServer *>::const_iterator it = servers.begin();
-		for (; it != servers.end(); it++)
-		{
-			(*it)->start(_binded_listens);
-			std::set<int>::const_iterator it3 = (*it)->getFds().begin();
-			for (; it3 != (*it)->getFds().end(); it3++)
-				_fd_to_vserver[*it3].push_back(*it);
-		}
-		_setup = true;
-	}
-
 	/// helper functions ///
 	inline bool Cluster::isServerFd(int fd)
 	{
@@ -109,13 +94,27 @@ namespace ws
 		}
 	}
 
+	void Cluster::setup()
+	{
+		std::vector<VServer *> const &servers = _config.getVServers();
+
+		std::vector<VServer *>::const_iterator it = servers.begin();
+		for (; it != servers.end(); it++)
+		{
+			(*it)->start(_binded_listens);
+			std::set<int>::const_iterator it3 = (*it)->getFds().begin();
+			for (; it3 != (*it)->getFds().end(); it3++)
+				_fd_to_vserver[*it3].push_back(*it);
+		}
+		_io.setup(servers, this->_server_fds);	
+		_setup = true;
+	}
+
 	/// Main loop ///
 	void Cluster::run()
 	{
 		if (_setup == false)
 			throw std::runtime_error("Cluster::run() : setup() must be called before run()");
-
-		_io.setup(this->_config.getVServers(), this->_server_fds);
 
 		_running = true;
 		while (_running)
