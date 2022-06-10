@@ -28,6 +28,8 @@ namespace ws
 
         void prepareServerConfig(parser::Context const &context);
 
+        struct Location const &resolveLocation(std::string path) const;
+
     private:
         int _ctx_index; // index of the server in the configuration file
         std::vector<struct Listen> _listens;

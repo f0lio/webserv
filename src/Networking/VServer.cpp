@@ -2,12 +2,12 @@
 
 namespace ws
 {
-    bool isAlreadyBinded(struct Listen const &listen, std::vector<struct Listen> &_binded_listens, int *_fd);
+    bool isAlreadyBinded(struct Listen const& listen, std::vector<struct Listen>& _binded_listens, int* _fd);
 
-    VServer::VServer(parser::Context const &context) : _started(false)
+    VServer::VServer(parser::Context const& context) : _started(false)
     {
-        std::vector<parser::SimpleDirective> const &dirs = context.getSimpleDirectives();
-        std::vector<parser::BlockDirective> const &locs = context.getBlockDirectives();
+        std::vector<parser::SimpleDirective> const& dirs = context.getSimpleDirectives();
+        std::vector<parser::BlockDirective> const& locs = context.getBlockDirectives();
         _ctx_index = context.getIndex();
 
         struct sockaddr_in addr;
@@ -20,14 +20,14 @@ namespace ws
                 // if (parser::directiveRulesMap[dirs[i].getKey()].occurrence == parser::OCCURENCE_MULTIPLE)
                 //     _config[dirs[i].getKey()] = dirs[i].getArgs();
                 // else
-                    _config[dirs[i].getKey()] = dirs[i].getArgs();
+                _config[dirs[i].getKey()] = dirs[i].getArgs();
             }
         }
 
         for (size_t i = 0; i < locs.size(); i++)
         {
             struct Location loc;
-            std::vector<parser::SimpleDirective> const &dirs = locs[i].getDirectives();
+            std::vector<parser::SimpleDirective> const& dirs = locs[i].getDirectives();
             for (size_t j = 0; j < dirs.size(); j++)
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
 
@@ -41,18 +41,43 @@ namespace ws
             throw std::runtime_error(
                 "server block " + SSTR(context.getIndex()) + " doesn't have any listen directive");
         // _checkConfig(context);
+        prepareServerConfig(context);
     }
 
-    VServer::~VServer() 
+    VServer::~VServer()
     {
         for (size_t i = 0; i < _listens.size(); i++)
-            ::close(_listens[i].fd);   
+            ::close(_listens[i].fd);
     }
 
-    void VServer::prepareServerConfig(parser::Context const &context)
+    void VServer::prepareServerConfig(parser::Context const& context)
     {
-        if (this->get("root").size() == 0)
-            _config["root"] = std::vector<std::string>(1, "./");
+        bool foundRoot = false;
+        for (
+            std::map<std::string, struct Location>::iterator it = _locations.begin();
+            it != _locations.end();
+            it++
+            )
+        {
+            struct Location& loc = it->second;
+            if (loc.path == "/")
+            {
+                foundRoot = true;
+                break;
+            }
+        }
+        if (!foundRoot)
+        {
+            struct Location loc;
+            loc.path = "/";
+            std::map<const std::string, t_vec_str>::iterator it;
+            for (it = _config.begin(); it != _config.end(); it++)
+            {
+                if (locationDirectiveRulesMap.find(it->first) != locationDirectiveRulesMap.end())
+                    loc.config[it->first] = it->second;
+            }
+            _locations["/"] = loc;
+        }
 
         // for (std::map<int, std::string>::iterator it = g_errorPages.begin(); it != g_errorPages.end(); it++)
         // {
@@ -61,7 +86,7 @@ namespace ws
         // }
     }
 
-    t_vec_str const &VServer::get(const std::string &key) const
+    t_vec_str const& VServer::get(const std::string& key) const
     {
         if (_config.find(key) != _config.end())
             return _config.find(key)->second;
@@ -69,22 +94,22 @@ namespace ws
             return t_vec_str();
     }
 
-    std::map<std::string, struct Location> const &VServer::getLocations() const
+    std::map<std::string, struct Location> const& VServer::getLocations() const
     {
         return _locations;
     }
 
-    const std::vector<struct Listen> &VServer::getListens() const
+    const std::vector<struct Listen>& VServer::getListens() const
     {
         return _listens;
     }
 
-    std::set<int> const &VServer::getFds() const
+    std::set<int> const& VServer::getFds() const
     {
         return _server_fds;
     }
 
-    std::string const &VServer::getName() const
+    std::string const& VServer::getName() const
     {
         std::map<const std::string, t_vec_str>::const_iterator it;
         it = _config.find("name");
@@ -103,13 +128,13 @@ namespace ws
         return _ctx_index;
     }
 
-    void VServer::_checkConfig(parser::Context const &context) const
+    void VServer::_checkConfig(parser::Context const& context) const
     {
         // std::vector<parser::SimpleDirective> const& dirs = context.getSimpleDirectives();
         // std::vector<parser::BlockDirective> const& locs = context.getBlockDirectives();
     }
 
-    void VServer::setupListen(t_vec_str const &args)
+    void VServer::setupListen(t_vec_str const& args)
     {
         struct Listen listen;
         listen.fd = -1; // -1 means not binded yet
@@ -147,7 +172,7 @@ namespace ws
     }
 
     // void VServer::start(std::map<in_addr_t, std::vector<port_t> >& _binded_listens)
-    void VServer::start(std::vector<struct Listen> &_binded_listens)
+    void VServer::start(std::vector<struct Listen>& _binded_listens)
     {
         for (size_t i = 0; i < _listens.size(); i++)
         {
@@ -172,15 +197,15 @@ namespace ws
             // signal(SIGPIPE, SIG_IGN);
             if ((this->_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
                 throw std::runtime_error("Could not create socket for " + formated_listen);
-            
+
             // int optval = 1;
             // setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
             _listens[i].fd = this->_fd;
             if (::bind(
-                    this->_fd,
-                    (struct sockaddr *)&_listens[i].addr_in,
-                    (socklen_t)sock_len) == -1)
+                this->_fd,
+                (struct sockaddr*)&_listens[i].addr_in,
+                (socklen_t)sock_len) == -1)
                 throw std::runtime_error(
                     "Could not bind socket to address " + formated_listen);
 
@@ -193,6 +218,30 @@ namespace ws
         _started = true;
     }
 
+    // must be as copy
+    struct Location const& VServer::resolveLocation(std::string path) const
+    {
+
+        std::map<std::string, struct Location>::const_iterator it;
+
+        while (path.size() > 0)
+        {
+            it = _locations.find(path);
+            if (it != _locations.end())
+                return it->second;
+            size_t pos = path.find_last_of('/');
+            if (pos == std::string::npos)
+                break;
+            path = path.substr(0, pos);
+        }
+        it = _locations.find(path);
+
+        if (it != _locations.end())
+            return it->second;
+        else
+            return _locations.find("/")->second;
+    }
+
     void VServer::print() const
     {
         std::cout << "## VServer ##" << std::endl;
@@ -202,10 +251,10 @@ namespace ws
             std::cout << "Listen: " << _listens[i].host << ":" << _listens[i].port << std::endl;
         }
 
-        for (auto const &it : _config)
+        for (auto const& it : _config)
         {
             std::cout << it.first << ": ";
-            for (auto const &it2 : it.second)
+            for (auto const& it2 : it.second)
             {
                 std::cout << it2 << " ";
             }
@@ -213,13 +262,13 @@ namespace ws
         }
 
         std::cout << "-> Locations" << std::endl;
-        for (auto const &it : _locations)
+        for (auto const& it : _locations)
         {
             std::cout << it.first << ": ";
-            for (auto const &it2 : it.second.config)
+            for (auto const& it2 : it.second.config)
             {
                 std::cout << it2.first << ": ";
-                for (auto const &it3 : it2.second)
+                for (auto const& it3 : it2.second)
                 {
                     std::cout << it3 << " ";
                 }
@@ -232,9 +281,9 @@ namespace ws
 
     // helper function(s?)
     bool isAlreadyBinded(
-        struct Listen const &listen,
-        std::vector<struct Listen> &_binded_listens,
-        int *_fd)
+        struct Listen const& listen,
+        std::vector<struct Listen>& _binded_listens,
+        int* _fd)
     {
         for (size_t i = 0; i < _binded_listens.size(); i++)
         {
