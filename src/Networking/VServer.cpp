@@ -218,10 +218,8 @@ namespace ws
         _started = true;
     }
 
-    // must be as copy
     struct Location const& VServer::resolveLocation(std::string path) const
     {
-
         std::map<std::string, struct Location>::const_iterator it;
 
         while (path.size() > 0)
@@ -229,10 +227,12 @@ namespace ws
             it = _locations.find(path);
             if (it != _locations.end())
                 return it->second;
+            if (path.size() > 1 && path[path.size() - 1] == '/')
+                path.erase(path.size() - 1);
             size_t pos = path.find_last_of('/');
-            if (pos == std::string::npos)
+            if (pos == std::string::npos)   
                 break;
-            path = path.substr(0, pos);
+            path = path.substr(0, pos + 1); 
         }
         it = _locations.find(path);
 
