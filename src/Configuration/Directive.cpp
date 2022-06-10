@@ -53,8 +53,10 @@ namespace parser
 
         if (_args.size() < directiveRulesMap.at(_key).min_args)
             throw std::runtime_error("Directive " + _key + " has too few arguments");
+            
         if (_args.size() > directiveRulesMap.at(_key).max_args)
             throw std::runtime_error("Directive " + _key + " has too many arguments");
+
 
         if (_key == "methods")
         {
@@ -76,9 +78,10 @@ namespace parser
             for (; it != _args.end(); ++it)
             {
                 if (*it != "on" && *it != "off")
-                    throw std::runtime_error("Invalid autoindex " + *it);
+                    throw std::runtime_error(
+                        "Invalid autoindex argument \""+ *it 
+                        + "\". Must be \"on\" or \"off\"");
             }
-
         }
     }
 
@@ -125,6 +128,9 @@ namespace parser
 
     void BlockDirective::check() const
     {
+        std::vector<SimpleDirective>::const_iterator it = this->_directives_vec.begin();
+        for (; it != this->_directives_vec.end(); ++it)
+            it->check();
     }
 
     void BlockDirective::print() const

@@ -78,6 +78,10 @@ namespace parser
 		std::vector<SimpleDirective>::iterator it_sdir;
 		for (it_sdir = _simple_directives_vec.begin(); it_sdir != _simple_directives_vec.end(); ++it_sdir)
 			it_sdir->check();
+		
+		std::vector<BlockDirective>:: iterator it_bdir;
+		for (it_bdir = _block_directives_vec.begin(); it_bdir != _block_directives_vec.end(); ++it_bdir)
+			it_bdir->check();
 
 		for (it = locationDirectiveRulesMap.begin(); it != locationDirectiveRulesMap.end(); ++it)
 		{
