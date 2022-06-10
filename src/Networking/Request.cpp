@@ -1,4 +1,5 @@
 
+
 #include "Request.hpp"
 
 namespace ws
@@ -67,7 +68,6 @@ namespace ws
         std::vector<VServer*>::iterator it = _vservers.begin();
 
         std::string host = _headers.at("Host");
-
         for (; it != _vservers.end(); ++it)
         {
             if (std::find((*it)->get("server_name").begin(),
@@ -194,31 +194,22 @@ namespace ws
 			return 400; // Bad request
 		}
 
-		if (_content_length == -1)
+		if (_content_length == -1 && _method == "POST" && !_isChunked)
 		{
 			return 411; // Length Required
 		}
 
 		_vserver = resolveVServer();
 
-		// for (auto it = _vserver->_config.begin(); it != _vserver->_config.end(); ++it)
-		// {
-		// 	std::cout << "		" << it->first << ": ";
-
-		// 	for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-		// 		std::cout << *it2 << " ";
-		// 	std::cout << std::endl;
-		// }
-
 		if (std::find(_vserver->get("methods").begin(), _vserver->get("methods").end(), _method) == _vserver->get("methods").end())
 			return 405; // Method not allowed
 
 		if (std::find(_vserver->get("max_body_size").begin(), _vserver->get("max_body_size").end(), _method) != _vserver->get("max_body_size").end())
 		{
-			max_body_size = std::atoi(_vserver->get("max_body_size")[0].c_str());
+			max_body_size = std::atoi(_vserver->get("max_body_size")[0].c_str()); // **temporary
 		}
 		
-		return 1; // OK
+		return _method == "POST" ? READING_BODY : OK_200; // OK
 	}
 
 	int Request::parseHeader()
@@ -233,7 +224,7 @@ namespace ws
 				// std::cout << "\n\nparseHeader+++++++++++++++++ n: " + SSTR(n) + "\n" << std::endl;
 			if (n == 0 || n == -1)
 			{
-				return 0;
+				return READING_HEADER;
 			}
 			buffer[n] = '\0';
 			_request.append(buffer, n);
@@ -265,7 +256,6 @@ namespace ws
 
 		size_t prevSize = _content_length;
 
-		// an alternative is chunk = _body if !_body.empty()
 		while (true)
 		{
 			if (_body.find(delim, prevSize) != std::string::npos)
@@ -274,7 +264,7 @@ namespace ws
 				// std::cout << "\n\nchunkedBody1+++++++++++++++++ n: " + SSTR(n) + "\n" << std::endl;
 			if (n == 0 || n == -1) // inf loop if request doesnt have delim
 			{
-				return 1;
+				return READING_BODY;
 			}
 			buffer[n] = '\0';
 
@@ -283,27 +273,55 @@ namespace ws
 			_body.append(buffer, n);
 		}
 
-		size_t cl_end = _body.find(delim, prevSize); //chunk length end
+		size_t delimPos = _body.find(delim, prevSize);
+		size_t rawSize = delimPos - prevSize; // this may be off by one
 
-		if (!cl_end || _body.find_first_not_of(CI_HEX) != cl_end)
-			return 400;
+		size_t cl_start = _body.find_last_not_of(CI_HEX, prevSize, rawSize); //chunk length Start
+		// size_t cl_end   = _body.find_first_of (CI_HEX, prevSize, rawSize); //chunk length End
 
-		size_t chunk_length = strtol(_body.c_str(), NULL, 16);
-
-		if (chunk_length == 0) // eof
+		if (!rawSize || cl_start == delimPos) // no data or no hex
 		{
-			if (_body.find(delim, cl_end + delim.size()) == std::string::npos)
-				;
+			_content_length = delimPos + delim.size(); // if unexpected structure maybe delim is part of body
+			return READING_BODY; // no number
 		}
-		std::string	chunk = _body.substr(cl_end + delim.size()); // from after \r\n to end of buffered _body
-		_body.erase(cl_end); // _body should only have raw content
 
+		size_t chunk_length = strtol(_body.c_str() + cl_start, NULL, 16);
 
+		if (chunk_length <= 0) // eof
+		{
+			if (_body.find(delim + delim, delimPos) != delimPos) // bad delimiter (not \r\n\r\n)
+				return 400; // bad request
+			else
+				return OK_200; // end of body
+		}
+		std::string	chunk = _body.substr(delimPos + delim.size()); // from after \r\n to end of buffered _body
+		_body.erase(delimPos); // _body should only have raw content
+
+		while (chunk.size() < chunk_length)
+		{
+			int n = read(_client_fd, buffer, REQUEST_BUFFER_SIZE);
+			if (n == 0 || n == -1) // inf loop if request doesnt have delim
+				break ; //experimenting
+			buffer[n] = '\0';
+
+			chunk.append(buffer, n);
+		}
+
+		if (chunk.size() >= chunk_length + delim.size()) // debatable
+		{
+			if (chunk.find(delim, chunk_length) != chunk_length) // non debatable
+				return 400;
+			chunk.erase(chunk_length, delim.size()); // remove delim
+		}
+		_body.append(chunk);
+
+		_content_length = chunk_length;
+		
+		return READING_BODY;
 	}
 
 	int Request::parseBody()
 	{
-		std::cout << "length: " << _content_length << std::endl;
 
 		if (!_isChunked)
 		{
@@ -313,7 +331,7 @@ namespace ws
 					// std::cout << "\n\nparseBody+++++++++++++++++ n: " + SSTR(n) + "\n" << std::endl;
 				if (n == 0 || n == -1)
 				{
-					return 0;
+					return READING_BODY;
 				}
 				buffer[n] = '\0';
 				_body.append(buffer, n);
@@ -321,27 +339,26 @@ namespace ws
 		}
 		else
 		{
-			return 400; // chunked WIP
-			// return chunkedBody();
+			return chunkedBody();
+			// return 400; // chunked WIP
 		}
+		return OK_200;
 	}
 
 	void Request::process()
 	{
-		// 0 ==> in header
-		// 1 ==> in body
 		// 200 ==> done
 		// else error
 
-		if (_status == 0)
+		if (_status == READING_HEADER)
 			_status = parseHeader();
-		if (_status == 1)
+		if (_status == READING_BODY)
 			_status = parseBody();
 		// else go to error page
 
-		if (_status != 200)
+		if (_status != OK_200)
 			console.err("Error: " + SSTR(_status));
-		if (_status < 200)
+		if (_status < OK_200)
 			return;
 		_isDone = true; // this is wrong!!! change it
 	}
