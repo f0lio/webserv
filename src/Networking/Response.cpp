@@ -3,7 +3,7 @@
 
 namespace ws
 {
-    Response::Response(Request const &request, const Configuration &config)
+    Response::Response(Request const& request, const Configuration& config)
         : _request(request), _config(config), _isProcessed(false), _isSent(false)
     {
     }
@@ -12,17 +12,17 @@ namespace ws
     {
     }
 
-    std::string const &Response::getBody() const
+    std::string const& Response::getBody() const
     {
         return _body;
     }
 
-    std::string const &Response::getHeader() const
+    std::string const& Response::getHeader() const
     {
         return _header;
     }
 
-    std::string const &Response::getStatus() const
+    std::string const& Response::getStatus() const
     {
         return _status;
     }
@@ -34,26 +34,37 @@ namespace ws
 
         console.log("Formating response...");
 
-        if (_request.getStatus() != 200)
-        {
-            _status = "HTTP/1.1 " + SSTR(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
-            _header = "Content-Type: text/html\r\n";
-            _body = g_errorPages.at(_request.getStatus());
-        }
-        else
+        // if (_request.getStatus() != 200)
+        // {
+        //     _status = "HTTP/1.1 " + SSTR(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
+        //     _header = "Content-Type: text/html\r\n";
+        //     _body = g_errorPages.at(_request.getStatus());
+        // }
+        // else
         {
             // TODO: get vs from request, as it already has been resolved
-            const VServer &vs = *_request.resolveVServer();
+            const VServer& vs = *_request.resolveVServer();
             std::cout << vs.getName() << std::endl;
 
-            // vs.
-            
+
+            const struct Location& loc = vs.resolveLocation(_request.getPath());
+            try
+            {
+                std::cout << std::endl;
+                std::cout << "## LOC_ROOT: " << loc.config.at("root")[0] << std::endl;
+                std::cout << std::endl;
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << e.what() << '\n';
+            }
+
             this->_status = "HTTP/1.1 " + SSTR(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
             this->_header = "Content-Type: text/html; charset=UTF-8";
             // styled html with css
             this->_body =
-            _request.getBody();
-                // "<!DOCTYPE html><html><head><title>" + vs.getName() + "</title><style>body{background-color: #ddd;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>" + vs.getName() + " : " + SSTR(vs.getIndex()) + "</h1></body></html>";
+                _request.getBody();
+            // "<!DOCTYPE html><html><head><title>" + vs.getName() + "</title><style>body{background-color: #ddd;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>" + vs.getName() + " : " + SSTR(vs.getIndex()) + "</h1></body></html>";
         }
 
         _response = _status + "\r\n" + _header + "\r\n\r\n" + _body;
@@ -87,7 +98,7 @@ namespace ws
     **  otherwise, it returns the coresponding status code
     **/
 
-    int Response::precheck(Request const &req) // TODO: WIP: implement functionlity in request
+    int Response::precheck(Request const& req) // TODO: WIP: implement functionlity in request
     {
         // const VServer* vs = request.getVServer();
 
