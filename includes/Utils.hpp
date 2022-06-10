@@ -38,6 +38,11 @@
 
 #define PASS 0
 
+// for request
+#define READING_HEADER 0
+#define READING_BODY 1
+#define OK_200 200
+
 #define MAX_PATH_LENGTH 256
 #define MAX_HEADER_SIZE 8192
 #define REQUEST_BUFFER_SIZE 1024

@@ -34,7 +34,8 @@
 .vscode
 *log*
 
-*.ignore*
+*ignore*
+# *draft*
 
 .docker
 *.tldr
