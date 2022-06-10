@@ -5,11 +5,15 @@ namespace ws
 	KQueue::KQueue() {};
 	KQueue::~KQueue() {}
 	
-	KQueue::setup(
+	void KQueue::setup(
 		std::vector<VServer*> const& servers,
 		std::set<int>& _server_fds)
 	{
 		_nfds = 0;
+		
+		// this->_kq = kqueue();
+		// if (_kq == -1) {};
+		
 		for (size_t i = 0; i < servers.size(); i++)
 		{
 			std::vector<struct Listen>::const_iterator it = servers[i]->getListens().begin();
@@ -17,12 +21,9 @@ namespace ws
 			{
 				if (it->fd == -1)
 					continue;
-				_kevents[_nfds].ident = it->fd;
-				_kevents[_nfds].filter = EVFILT_READ;
-				_kevents[_nfds].flags = EV_ADD | EV_ENABLE;
-				_kevents[_nfds].fflags = 0;
-				_kevents[_nfds].data = 0;
-				_kevents[_nfds].udata = NULL;
+
+				// Later..
+				
 				_nfds++;
 				_server_fds.insert(it->fd);
 			}
@@ -31,57 +32,55 @@ namespace ws
 
 	int KQueue::monitor()
 	{
-		return ::kevent(_kq, _kevents, _nfds, _kevents, _nfds, NULL);
+		return ::kevent(_kq, &_kevents.front() , _kevents.size(), NULL, 0, NULL);
 	}
 
 	void KQueue::addEvent(int fd)
 	{
-		_kevents[_nfds].ident = fd;
-		_kevents[_nfds].filter = EVFILT_READ;
-		_kevents[_nfds].flags = EV_ADD | EV_ENABLE;
-		_kevents[_nfds].fflags = 0;
-		_kevents[_nfds].data = 0;
-		_kevents[_nfds].udata = NULL;
+		struct kevent ev;
+		EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+		_kevents.push_back(ev);
+		_nfds++;
 		_nfds++;
 	}
 
 	void KQueue::setWriteEvent(int fd_index)
 	{
-		_kevents[fd_index].filter = EVFILT_WRITE;
-		_kevents[fd_index].flags = EV_ADD | EV_ENABLE;
-		_kevents[fd_index].fflags = 0;
-		_kevents[fd_index].data = 0;
-		_kevents[fd_index].udata = NULL;
+		_kevents.at(fd_index).flags = EV_ADD | EV_ENABLE | EV_CLEAR;
+		_kevents.at(fd_index).flags = EV_ADD | EV_ENABLE | EV_CLEAR;
 	}
 
 	void KQueue::removeEvent(int fd_index)
 	{
-		_kevents[fd_index].flags = EV_DELETE;
-		_kevents[fd_index].fflags = 0;
-		_kevents[fd_index].data = 0;
-		_kevents[fd_index].udata = NULL;
+		_kevents.erase(_kevents.begin() + fd_index);
 	}
 
 	bool KQueue::isRead(int _event_index)
 	{
-		return _kevents[_event_index].flags & EV_ERROR;
+		return _kevents[_event_index].filter & EVFILT_READ;
 	}
 
 	bool KQueue::isWrite(int _event_index)
 	{
-		return _kevents[_event_index].flags & EV_ERROR;
+		return _kevents[_event_index].filter & EVFILT_WRITE;
 	}
 
 	bool KQueue::isError(int _event_index)
 	{
-		return _kevents[_event_index].flags & EV_ERROR;
+		return _kevents[_event_index].filter & EV_ERROR;
 	}
+	
+	bool KQueue::isEOF(int _event_index)
+	{
+		return _kevents[_event_index].flags & EV_EOF;
+	}
+
 	size_t KQueue::size() const
 	{
 		return _nfds;
 	}
 
-	int Poll::getFd(int index) const
+	int KQueue::getFd(int index) const
 	{
 		// if (index < 0 || index >= _nfds)
 		// 	return -1;
