@@ -3,7 +3,7 @@
 #include "IEventMonitor.hpp"
 
 #include <sys/types.h>
-#include <event.h>
+#include <sys/event.h>
 #include <sys/time.h>
 
 #define MAX_FDS 1024
@@ -27,8 +27,11 @@ namespace ws
 		virtual bool isError(int _event_index);
 		virtual int getFd(int index) const;
 		virtual size_t size() const;
+	// additonal..
+		bool isEOF(int _event_index);
 	private:
-		struct kevent _kevents[MAX_FDS];
+		std::vector<struct kevent> _kevents;
+		int _kq;
 		int _nfds;
 	};
 } // namespace ws

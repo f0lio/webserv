@@ -173,8 +173,8 @@ namespace ws
             if ((this->_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
                 throw std::runtime_error("Could not create socket for " + formated_listen);
             
-            int optval = 1;
-            setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
+            // int optval = 1;
+            // setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
             _listens[i].fd = this->_fd;
             if (::bind(

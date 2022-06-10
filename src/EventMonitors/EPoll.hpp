@@ -1,19 +1,18 @@
 #pragma once
 
 #include "IEventMonitor.hpp"
-#include <vector>
-#include <poll.h>
+#include <sys/epoll.h>
 
 #define MAX_FDS 1024
 
 namespace ws
 {
-	class Poll : public IEventMonitor
+	class EPoll : public IEventMonitor
 	{
 	public:
 
-		Poll();
-		~Poll();
+		EPoll();
+		~EPoll();
 		virtual void setup(
 			std::vector<VServer*> const& servers,
 			std::set<int>& _server_fds);
@@ -27,7 +26,8 @@ namespace ws
 		virtual int getFd(int index) const;
 		virtual size_t size() const;
 	private:
-		std::vector<struct pollfd> _pollfds;
+		int _epoll_fd;
+		struct epoll_event _events[MAX_FDS];
 		int _nfds;
 	};
 } // namespace ws

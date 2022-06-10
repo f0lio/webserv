@@ -10,21 +10,6 @@ namespace ws
 	{
 	}
 
-	void Cluster::setup()
-	{
-		std::vector<VServer *> const &servers = _config.getVServers();
-
-		std::vector<VServer *>::const_iterator it = servers.begin();
-		for (; it != servers.end(); it++)
-		{
-			(*it)->start(_binded_listens);
-			std::set<int>::const_iterator it3 = (*it)->getFds().begin();
-			for (; it3 != (*it)->getFds().end(); it3++)
-				_fd_to_vserver[*it3].push_back(*it);
-		}
-		_setup = true;
-	}
-
 	/// helper functions ///
 	inline bool Cluster::isServerFd(int fd)
 	{
@@ -83,6 +68,7 @@ namespace ws
 		else
 		{
 			// console.log("Response handler : request not complete");
+			// close(_io.getFd(fd_index));
 			return;
 		}
 		// console.log("Response handler : request complete");
@@ -108,29 +94,50 @@ namespace ws
 		}
 	}
 
+	void Cluster::setup()
+	{
+		std::vector<VServer *> const &servers = _config.getVServers();
+
+		std::vector<VServer *>::const_iterator it = servers.begin();
+		for (; it != servers.end(); it++)
+		{
+			(*it)->start(_binded_listens);
+			std::set<int>::const_iterator it3 = (*it)->getFds().begin();
+			for (; it3 != (*it)->getFds().end(); it3++)
+				_fd_to_vserver[*it3].push_back(*it);
+		}
+		_io.setup(servers, this->_server_fds);	
+		_setup = true;
+	}
+
 	/// Main loop ///
 	void Cluster::run()
 	{
 		if (_setup == false)
 			throw std::runtime_error("Cluster::run() : setup() must be called before run()");
 
-		_io.setup(this->_config.getVServers(), this->_server_fds);
-
 		_running = true;
 		while (_running)
 		{
-			std::cout << "monitoring..." << std::endl;
-			int ret = _io.monitor();
 
 			/* TODO: 
 			** error handling should be done inside the io class
 			*/
+		
+			int ret = _io.monitor();
+			std::cout << "monitoring..." << std::endl;
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : monitor() failed");
 			else if (ret == 0)
 				continue;
 			for (size_t i = 0; i < _io.size(); i++)
 			{
+				if (_io.isError(i))
+				{
+					close(_io.getFd(i));
+					_io.removeEvent(i);
+					continue;
+				}
 				if (_io.isRead(i))
 				{
 					if (isServerFd(_io.getFd(i)))
