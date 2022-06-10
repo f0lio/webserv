@@ -74,6 +74,11 @@ namespace parser
 			}
 		}
 
+		// dumb extra iteration for now
+		std::vector<SimpleDirective>::iterator it_sdir;
+		for (it_sdir = _simple_directives_vec.begin(); it_sdir != _simple_directives_vec.end(); ++it_sdir)
+			it_sdir->check();
+
 		for (it = locationDirectiveRulesMap.begin(); it != locationDirectiveRulesMap.end(); ++it)
 		{
 			if (it->second.is_required)
