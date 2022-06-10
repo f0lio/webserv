@@ -34,22 +34,25 @@ namespace ws
 
         console.log("Formating response...");
 
-        if (_request.getStatus() != 200)
+        // if (_request.getStatus() != 200)
+        // {
+        //     _status = "HTTP/1.1 " + SSTR(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
+        //     _header = "Content-Type: text/html\r\n";
+        //     _body = g_errorPages.at(_request.getStatus());
+        // }
+        // else
         {
-            _status = "HTTP/1.1 " + SSTR(_request.getStatus()) + " " + g_statusMessages.at(_request.getStatus());
-            _header = "Content-Type: text/html\r\n";
-            _body = g_errorPages.at(_request.getStatus());
-        }
-        else
-        {
-            const VServer *vs = _request.resolveVServer();
-            std::cout << vs->getName() << std::endl;
+            // TODO: get vs from request, as it already has been resolved
+            const VServer &vs = *_request.resolveVServer();
+            std::cout << vs.getName() << std::endl;
+
+            // vs.
 
             this->_status = "HTTP/1.1 200 OK";
             this->_header = "Content-Type: text/html; charset=UTF-8";
             // styled html with css
             this->_body =
-                "<!DOCTYPE html><html><head><title>" + vs->getName() + "</title><style>body{background-color: #ddd;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>" + "</head><body><h1>" + vs->getName() + " : " + SSTR(vs->getIndex()) + "</h1></body></html>";
+                "<!DOCTYPE html><html><head><title>" + vs.getName() + "</title><style>body{background-color: #ddd;font-size: 1em;color: #333;margin: 0;padding: 5px 5px ;}</style>" + vs.getName() + " : " + SSTR(vs.getIndex()) + "</h1></body></html>";
         }
 
         _response = _status + "\r\n" + _header + "\r\n\r\n" + _body;
@@ -102,5 +105,4 @@ namespace ws
         //...
         return 0;
     }
-
 }

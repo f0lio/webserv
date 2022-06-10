@@ -9,7 +9,7 @@ FLAGS   = -w -std=c++98 -D DEBUG -D CONSOLE_ON
 INCLUDES= includes 
 
 UTILS	= helpers.cpp
-CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp 
+CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp Context.cpp
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp Request.cpp Response.cpp
 
 KQUEUE_FLAGS	= ./src/EventMonitors/KQueue.cpp -D WITH_KQUEUE

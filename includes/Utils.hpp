@@ -24,6 +24,7 @@
 
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
+#include "../src/Configuration/ParserRules.hpp"
 
 #define ARRAY_SIZE(X_X) (sizeof(X_X) / sizeof(X_X[0]))
 
@@ -66,6 +67,8 @@ static const std::map<int, std::string> g_statusMessages = initStatusMessages();
 static const std::map<int, std::string> g_errorPages = initErrorPages();
 static const std::set<std::string> AllMethods = initAllMethods();
 static const std::set<std::string> ImplementedMethods = initImplementedMethods();
+static const std::map<std::string, DirectiveRules> directiveRulesMap = initDirectiveRules();
+static const std::map<std::string, DirectiveRules> locationDirectiveRulesMap = initLocationDirectiveRules();
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
