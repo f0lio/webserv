@@ -25,7 +25,7 @@ example:
 
 namespace parser
 {
-    class Context;
+    // class Context;
     class SimpleDirective
     {
         friend class Parser;

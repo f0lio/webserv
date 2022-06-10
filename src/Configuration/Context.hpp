@@ -2,6 +2,7 @@
 
 #include "Utils.hpp"
 #include "Directive.hpp"
+#include "ParserRules.hpp"
 
 namespace parser
 {
@@ -10,45 +11,24 @@ namespace parser
 	class Context
 	{
 	public:
-		Context(){};
-		~Context(){};
+		Context();
+		~Context();
 
-		std::string getName() const { return _name; }
+		std::string getName() const;
 
-		void setName(std::string &name)
-		{
-			_name = name;
-		}
+		void setName(std::string &name);
 
-		void setIndex(size_t index) // used for setting default_server
-		{
-			_index = index;
-		}
+		void setIndex(size_t index); // used for setting default_server
+		
+		size_t getIndex() const;
 
-		size_t getIndex() const
-		{
-			return _index;
-		}
+		void addDirective(const BlockDirective &dir);
 
-		void addDirective(const BlockDirective &dir)
-		{
-			_block_directives_vec.push_back(dir);
-		}
+		void addDirective(const SimpleDirective &dir);
 
-		void addDirective(const SimpleDirective &dir)
-		{
-			_simple_directives_vec.push_back(dir);
-		}
+		std::vector<SimpleDirective> const &getSimpleDirectives() const;
 
-		std::vector<SimpleDirective> const &getSimpleDirectives() const
-		{
-			return _simple_directives_vec;
-		}
-
-		std::vector<BlockDirective> const &getBlockDirectives() const
-		{
-			return _block_directives_vec;
-		}
+		std::vector<BlockDirective> const &getBlockDirectives() const;
 
 		// std::vector<std::string> get(std::string key)
 		// {
@@ -58,14 +38,7 @@ namespace parser
 		// 	return std::vector<std::string>();
 		// }
 
-		void prepare() {
-			// for (size_t i = 0; i < _simple_directives_vec.size(); i++)
-			// 	_simple_directives_vec[i].check();
-			// for (size_t i = 0; i < _block_directives_vec.size(); i++)
-			// 	_block_directives_vec[i].getDirectives();
-			
-
-		}
+		void prepare();
 
 	private:
 		std::string _name;

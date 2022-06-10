@@ -1,10 +1,10 @@
 
 #pragma once
 
+#include "ParserRules.hpp"
 #include "Utils.hpp"
 #include "Tokenizer.hpp"
 #include "Context.hpp"
-#include "ParserRules.hpp"
 
 namespace parser
 {
