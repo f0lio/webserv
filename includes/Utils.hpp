@@ -21,6 +21,9 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <sys/stat.h>
+#include <dirent.h>
+
 
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
@@ -91,3 +94,4 @@ struct Location
 bool is_included(char c, char *str);
 bool is_number(const std::string &s);
 bool is_number(const char *s);
+const std::string& autoIndex(const std::string& root, const std::string& path);

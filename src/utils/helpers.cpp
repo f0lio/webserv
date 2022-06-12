@@ -1,27 +1,39 @@
 
 #include "Utils.hpp"
 
-bool  is_included(char c, char *str)
+bool  is_included(char c, char* str)
 {
-    while (str)
-        if (c == *str++)
-            return true;
-    return false;
+	while (str)
+		if (c == *str++)
+			return true;
+	return false;
 }
 
 bool is_number(const std::string& s)
 {
-    std::string::const_iterator it = s.begin();
-    while (it != s.end() && std::isdigit(*it)) ++it;
-    return !s.empty() && it == s.end();
+	std::string::const_iterator it = s.begin();
+	while (it != s.end() && std::isdigit(*it)) ++it;
+	return !s.empty() && it == s.end();
 }
 
-bool is_number(const char *s)
+bool is_number(const char* s)
 {
-    while (*s)
-        if (!std::isdigit(*s++))
-            return false;
-    return true;
+	while (*s)
+		if (!std::isdigit(*s++))
+			return false;
+	return true;
+}
+
+bool is_directory(const std::string& path)
+{
+	struct stat st;
+	return stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+bool is_regular_file(const std::string& path)
+{
+	struct stat st;
+	return stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode);
 }
 
 const std::map<int, std::string> initStatusMessages()
@@ -198,7 +210,7 @@ const std::map<int, std::string> initErrorPages()
 	errorPages[507] =
 		"<html>" CRLF "<head><title>507 Insufficient Storage</title></head>" CRLF
 		"<body>" CRLF "<center><h1>507 Insufficient Storage</h1></center>" CRLF;
-	
+
 	return errorPages;
 }
 
@@ -224,4 +236,33 @@ const std::set<std::string> initImplementedMethods()
 	tmp.insert("POST");
 	tmp.insert("DELETE");
 	return tmp;
+}
+
+const std::string& autoIndex(const std::string& root, const std::string& path)
+{
+	DIR* dir = opendir(path.c_str());
+	if (dir)
+	{
+		struct dirent* ent;
+		std::string dirContent = \
+		"<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>";
+		while ((ent = readdir(dir)) != NULL)
+		{
+			std::string filePath = ent->d_name;
+			if (ent->d_name[0] == '.')
+			{
+				dirContent += "<a href=\"" + filePath + "\">" + filePath + "</a>\n";
+				continue;
+			}
+
+			if (is_directory(filePath.c_str()))
+				filePath += "/";
+			dirContent += "<a href=\"" + filePath + "\">" + filePath + "</a>\n";
+		}
+		dirContent += "</pre><hr></body></html>";
+		closedir(dir);
+		return dirContent;
+	}
+	return "Nope";
+	return "";
 }

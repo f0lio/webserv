@@ -124,8 +124,9 @@ namespace ws
 			** error handling should be done inside the io class
 			*/
 		
-			int ret = _io.monitor();
 			std::cout << "monitoring..." << std::endl;
+			int ret = _io.monitor();
+			std::cout << "monitoring done" << std::endl;
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : monitor() failed");
 			else if (ret == 0)
