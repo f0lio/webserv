@@ -30,9 +30,17 @@ namespace ws
         for (size_t i = 0; i < locs.size(); i++)
         {
             struct Location loc;
-            std::vector<parser::SimpleDirective> const& dirs = locs[i].getDirectives();
+            std::vector<parser::SimpleDirective> const&
+            loc_dirs = locs[i].getDirectives();
+
+            // TODO: optimize (?)
+            // init with server config
             for (size_t j = 0; j < dirs.size(); j++)
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
+
+            // override with location config
+            for (size_t j = 0; j < loc_dirs.size(); j++)
+                loc.config[loc_dirs[j].getKey()] = loc_dirs[j].getArgs();
 
             loc.path = locs[i].getArgs()[0];
             if (loc.config.find("root") == loc.config.end())

@@ -30,10 +30,20 @@ bool is_directory(const std::string& path)
 	return stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
 }
 
+bool is_directory(struct stat& st)
+{
+	return S_ISDIR(st.st_mode);
+}
+
 bool is_regular_file(const std::string& path)
 {
 	struct stat st;
 	return stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode);
+}
+
+bool is_regular_file(struct stat& st)
+{
+	return S_ISREG(st.st_mode);
 }
 
 const std::map<int, std::string> initStatusMessages()
@@ -238,31 +248,60 @@ const std::set<std::string> initImplementedMethods()
 	return tmp;
 }
 
+const std::string& formatDate(time_t time)
+{
+	struct tm* tm = gmtime(&time);
+	char buffer[80];
+	strftime(buffer, 80, "%d-%b-%Y %H:%M", tm);
+	return buffer;
+}
+
+
 const std::string& autoIndex(const std::string& root, const std::string& path)
 {
-	DIR* dir = opendir(path.c_str());
+	std::string dir_path = root + path;
+	console.log("dir_path: " + dir_path);
+	DIR* dir = opendir(dir_path.c_str());
 	if (dir)
 	{
 		struct dirent* ent;
+		std::string sufix = "";
 		std::string dirContent = \
-		"<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>";
+			"<html><head><title>Index of " + path
+			+ "</title></head><body><h1>Index of "
+			+ path + "</h1><hr><pre>";
 		while ((ent = readdir(dir)) != NULL)
 		{
-			std::string filePath = ent->d_name;
+			std::string filePath(ent->d_name);
 			if (ent->d_name[0] == '.')
 			{
 				dirContent += "<a href=\"" + filePath + "\">" + filePath + "</a>\n";
 				continue;
 			}
 
-			if (is_directory(filePath.c_str()))
-				filePath += "/";
-			dirContent += "<a href=\"" + filePath + "\">" + filePath + "</a>\n";
+			struct stat st;
+			stat(filePath.c_str(), &st);
+
+			// if (is_directory(st))
+			if (is_directory(filePath))
+				sufix = "/";
+			else
+				sufix = "";
+			dirContent += "<a href=\"" + path + "/" + filePath + sufix + "\">" + filePath + "</a>";
+			std::string formattedDate = formatDate(st.st_mtime);
+			dirContent += "\t\t\t\t\t\t\t" + formattedDate + "\t\t\t\t";
+
+			if (sufix == "/")
+				dirContent += "-";
+			else
+				dirContent += SSTR(st.st_size) + " bytes\n";
+			dirContent += "\n";
+
 		}
 		dirContent += "</pre><hr></body></html>";
 		closedir(dir);
 		return dirContent;
 	}
-	return "Nope";
-	return "";
+	return "AutoIndex: FAILED TO OPEN DIRECTORY";
+	// return g_errorPages[403]; // 403 Forbidden
 }

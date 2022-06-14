@@ -2,6 +2,9 @@
 
 #include "Request.hpp"
 
+#define HTTP_VERSION "HTTP/1.1"
+#define SERVER_NAME "Shabalido""
+
 namespace ws
 {
     class Configuration;
@@ -16,12 +19,17 @@ namespace ws
         std::string const &getHeader() const;
         std::string const &getStatus() const;
         
-        int precheck(Request const& request);
         void setup();
         void process();
         void send();
         bool isProcessed() const;
         bool isSent() const;
+
+        //tmp
+        int resolveFile(
+            struct Location const& loc,
+            std::string const& path,
+            std::string* fileName);
 
     private:
         Request const &_request;
@@ -31,6 +39,18 @@ namespace ws
         std::string _status;
         bool _isProcessed;
         bool _isSent;
-        const Configuration &_config;
+        const Configuration &_config; // (?)
+
+        // private methods
+        int precheck(Request const& request); // to be moved to request class
+        void setStatus(int status);
+        void setHeader(std::string const& name, std::string const& value);
+        void setBody(std::string const& body);
+        void setResponse();
+        void setContentType(std::string const& contentType);
+        void setContentLength(size_t contentLength);
+        void setLocation(std::string const& location);
+        void setConnection(std::string const& connection);
+        void setDate();
     };
 } // namespace ws
