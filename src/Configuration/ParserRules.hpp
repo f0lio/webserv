@@ -41,8 +41,9 @@ static const char* _simple_identifiers[] = {
     "error_page",
     "max_body_size",
     "methods",
-    "autoindex",
     "redirect",
+    "autoindex",    // better keep it only for location block.
+                    // as it could lead to ambiguity. (idk)
 };
 
 static const char* _location_identifiers[] = {

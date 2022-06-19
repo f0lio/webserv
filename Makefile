@@ -57,7 +57,10 @@ clean:
 fclean: clean
 	@rm -rf $(NAME)
 
-re: fclean all
+re:
+	@echo "Re-building..."
+	@make fclean
+	@make
 
 run: $(NAME)
 	@./$(NAME) $(CONFIG_FILE)
@@ -76,4 +79,5 @@ setup-dirs:
 	@echo "<html><body><h1>Hello From /tmp/ws/b</h1></body></html>" > /tmp/ws/b/index.html
 	@echo "<html><body><h1>Hello From /tmp/ws/c</h1></body></html>" > /tmp/ws/c/index.html
 	@echo "<html><body><h1>Hello From /tmp/ws/a/inside</h1></body></html>" > /tmp/ws/a/inside/index.html
+	@echo "<html><body><h1>Hello From /tmp/ws/a/inside/file.txt</h1></body></html>" > /tmp/ws/a/inside/file.txt
 	@chmod -R 777 /tmp/ws

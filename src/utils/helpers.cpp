@@ -24,6 +24,11 @@ bool is_number(const char* s)
 	return true;
 }
 
+bool file_exists(const std::string& name)
+{
+	return access(name.c_str(), F_OK) != -1;
+}
+
 bool is_directory(const std::string& path)
 {
 	struct stat st;
