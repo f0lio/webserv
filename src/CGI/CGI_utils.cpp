@@ -19,7 +19,7 @@ bool	file_exists(std::string path)
 	return true;
 }
 
-char**	map_to_envp(std::map<std::string, std::string> &strings)
+char**	mapToArray(std::map<std::string, std::string> &strings)
 {
 	char	**array = new char*[strings.size()];
 	int		i = 0;

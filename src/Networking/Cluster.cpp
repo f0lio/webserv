@@ -43,7 +43,6 @@ namespace ws
 
 			Request *request = new Request(
 				_io.getFd(fd_index), _fd_to_vserver[_client_to_server[_io.getFd(fd_index)]]);
-			console.log("Cluster::run() : new request", ": ", _io.getFd(fd_index), "\n");
 			_fd_to_request[_io.getFd(fd_index)] = request;
 		}
 		// console.log("Request handler");
@@ -59,9 +58,9 @@ namespace ws
 		// console.log("Response handler");
 		if (_fd_to_request[_io.getFd(fd_index)]->isComplete())
 		{	
-			console.log("Cluster::run() : new response", ": ", _io.getFd(fd_index), "\n");
 			if (_fd_to_response.find(_io.getFd(fd_index)) == _fd_to_response.end())
 			{
+				console.log("Cluster::run() : new response", ": ", _io.getFd(fd_index), "\n");
 				Response *response = new Response(*_fd_to_request[_io.getFd(fd_index)], this->_config);
 				_fd_to_response[_io.getFd(fd_index)] = response;
 			}
