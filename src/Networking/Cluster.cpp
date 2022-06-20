@@ -49,8 +49,9 @@ namespace ws
 		// console.log("Request handler");
 		_fd_to_request[_io.getFd(fd_index)]->process();
 		// console.log("Request processed");
-		
-		_io.setWriteEvent(fd_index);
+
+		if (_fd_to_request[_io.getFd(fd_index)]->isComplete())
+			_io.setWriteEvent(fd_index);
 	}
 
 	void Cluster::responseHandler(int fd_index)
