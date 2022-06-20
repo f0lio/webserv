@@ -10,7 +10,7 @@ namespace ws
 		std::set<int>& _server_fds)
 	{
 		_nfds = 0;
-		
+
 		// this->_kq = kqueue();
 		// if (_kq == -1) {};
 		
@@ -41,18 +41,18 @@ namespace ws
 		EV_SET(&ev, fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 		_kevents.push_back(ev);
 		_nfds++;
-		_nfds++;
 	}
 
 	void KQueue::setWriteEvent(int fd_index)
 	{
 		_kevents.at(fd_index).flags = EV_ADD | EV_ENABLE | EV_CLEAR;
-		_kevents.at(fd_index).flags = EV_ADD | EV_ENABLE | EV_CLEAR;
+		// _kevents.at(fd_index).fflags = 0;
 	}
 
 	void KQueue::removeEvent(int fd_index)
 	{
 		_kevents.erase(_kevents.begin() + fd_index);
+		_nfds--;
 	}
 
 	bool KQueue::isRead(int _event_index)

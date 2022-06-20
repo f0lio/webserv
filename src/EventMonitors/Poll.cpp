@@ -14,8 +14,8 @@ namespace ws
 		memset(&_pollfds, 0, sizeof(_pollfds));
 		for (size_t i = 0; i < servers.size(); i++)
 		{
-			std::vector<struct Listen>::const_iterator it = servers[i]->getListens().begin();
-				
+			std::vector<struct Listen>::const_iterator
+			it = servers[i]->getListens().begin();	
 			for (; it != servers[i]->getListens().end(); it++)
 			{
 				if (it->fd == -1)
@@ -46,9 +46,10 @@ namespace ws
 		_pollfds.at(fd_index).revents = 0;
 	}
 
-	void Poll::removeEvent(int fd_index) //not really removing, just disabling
+	void Poll::removeEvent(int fd_index)
 	{
 		_pollfds.erase(_pollfds.begin() + fd_index);
+		_nfds--;
 	}
 
 	bool Poll::isRead(int _event_index)
@@ -63,7 +64,9 @@ namespace ws
 
 	bool Poll::isError(int _event_index)
 	{
-		return _pollfds.at(_event_index).revents & POLLHUP || _pollfds.at(_event_index).revents & POLLERR || _pollfds.at(_event_index).revents & POLLNVAL;
+		return _pollfds.at(_event_index).revents & POLLHUP
+			|| _pollfds.at(_event_index).revents & POLLERR
+			|| _pollfds.at(_event_index).revents & POLLNVAL;
 		// return _pollfds.at(_event_index).revents & (POLLHUP | POLLERR | POLLNVAL);
 		// return _pollfds.at(_event_index).revents & POLLERR;
 	}
@@ -80,6 +83,4 @@ namespace ws
 		// 	return -1;
 		return _pollfds.at(index).fd;
 	}
-
-
 } // namespace ws

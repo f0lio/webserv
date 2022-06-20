@@ -49,8 +49,9 @@ namespace ws
 		// console.log("Request handler");
 		_fd_to_request[_io.getFd(fd_index)]->process();
 		// console.log("Request processed");
-		
-		_io.setWriteEvent(fd_index);
+
+		if (_fd_to_request[_io.getFd(fd_index)]->isComplete())
+			_io.setWriteEvent(fd_index);
 	}
 
 	void Cluster::responseHandler(int fd_index)
@@ -119,26 +120,24 @@ namespace ws
 		_running = true;
 		while (_running)
 		{
-
-			/* TODO: 
-			** error handling should be done inside the io class
-			*/
-		
+			console.log("monitoring...");
 			int ret = _io.monitor();
-			std::cout << "monitoring..." << std::endl;
+			console.log("monitoring done");
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : monitor() failed");
 			else if (ret == 0)
+			{
+				console.warn("-- CONTINUE --" + __COUNTER__);
 				continue;
+			}
 			for (size_t i = 0; i < _io.size(); i++)
 			{
 				if (_io.isError(i))
 				{
 					close(_io.getFd(i));
 					_io.removeEvent(i);
-					continue;
 				}
-				if (_io.isRead(i))
+				else if (_io.isRead(i))
 				{
 					if (isServerFd(_io.getFd(i)))
 						connectionHandler(i);

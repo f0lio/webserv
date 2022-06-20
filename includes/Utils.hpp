@@ -21,6 +21,9 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <sys/stat.h>
+#include <dirent.h>
+
 
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
@@ -51,9 +54,14 @@
 
 #define BACK_LOG 128
 
-// space in between makes it a special key (2 tokens), thus avoid collision with server_name named (e.g. "default_server")")
+/*
+** space in between makes it a special key (2 tokens),
+** thus avoid collision with server_name named (e.g. "default_server")")
+*/
 #define DEFAULT_SERVER_KEY "default server"
-#define PATH_VALID_CHARS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;="
+#define PATH_VALID_CHARS \
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"\
+            "0123456789-._~:/?#[]@!$&'()*+,;="
 #define CRLF "\r\n"
 
 static Console console;
@@ -63,12 +71,23 @@ const std::map<int, std::string> initErrorPages();
 const std::set<std::string> initAllMethods();
 const std::set<std::string> initImplementedMethods();
 
-static const std::map<int, std::string> g_statusMessages = initStatusMessages();
-static const std::map<int, std::string> g_errorPages = initErrorPages();
-static const std::set<std::string> AllMethods = initAllMethods();
-static const std::set<std::string> ImplementedMethods = initImplementedMethods();
-static const std::map<std::string, DirectiveRules> directiveRulesMap = initDirectiveRules();
-static const std::map<std::string, DirectiveRules> locationDirectiveRulesMap = initLocationDirectiveRules();
+static const std::map<int, std::string>
+g_statusMessages = initStatusMessages();
+
+static const std::map<int, std::string>
+g_errorPages = initErrorPages();
+
+static const std::set<std::string>
+AllMethods = initAllMethods();
+
+static const std::set<std::string>
+ImplementedMethods = initImplementedMethods();
+
+static const std::map<std::string, DirectiveRules>
+directiveRulesMap = initDirectiveRules();
+
+static const std::map<std::string, DirectiveRules>
+locationDirectiveRulesMap = initLocationDirectiveRules();
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
@@ -88,6 +107,13 @@ struct Location
 };
 
 // function prototypes
-bool is_included(char c, char *str);
-bool is_number(const std::string &s);
-bool is_number(const char *s);
+bool is_included(char c, char* str);
+bool is_number(const std::string& s);
+bool is_number(const char* s);
+const std::string& autoIndex(
+    const std::string& root, const std::string& path);
+bool file_exists(const std::string& name);
+bool is_directory(const std::string& path);
+bool is_directory(struct stat& st);
+bool is_regular_file(const std::string& path);
+bool is_regular_file(struct stat& st);

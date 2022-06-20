@@ -24,18 +24,31 @@ namespace ws
             }
         }
 
+        if (_config.find("redirect") == _config.end())
+            _config["redirect"].push_back("/");
+
         for (size_t i = 0; i < locs.size(); i++)
         {
             struct Location loc;
-            std::vector<parser::SimpleDirective> const& dirs = locs[i].getDirectives();
+            std::vector<parser::SimpleDirective> const&
+            loc_dirs = locs[i].getDirectives();
+
+            // TODO: optimize (?)
+            // init with server config
             for (size_t j = 0; j < dirs.size(); j++)
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
 
-            loc.path = locs[i].getArgs()[0];
+            // override with location config
+            for (size_t j = 0; j < loc_dirs.size(); j++)
+                loc.config[loc_dirs[j].getKey()] = loc_dirs[j].getArgs();
 
+            loc.path = locs[i].getArgs()[0];
             if (loc.config.find("root") == loc.config.end())
                 loc.config["root"] = _config["root"];
+            if (loc.config.find("redirect") == loc.config.end())
+                loc.config["redirect"] = _config["redirect"];
             _locations[loc.path] = loc;
+
         }
         if (_listens.size() == 0)
             throw std::runtime_error(
@@ -52,6 +65,7 @@ namespace ws
 
     void VServer::prepareServerConfig(parser::Context const& context)
     {
+
         bool foundRoot = false;
         for (
             std::map<std::string, struct Location>::iterator it = _locations.begin();
@@ -66,6 +80,8 @@ namespace ws
                 break;
             }
         }
+
+
         if (!foundRoot)
         {
             struct Location loc;
@@ -218,21 +234,22 @@ namespace ws
         _started = true;
     }
 
-    // must be as copy
     struct Location const& VServer::resolveLocation(std::string path) const
     {
-
         std::map<std::string, struct Location>::const_iterator it;
 
         while (path.size() > 0)
         {
+            console.warn("resolveLocation: [" + path + "]");
             it = _locations.find(path);
             if (it != _locations.end())
                 return it->second;
+            if (path.size() > 1 && path[path.size() - 1] == '/')
+                path.erase(path.size() - 1);
             size_t pos = path.find_last_of('/');
             if (pos == std::string::npos)
                 break;
-            path = path.substr(0, pos);
+            path = path.substr(0, pos + 1);
         }
         it = _locations.find(path);
 

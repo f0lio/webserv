@@ -41,7 +41,9 @@ static const char* _simple_identifiers[] = {
     "error_page",
     "max_body_size",
     "methods",
-    "autoindex",
+    "redirect",
+    "autoindex",    // better keep it only for location block.
+                    // as it could lead to ambiguity. (idk)
 };
 
 static const char* _location_identifiers[] = {
@@ -52,6 +54,8 @@ static const char* _location_identifiers[] = {
     "redirection",
     "autoindex",
     "upload_dir",
+    "upload_max_size", // could wait.
+    "redirect"
 };
 
 
@@ -155,6 +159,13 @@ static std::map<std::string, DirectiveRules> initDirectiveRules()
         .occurrence = 1,
         .is_required = false };
 
+    directiveRulesMap["redirect"] = (DirectiveRules){
+        .name = "redirect",
+        .args_type = DIRECTIVE_ARG_TYPE_STRING,
+        .min_args = 1,
+        .max_args = 1,
+        .occurrence = 1,
+        .is_required = false };
     return directiveRulesMap;
 }
 
@@ -215,6 +226,21 @@ static std::map<std::string, DirectiveRules> initLocationDirectiveRules()
         .occurrence = 1,
         .is_required = false };
 
+    locationDirectiveRulesMap["redirect"] = (DirectiveRules){
+        .name = "redirect",
+        .args_type = DIRECTIVE_ARG_TYPE_STRING,
+        .min_args = 1,
+        .max_args = 1,
+        .occurrence = 1,
+        .is_required = false };
+
+    locationDirectiveRulesMap["upload_max_size"] = (DirectiveRules){
+        .name = "upload_max_size",
+        .args_type = DIRECTIVE_ARG_TYPE_NUMBER,
+        .min_args = 1,
+        .max_args = 1,
+        .occurrence = 1,
+        .is_required = false };
 
     return locationDirectiveRulesMap;
 }

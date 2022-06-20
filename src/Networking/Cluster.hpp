@@ -12,8 +12,6 @@
 #include "../EventMonitors/Poll.hpp"
 #endif
 
-#define MAX_FDS 1024
-
 namespace ws
 {
 	class Configuration;
