@@ -72,7 +72,8 @@ strace: $(NAME)
 	-f -e trace=${TRACE} ./$(NAME) $(CONFIG_FILE) \
 
 setup-dirs:
-	@mkdir -p /tmp/ws/{default,a,b,c}
+#Lazy shells forced me to be explicit at dirs' names
+	@mkdir -p /tmp/ws/default /tmp/ws/a /tmp/ws/b /tmp/ws/c 
 	@mkdir -p /tmp/ws/a/inside
 	@echo "<html><body><h1>Hello From /tmp/ws/default</h1></body></html>" > /tmp/ws/default/index.html
 	@echo "<html><body><h1>Hello From /tmp/ws/a</h1></body></html>" > /tmp/ws/a/index.html

@@ -14,7 +14,8 @@ namespace ws
 
     void Configuration::parse()
     {
-        std::ifstream file(_path.c_str());
+        std::ifstream file;
+        file.open(_path.c_str());
         if (!file.is_open())
             throw std::runtime_error("Can't open file: " + _path);
 

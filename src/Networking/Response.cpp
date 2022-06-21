@@ -43,7 +43,8 @@ namespace ws
             //open file and set body
             std::string filePath = loc.config.at("root")[0] + _request.getPath();
             console.log("File path: " + filePath);
-            std::ifstream file(filePath);
+            std::ifstream file;
+            file.open(filePath.c_str());
             if (file.is_open())
             {
                 console.log("File opened");
@@ -83,7 +84,8 @@ namespace ws
             path = fileName;
             console.log("Opening file: " + path);
 
-            std::ifstream file(path, std::ios::in | std::ios::binary);
+            std::ifstream file;
+            file.open(path.c_str(), std::ios::in | std::ios::binary);
             if (file.is_open())
             {
                 console.log("File opened");
@@ -356,7 +358,7 @@ namespace ws
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
             std::string indexPath;
-            if (path.back() == '/')
+            if (*path.rbegin() == '/')
                 indexPath = path + *it;
             else
                 indexPath = path + "/" + *it;
@@ -388,7 +390,8 @@ namespace ws
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
             std::string indexPath;
-            if (path.back() == '/')
+            // if (path.back() == '/')
+            if (*path.rbegin() == '/')
                 indexPath = path + *it;
             else
                 indexPath = path + "/" + *it;

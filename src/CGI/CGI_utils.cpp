@@ -13,7 +13,8 @@
 
 bool	file_exists(std::string path)
 {
-	std::ifstream	f(path);
+	std::ifstream	f;
+	f.open(path.c_str());
 	if (!f.good())
 		return false;
 	return true;
