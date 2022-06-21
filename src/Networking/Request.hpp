@@ -16,12 +16,12 @@ namespace ws
 		std::string const &getMethod() const;
 		std::string const &getPath() const;
 		std::string const &getQuery() const;
-		VServer const *getVServer() const;
+		VServer const &getVServer() const;
+		struct Location const &getLoc() const;
 		int const &getStatus() const;
 		int const &getClientFd() const;
 
 		std::vector<VServer *> &getVServers() const;
-		const VServer *resolveVServer() const;
 
 		void process();
 		bool isComplete() const;
@@ -45,13 +45,22 @@ namespace ws
 		std::map<std::string, std::string> _headers; // capitalise with toUpperStr() before searching, header fields are case-insensitive
 		std::vector<VServer *> &_vservers;
 		const VServer *_vserver;
+		const struct Location *_loc;
 
-		//
+		const std::string _delim = CRLF;
+		const std::string _delim_end = CRLF CRLF;
+
+		int setLoc();
 		int parseHeader();
 		int processHeader();
+		int requestLineParse();
 
 		int parseBody();
 		int chunkedBody();
+
+		const VServer *resolveVServer() const;
+		int resolveIndexFile(struct Location const &loc, std::string const &path, std::string &fileName);
+		int resolveIndexFile(struct Location const &loc, std::string const &path);
 	};
 
 } // namespace ws

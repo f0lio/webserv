@@ -49,7 +49,7 @@
 
 #define MAX_PATH_LENGTH 8192 // RFC compliant see: https://www.rfc-editor.org/rfc/rfc9112#section-3-5
 #define MAX_HEADER_SIZE 8192
-#define REQUEST_BUFFER_SIZE 1
+#define REQUEST_BUFFER_SIZE 1024 // may break some shit now
 #define CI_HEX "0123456789abcdefABCDEF"
 
 #define BACK_LOG 128

@@ -23,8 +23,8 @@ namespace ws
 
         status = this->precheck(this->_request);
 
-        const VServer& vs = *_request.resolveVServer();
-        const struct Location& loc = vs.resolveLocation(_request.getPath());
+        const VServer& vs = _request.getVServer();
+        const struct Location& loc = _request.getLoc();
 
         if (status == 301) // redirection
         {
@@ -127,18 +127,9 @@ namespace ws
         **  - get vs, and loc from request
         */
 
-        console.warn("Finding VServer...");
-        const VServer& vs = *_request.resolveVServer();
+        const VServer& vs = _request.getVServer();
 
-        console.warn("Finding location...");
-        const struct Location& loc = vs.resolveLocation(_request.getPath());
-
-        //print location config
-        console.log("Location config: ");
-        for (auto const& it : loc.config)
-        {
-            console.log("\t" + it.first + ": " + it.second[0]);
-        }
+        const struct Location& loc = _request.getLoc();
 
         // console.warn("Checking if should redirect...");
         // if (req.getPath() != "/" && req.getPath().back() != '/' && loc.path == req.getPath())
@@ -151,6 +142,11 @@ namespace ws
 
         //     return 301; // redirect to the correct location
         // }
+
+        std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
+
+        if (_request.getStatus() != OK_200)
+            return _request.getStatus();
 
         try
         {
