@@ -23,8 +23,8 @@ namespace ws
 
         status = this->precheck(this->_request);
 
-        const VServer& vs = *_request.resolveVServer();
-        const struct Location& loc = vs.resolveLocation(_request.getPath());
+        const VServer& vs = _request.getVServer();
+        const struct Location& loc = _request.getLoc();
 
         if (status == 301) // redirection
         {
@@ -43,7 +43,8 @@ namespace ws
             //open file and set body
             std::string filePath = loc.config.at("root")[0] + _request.getPath();
             console.log("File path: " + filePath);
-            std::ifstream file(filePath);
+            std::ifstream file;
+            file.open(filePath.c_str());
             if (file.is_open())
             {
                 console.log("File opened");
@@ -83,7 +84,8 @@ namespace ws
             path = fileName;
             console.log("Opening file: " + path);
 
-            std::ifstream file(path, std::ios::in | std::ios::binary);
+            std::ifstream file;
+            file.open(path.c_str(), std::ios::in | std::ios::binary);
             if (file.is_open())
             {
                 console.log("File opened");
@@ -127,18 +129,9 @@ namespace ws
         **  - get vs, and loc from request
         */
 
-        console.warn("Finding VServer...");
-        const VServer& vs = *_request.resolveVServer();
+        const VServer& vs = _request.getVServer();
 
-        console.warn("Finding location...");
-        const struct Location& loc = vs.resolveLocation(_request.getPath());
-
-        //print location config
-        console.log("Location config: ");
-        for (auto const& it : loc.config)
-        {
-            console.log("\t" + it.first + ": " + it.second[0]);
-        }
+        const struct Location& loc = _request.getLoc();
 
         // console.warn("Checking if should redirect...");
         // if (req.getPath() != "/" && req.getPath().back() != '/' && loc.path == req.getPath())
@@ -151,6 +144,11 @@ namespace ws
 
         //     return 301; // redirect to the correct location
         // }
+
+        std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
+
+        if (_request.getStatus() != OK_200)
+            return _request.getStatus();
 
         try
         {
@@ -360,7 +358,7 @@ namespace ws
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
             std::string indexPath;
-            if (path.back() == '/')
+            if (*path.rbegin() == '/')
                 indexPath = path + *it;
             else
                 indexPath = path + "/" + *it;
@@ -392,7 +390,8 @@ namespace ws
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
             std::string indexPath;
-            if (path.back() == '/')
+            // if (path.back() == '/')
+            if (*path.rbegin() == '/')
                 indexPath = path + *it;
             else
                 indexPath = path + "/" + *it;

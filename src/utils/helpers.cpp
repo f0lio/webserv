@@ -229,21 +229,6 @@ const std::map<int, std::string> initErrorPages()
 	return errorPages;
 }
 
-const std::set<std::string> initAllMethods()
-{
-	std::set<std::string> tmp;
-	tmp.insert("GET");
-	tmp.insert("POST");
-	tmp.insert("DELETE");
-	tmp.insert("HEAD");
-	tmp.insert("PUT");
-	tmp.insert("CONNECT");
-	tmp.insert("OPTIONS");
-	tmp.insert("TRACE");
-	tmp.insert("PATCH");
-	return tmp;
-}
-
 const std::set<std::string> initImplementedMethods()
 {
 	std::set<std::string> tmp;
@@ -251,6 +236,46 @@ const std::set<std::string> initImplementedMethods()
 	tmp.insert("POST");
 	tmp.insert("DELETE");
 	return tmp;
+}
+
+std::string toUpperStr(std::string const & str)
+{
+	std::string uppedStr(str);
+
+	for (size_t i = 0; i < uppedStr.size(); i++)
+		uppedStr[i] -= 32 * (uppedStr[i] >= 'a' && uppedStr[i] <= 'z');
+	
+	return uppedStr;
+}
+
+// char to hex string
+std::string charToHex(char c)
+{
+	std::stringstream ss;
+	ss << std::hex << (int)c;
+	return ss.str();
+}
+
+// string to url-encoded string
+std::string showWhiteSpaces(std::string const & str)
+{
+	std::string encodedStr;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] == ' ')
+			encodedStr += '+';
+
+		else if (str[i] == '\n')
+			encodedStr += "\\n";
+		else if (str[i] == '\r')
+			encodedStr += "\\r";
+
+		else if (str[i] < ' ' || str[i] > '~')
+			encodedStr += "%" + charToHex(str[i]);
+		else
+			encodedStr += str[i];
+	}
+	return encodedStr;
 }
 
 const std::string& formatDate(time_t time)

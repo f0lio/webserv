@@ -1,6 +1,8 @@
 #pragma once
 
+#include <iostream>
 #include "Request.hpp"
+#include <fstream>
 
 #define HTTP_VERSION "HTTP/1.1"
 #define SERVER_NAME "Shabalido"

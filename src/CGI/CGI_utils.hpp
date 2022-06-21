@@ -6,6 +6,6 @@
 
 bool	file_exists(std::string);
 
-char**	map_to_envp(std::map<std::string, std::string> &strings);
+char**	mapToArray(std::map<std::string, std::string> &strings);
 
 char**	paths(std::string path); 
