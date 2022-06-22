@@ -53,6 +53,22 @@ namespace parser
 	// 	return std::vector<std::string>();
 	// }
 
+	void Context::check_occurrence(
+		std::map<std::string, int>& loaded_directives, std::string const& key) const
+	{
+		loaded_directives[key]++;
+
+		int occurrence = loaded_directives[key];
+		int occurrence_rule = directiveRulesMap.at(key).occurrence;
+
+		if (occurrence_rule != -1 && loaded_directives[key] > occurrence_rule)
+		{
+			throw std::runtime_error(
+				"Directive \"" + key + "\" should occur "
+				+ SSTR(occurrence_rule) + (occurrence_rule == 1 ? " time max" : " times max"));
+		}
+	}
+
 	void Context::prepare()
 	{
 		std::map<std::string, DirectiveRules>::const_iterator it;
@@ -70,16 +86,21 @@ namespace parser
 					}
 				}
 				if (!found)
-					throw std::runtime_error("Directive \"" + it->first + "\" is required in context " + _name);
+					throw std::runtime_error("Directive \"" + it->first + "\" is required in " + _name + " context");
 			}
 		}
 
+
+
+		std::map<std::string, int> loaded_directives;
 		// dumb extra iteration for now
 		std::vector<SimpleDirective>::iterator it_sdir;
 		for (it_sdir = _simple_directives_vec.begin(); it_sdir != _simple_directives_vec.end(); ++it_sdir)
+		{
+			it_sdir->check_occurrence(loaded_directives, it_sdir->getKey());
 			it_sdir->check();
-		
-		std::vector<BlockDirective>:: iterator it_bdir;
+		}
+		std::vector<BlockDirective>::iterator it_bdir;
 		for (it_bdir = _block_directives_vec.begin(); it_bdir != _block_directives_vec.end(); ++it_bdir)
 			it_bdir->check();
 

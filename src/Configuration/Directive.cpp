@@ -84,6 +84,23 @@ namespace parser
             }
         }
     }
+    
+    void SimpleDirective::check_occurrence(
+		std::map<std::string, int>& loaded_directives, std::string const& key) const
+	{
+		loaded_directives[key]++;
+
+		int occurrence = loaded_directives[key];
+		int occurrence_rule = directiveRulesMap.at(key).occurrence;
+
+		if (occurrence_rule != -1 && loaded_directives[key] > occurrence_rule)
+		{
+			throw std::runtime_error(
+				"Directive \"" + key + "\" should occur "
+				+ SSTR(occurrence_rule) + (occurrence_rule == 1 ? " time max" : " times max"));
+		}
+	}
+
 
     void SimpleDirective::print() const
     {
@@ -129,8 +146,12 @@ namespace parser
     void BlockDirective::check() const
     {
         std::vector<SimpleDirective>::const_iterator it = this->_directives_vec.begin();
+        std::map<std::string, int> loaded_directives;
         for (; it != this->_directives_vec.end(); ++it)
+        {
+            it->check_occurrence(loaded_directives, it->getKey());
             it->check();
+        }
     }
 
     void BlockDirective::print() const

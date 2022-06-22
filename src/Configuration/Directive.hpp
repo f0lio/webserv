@@ -32,14 +32,17 @@ namespace parser
 
     public:
         SimpleDirective();
-        SimpleDirective(const std::string &key, const std::vector<std::string> &params);
+        SimpleDirective(const std::string& key, const std::vector<std::string>& params);
         ~SimpleDirective();
 
-        const SimpleDirective &operator=(SimpleDirective const &rhs);
+        const SimpleDirective& operator=(SimpleDirective const& rhs);
 
-        std::string const &getKey() const;
-        std::vector<std::string> const &getArgs() const;
+        std::string const& getKey() const;
+        std::vector<std::string> const& getArgs() const;
         void check() const;
+        void check_occurrence(
+            std::map<std::string, int>& loaded_directives,
+            std::string const& key) const;
         void print() const;
 
     private:
@@ -53,16 +56,16 @@ namespace parser
 
     public:
         BlockDirective();
-        BlockDirective(const std::string &key, const std::vector<std::string> &_params);
+        BlockDirective(const std::string& key, const std::vector<std::string>& _params);
         ~BlockDirective();
 
-        std::string const &getKey() const;
-        std::vector<std::string> const &getArgs() const;
+        std::string const& getKey() const;
+        std::vector<std::string> const& getArgs() const;
 
         // std::map<std::string, SimpleDirective> const & getDirectives() const;
-        std::vector<SimpleDirective> const &getDirectives() const;
+        std::vector<SimpleDirective> const& getDirectives() const;
 
-        void addDirective(const SimpleDirective &dir)
+        void addDirective(const SimpleDirective& dir)
         {
             // std::map<std::string, SimpleDirective> _directives;
             _directives_vec.push_back(dir);
