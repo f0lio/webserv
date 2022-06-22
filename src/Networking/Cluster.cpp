@@ -24,15 +24,11 @@ namespace ws
 	void Cluster::connectionHandler(int fd_index)
 	{
 		_client_fd = accept(_io.getFd(fd_index), (struct sockaddr *)&_client_addr, &_client_addr_len);
-
-		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
-
-		_client_to_server[_client_fd] = _io.getFd(fd_index);
-
 		if (_client_fd == -1)
 			throw std::runtime_error("Cluster::run() : accept() failed");
-		else
-			_io.addEvent(_client_fd);
+		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
+		_client_to_server[_client_fd] = _io.getFd(fd_index);
+		_io.addEvent(_client_fd);
 	}
 
 	void Cluster::requestHandler(int fd_index)
