@@ -7,7 +7,7 @@ void print_usage()
 
 void handle_flags(int argc, const char* argv[])
 {
-    if (argc > 3 && strcmp(argv[1], "-t") != 0)
+    if (argc > 2 && strcmp(argv[1], "-t") != 0)
     {
         print_usage();
         exit(2);
