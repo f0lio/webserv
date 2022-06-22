@@ -35,7 +35,12 @@ namespace ws
         {
             console.log("Autoindexing...");
             setBody(::autoIndex(loc.config.at("root")[0], _request.getPath()));
-            setResponse(200, "text/html");
+            const char *type = mimeTypes::getType(_request.getPath().c_str());
+            if (type)
+                setResponse(200, type);
+            else
+                setResponse(200, "text/plain");
+            
         }
         else if (status == 200) // success
         {
@@ -51,7 +56,11 @@ namespace ws
                 std::stringstream buffer;
                 buffer << file.rdbuf();
                 setBody(buffer.str());
-                setResponse(status, "text/html");
+                const char *type = mimeTypes::getType(filePath.c_str());
+                if (type)
+                    setResponse(status, type);
+                else
+                    setResponse(status, "text/plain");
                 file.close();
             }
             else
@@ -94,7 +103,11 @@ namespace ws
                 setBody(ss.str());
                 // setBody(file);
                 file.close();
-                setResponse(200, "text/html");
+                const char *type = mimeTypes::getType(path.c_str());
+                if (type)
+                    setResponse(200, type);
+                else
+                    setResponse(200, "text/plain");
             }
             else
             {

@@ -27,6 +27,7 @@
 
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
+#include "../src/utils/mimeTypes.hpp"
 #include "../src/Configuration/ParserRules.hpp"
 
 #define ARRAY_SIZE(X_X) (sizeof(X_X) / sizeof(X_X[0]))

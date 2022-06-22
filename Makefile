@@ -8,7 +8,7 @@ FLAGS   = -w -std=c++98 -D DEBUG -D CONSOLE_ON
 #-Wall -Werror -Wextra
 INCLUDES= includes 
 
-UTILS	= helpers.cpp
+UTILS	= helpers.cpp mimeTypes.cpp
 CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp Context.cpp
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp Request.cpp Response.cpp
 
