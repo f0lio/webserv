@@ -36,6 +36,7 @@ namespace ws
 
         void setup();
         void print() const;
+        std::string const & getPath() const;
         std::vector<ws::VServer*> const& getVServers() const;
         std::map<port_t, struct ServerName> const& getServerNamesMap() const;
 

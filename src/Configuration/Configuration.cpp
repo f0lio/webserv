@@ -76,6 +76,11 @@ namespace ws
             }
         }
     }
+    
+    std::string const & Configuration::getPath() const
+    {
+        return _path;
+    }
 
     void Configuration::print() const
     {
