@@ -320,7 +320,7 @@ namespace ws
             return;
         setDate();
         setHeader("Server", SERVER_NAME);
-        _response = _status + CRLF + _header + CRLF + CRLF + _body;
+        _response = _status + CRLF + _header + CRLF + _body +  CRLF;
         _isProcessed = true;
         console.log("Response formated.");
     }
