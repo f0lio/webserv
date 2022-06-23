@@ -1,7 +1,6 @@
 
 .PHONEY : all clean fclean re bonus run
 
-## variables
 NAME    = webserv
 CC		= clang++
 FLAGS   = -w -std=c++98 -D DEBUG -D CONSOLE_ON
@@ -27,7 +26,16 @@ HEADERS =	$(CONFIG:%.cpp=./src/Configuration/%.hpp)\
 			./src/utils/Console.hpp\
 			./src/utils/Logger.hpp
 
-CONFIG_FILE = ./other/sample.conf
+CONFIG_FILE			= ./conf/default.conf
+
+#Test dirs
+TEST_DIR_ROOT		= /tmp/ws
+TEST_DIR_DEFAULT	= /tmp/ws/default
+TEST_DIR_A 			= /tmp/ws/a
+TEST_DIR_B			= /tmp/ws/b
+TEST_DIR_C			= /tmp/ws/c
+TEST_DIR_INSIDE_A 	= /tmp/ws/a/inside
+
 ## rules
 $(NAME): $(SRCS) $(HEADERS)
 		@$(CC) $(FLAGS) $(SRCS) $(POLL_FLAGS)\
@@ -72,13 +80,12 @@ strace: $(NAME)
 	-f -e trace=${TRACE} ./$(NAME) $(CONFIG_FILE) \
 
 setup-dirs:
-#Lazy shells forced me to be explicit at dirs' names
-	@mkdir -p /tmp/ws/default /tmp/ws/a /tmp/ws/b /tmp/ws/c 
-	@mkdir -p /tmp/ws/a/inside
-	@echo "<html><body><h1>Hello From /tmp/ws/default</h1></body></html>" > /tmp/ws/default/index.html
-	@echo "<html><body><h1>Hello From /tmp/ws/a</h1></body></html>" > /tmp/ws/a/index.html
-	@echo "<html><body><h1>Hello From /tmp/ws/b</h1></body></html>" > /tmp/ws/b/index.html
-	@echo "<html><body><h1>Hello From /tmp/ws/c</h1></body></html>" > /tmp/ws/c/index.html
-	@echo "<html><body><h1>Hello From /tmp/ws/a/inside</h1></body></html>" > /tmp/ws/a/inside/index.html
-	@echo "<html><body><h1>Hello From /tmp/ws/a/inside/file.txt</h1></body></html>" > /tmp/ws/a/inside/file.txt
-	@chmod -R 777 /tmp/ws
+#Lazy shells forced me to be explicit at dirs' names	
+	@mkdir -p $(TEST_DIR_DEFAULT) $(TEST_DIR_A) $(TEST_DIR_B) $(TEST_DIR_C) $(TEST_DIR_INSIDE_A)
+	@tar -xzf ./other/static-website.tar.gz -C $(TEST_DIR_DEFAULT) --strip-components 1
+	@echo "<html><body><h1>Hello From $(TEST_DIR_A)</h1></body></html>" > $(TEST_DIR_A)/index.html
+	@echo "<html><body><h1>Hello From $(TEST_DIR_B)</h1></body></html>" > $(TEST_DIR_B)/index.html
+	@echo "<html><body><h1>Hello From $(TEST_DIR_C)</h1></body></html>" > $(TEST_DIR_C)/index.html
+	@echo "<html><body><h1>Hello From $(TEST_DIR_INSIDE_A)</h1></body></html>" > $(TEST_DIR_INSIDE_A)/index.html
+	@echo "<html><body><h1>Hello From $(TEST_DIR_INSIDE_A)/file.txt</h1></body></html>" > $(TEST_DIR_INSIDE_A)file.txt
+	@chmod -R 777 $(TEST_DIR_ROOT)
