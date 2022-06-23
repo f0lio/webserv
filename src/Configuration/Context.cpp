@@ -65,7 +65,8 @@ namespace parser
 		{
 			throw std::runtime_error(
 				"Directive \"" + key + "\" should occur "
-				+ SSTR(occurrence_rule) + (occurrence_rule == 1 ? " time max" : " times max"));
+				+ SSTR(occurrence_rule) 
+				+ (occurrence_rule == 1 ? " time max" : " times max"));
 		}
 	}
 
@@ -86,11 +87,11 @@ namespace parser
 					}
 				}
 				if (!found)
-					throw std::runtime_error("Directive \"" + it->first + "\" is required in " + _name + " context");
+					throw std::runtime_error(
+						"Directive \"" + it->first + 
+						"\" is required in " + _name + " context");
 			}
 		}
-
-
 
 		std::map<std::string, int> loaded_directives;
 		// dumb extra iteration for now

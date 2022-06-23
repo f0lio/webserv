@@ -35,11 +35,7 @@ namespace ws
         {
             console.log("Autoindexing...");
             setBody(::autoIndex(loc.config.at("root")[0], _request.getPath()));
-            const char *type = mimeTypes::getType(_request.getPath().c_str());
-            if (type)
-                setResponse(200, type);
-            else
-                setResponse(200, "text/plain");
+            setResponse(200, resolveContentType(_request.getPath()));
             
         }
         else if (status == 200) // success
@@ -56,16 +52,11 @@ namespace ws
                 std::stringstream buffer;
                 buffer << file.rdbuf();
                 setBody(buffer.str());
-                const char *type = mimeTypes::getType(filePath.c_str());
-                if (type)
-                    setResponse(status, type);
-                else
-                    setResponse(status, "text/plain");
+                setResponse(status, resolveContentType(filePath));
                 file.close();
             }
             else
                 setErrorResponse(404), console.err("File not found");
-
         }
         // else if (status >= 400 && status < 500)
         else if (status) // error
@@ -103,11 +94,7 @@ namespace ws
                 setBody(ss.str());
                 // setBody(file);
                 file.close();
-                const char *type = mimeTypes::getType(path.c_str());
-                if (type)
-                    setResponse(200, type);
-                else
-                    setResponse(200, "text/plain");
+                setResponse(200, resolveContentType(path));
             }
             else
             {
@@ -350,6 +337,15 @@ namespace ws
             return 0;
         }
         return -1;
+    }
+
+    const char *Response::resolveContentType(std::string const & file) const
+    {
+        const char *type = mimeTypes::getType(file.c_str());
+        if (type)
+            return type;
+        else
+            return "text/plain";
     }
 
     /*

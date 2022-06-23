@@ -94,7 +94,7 @@ static std::map<std::string, DirectiveRules> initDirectiveRules()
         .min_args = 1,
         .max_args = 8,
         .occurrence = 1,
-        .is_required = true };
+        .is_required = false };
 
     directiveRulesMap["server_name"] = (DirectiveRules){
         .name = "server_name",
@@ -102,7 +102,7 @@ static std::map<std::string, DirectiveRules> initDirectiveRules()
         .min_args = 1,
         .max_args = 64, // monte carlo
         .occurrence = 1,
-        .is_required = true };
+        .is_required = false };
 
     directiveRulesMap["error_page"] = (DirectiveRules){
         .name = "error_page",
@@ -136,13 +136,13 @@ static std::map<std::string, DirectiveRules> initDirectiveRules()
         .occurrence = 1024,
         .is_required = false };
 
-    directiveRulesMap["index"] = (DirectiveRules){
-        .name = "index",
-        .args_type = DIRECTIVE_ARG_TYPE_STRING,
-        .min_args = 1,
-        .max_args = 24, // monte carlo
-        .occurrence = 1,
-        .is_required = true };
+    // directiveRulesMap["index"] = (DirectiveRules){
+    //     .name = "index",
+    //     .args_type = DIRECTIVE_ARG_TYPE_STRING,
+    //     .min_args = 1,
+    //     .max_args = 24, // monte carlo
+    //     .occurrence = 1,
+    //     .is_required = false };
 
     directiveRulesMap["cgi"] = (DirectiveRules){
         .name = "cgi",

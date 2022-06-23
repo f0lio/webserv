@@ -56,7 +56,8 @@ namespace ws
         void setResponse(int status, std::string& contentType, std::string& body);
         int setErrorResponse(int status);
         void endResponse();
-
+        
+        const char *resolveContentType(std::string const & file) const;
         //tmp
         int resolveIndexFile(
             struct Location const& loc,
