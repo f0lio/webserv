@@ -45,6 +45,7 @@
 
 // for request
 #define READING_HEADER 0
+#define BIG_BODY_SIZE 100000 // 100KB
 #define READING_BODY 1
 #define OK_200 200
 
@@ -109,6 +110,7 @@ bool is_number(const char* s);
 const std::string& autoIndex(
     const std::string& root, const std::string& path);
 bool file_exists(const std::string& name);
+bool file_exists(const std::string &path, struct stat &st);
 bool is_directory(const std::string& path);
 bool is_directory(struct stat& st);
 bool is_regular_file(const std::string& path);

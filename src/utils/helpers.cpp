@@ -1,7 +1,7 @@
 
 #include "Utils.hpp"
 
-bool  is_included(char c, char* str)
+bool is_included(char c, char *str)
 {
 	while (str)
 		if (c == *str++)
@@ -9,14 +9,15 @@ bool  is_included(char c, char* str)
 	return false;
 }
 
-bool is_number(const std::string& s)
+bool is_number(const std::string &s)
 {
 	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it)) ++it;
+	while (it != s.end() && std::isdigit(*it))
+		++it;
 	return !s.empty() && it == s.end();
 }
 
-bool is_number(const char* s)
+bool is_number(const char *s)
 {
 	while (*s)
 		if (!std::isdigit(*s++))
@@ -24,31 +25,45 @@ bool is_number(const char* s)
 	return true;
 }
 
-bool file_exists(const std::string& name)
-{
-	return access(name.c_str(), F_OK) != -1;
-}
-
-bool is_directory(const std::string& path)
+bool file_exists(const std::string &path)
 {
 	struct stat st;
-	return stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
+	return stat(path.c_str(), &st) == 0;
 }
 
-bool is_directory(struct stat& st)
+bool file_exists(const std::string &path, struct stat &st)
+{
+	return stat(path.c_str(), &st) == 0;
+}
+
+bool is_directory(struct stat &st)
 {
 	return S_ISDIR(st.st_mode);
 }
 
-bool is_regular_file(const std::string& path)
+bool is_directory(const std::string &path)
 {
 	struct stat st;
-	return stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode);
+
+	if (file_exists(path, st))
+		return is_directory(st);
+
+	return false;
 }
 
-bool is_regular_file(struct stat& st)
+bool is_regular_file(struct stat &st)
 {
 	return S_ISREG(st.st_mode);
+}
+
+bool is_regular_file(const std::string &path)
+{
+	struct stat st;
+
+	if (file_exists(path, st))
+		return is_regular_file(st);
+
+	return false;
 }
 
 const std::map<int, std::string> initStatusMessages()
@@ -238,13 +253,13 @@ const std::set<std::string> initImplementedMethods()
 	return tmp;
 }
 
-std::string toUpperStr(std::string const & str)
+std::string toUpperStr(std::string const &str)
 {
 	std::string uppedStr(str);
 
 	for (size_t i = 0; i < uppedStr.size(); i++)
 		uppedStr[i] -= 32 * (uppedStr[i] >= 'a' && uppedStr[i] <= 'z');
-	
+
 	return uppedStr;
 }
 
@@ -257,7 +272,7 @@ std::string charToHex(char c)
 }
 
 // string to url-encoded string
-std::string showWhiteSpaces(std::string const & str)
+std::string showWhiteSpaces(std::string const &str)
 {
 	std::string encodedStr;
 	for (size_t i = 0; i < str.size(); i++)
@@ -266,7 +281,7 @@ std::string showWhiteSpaces(std::string const & str)
 			encodedStr += '+';
 
 		else if (str[i] == '\n')
-			encodedStr += "\\n";
+			encodedStr += "\\n\n";
 		else if (str[i] == '\r')
 			encodedStr += "\\r";
 
@@ -278,28 +293,25 @@ std::string showWhiteSpaces(std::string const & str)
 	return encodedStr;
 }
 
-const std::string& formatDate(time_t time)
+const std::string &formatDate(time_t time)
 {
-	struct tm* tm = gmtime(&time);
+	struct tm *tm = gmtime(&time);
 	char buffer[80];
 	strftime(buffer, 80, "%d-%b-%Y %H:%M", tm);
 	return buffer;
 }
 
-
-const std::string& autoIndex(const std::string& root, const std::string& path)
+const std::string &autoIndex(const std::string &root, const std::string &path)
 {
 	std::string dir_path = root + path;
 	console.log("dir_path: " + dir_path);
-	DIR* dir = opendir(dir_path.c_str());
+	DIR *dir = opendir(dir_path.c_str());
 	if (dir)
 	{
-		struct dirent* ent;
+		struct dirent *ent;
 		std::string sufix = "";
-		std::string dirContent = \
-			"<html><head><title>Index of " + path
-			+ "</title></head><body><h1>Index of "
-			+ path + "</h1><hr><pre>";
+		std::string dirContent =
+			"<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>";
 		while ((ent = readdir(dir)) != NULL)
 		{
 			std::string filePath(ent->d_name);
@@ -326,7 +338,6 @@ const std::string& autoIndex(const std::string& root, const std::string& path)
 			else
 				dirContent += SSTR(st.st_size) + " bytes\n";
 			dirContent += "\n";
-
 		}
 		dirContent += "</pre><hr></body></html>";
 		closedir(dir);

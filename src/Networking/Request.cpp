@@ -83,7 +83,7 @@ namespace ws
 
 	bool Request::isComplete() const
 	{
-		return _isDone;
+		return done;
 	}
 
 	int Request::requestLineParse()
@@ -206,7 +206,7 @@ namespace ws
 			else if (key == "TRANSFER-ENCODING")
 			{
 				if (value == "chunked")
-					_isChunked = true;
+					chunked = true;
 				else
 				{
 					if (!ret)
@@ -229,13 +229,13 @@ namespace ws
 		if (ret) // first occurring non syntax error
 			return ret;
 
-		if (_content_length == -1 && !_isChunked && _method == "POST")
+		if (_content_length == -1 && !chunked && _method == "POST")
 		{
 			console.err("Invalid header: neither Content-Length nor Transfer-Encoding: chunked found with POST method");
 			return 411; // Length Required
 		}
 
-		if (_isChunked)
+		if (chunked)
 		{
 			if (_content_length != -1) // https://www.rfc-editor.org/rfc/rfc9112#section-6.1-14
 			{
@@ -284,7 +284,7 @@ namespace ws
 				return 431; // Request Header Fields Too Large
 			}
 		}
-		size_t pos = _request.find(_delim_end, prevSize);
+		size_t pos = _request.find(_delim_end, prevSize); // potential problems
 
 		_header = _request.substr(0, pos);
 		_body = _request.substr(pos + _delim_end.size());
@@ -293,14 +293,11 @@ namespace ws
 
 		_status = processHeader();
 
-		std::cout << ((_status == OK_200 && _method == "POST") || _status) << " - " << _status << std::endl; // testing 123
-
 		setLoc(); // there MUST be checks on when to precheck
-
 
 		if (_status == OK_200 && _method == "POST")
 			_status = READING_BODY;
-		
+
 		return _status;
 	}
 
@@ -346,7 +343,7 @@ namespace ws
 
 		std::cout << "chunk_length: " << chunk_length << " - cl_start: " << cl_start << " - cl_end: " << cl_end << " - _body.size(): " << _body.size() << std::endl;
 
-		if (chunk_length == 0) // eof
+		if (chunk_length == 0) // trailer header not implemented see: https://www.rfc-editor.org/rfc/rfc9112#name-chunked-trailer-section
 		{
 			if (_body.find(_delim + _delim, delimPos) != delimPos) // bad delimiter (not \r\n\r\n)
 			{
@@ -401,7 +398,7 @@ namespace ws
 
 	int Request::parseBody()
 	{
-		if (!_isChunked)
+		if (!chunked)
 		{
 			if (_body.capacity() < _content_length)
 				_body.reserve(_content_length);
@@ -433,13 +430,11 @@ namespace ws
 			_status = parseBody();
 		// else go to error page
 
-		if (_status != OK_200)
-			console.err("Error: " + SSTR(_status));
 		if (_status < OK_200)
 			return;
 		// if (_status == OK_200)
 		// 	std::cout << "SUCCESS _body: '" << showWhiteSpaces(_body) << "'" << std::endl;
-		_isDone = true; // this is wrong!!! change it
+		done = true;
 	}
 
 	int Request::setLoc() // TODO: WIP: implement functionality(?) in request
@@ -456,7 +451,7 @@ namespace ws
 		{
 			console.log("\t", it.first + ":");
 			for (auto const &it2 : it.second)
-				console.log(" ", it2);
+				console.log(" \"", it2, "\"");
 			std::cout << std::endl;
 		}
 		return 0;

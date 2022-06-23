@@ -1,10 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <fstream>
 #include "Request.hpp"
-#include "../utils/mimeTypes.hpp"
-
 
 #define HTTP_VERSION "HTTP/1.1"
 #define SERVER_NAME "Shabalido"
