@@ -133,17 +133,17 @@ namespace ws
 
         const struct Location& loc = _request.getLoc();
 
-        // console.warn("Checking if should redirect...");
-        // if (req.getPath() != "/" && req.getPath().back() != '/' && loc.path == req.getPath())
-        // {
-        //     std::cout << "------------------------------" << std::endl;
-        //     std::cout << "Redirecting ..." << std::endl;
-        //     std::cout << "Path: " << req.getPath() << std::endl;
-        //     std::cout << "Location: " << loc.path << std::endl;
-        //     std::cout << "------------------------------" << std::endl;
+        console.warn("Checking if should redirect...");
+        if (loc.config.find("redirect") != loc.config.end())
+        {
+            std::cout << "------------------------------" << std::endl;
+            std::cout << "Redirecting ..." << std::endl;
+            std::cout << "Path: " << req.getPath() << std::endl;
+            std::cout << "Location: " << loc.config.at("redirect")[0] << std::endl;
+            std::cout << "------------------------------" << std::endl;
 
-        //     return 301; // redirect to the correct location
-        // }
+            return 301; // redirect to the correct location
+        }
 
         std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
 
