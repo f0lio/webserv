@@ -33,7 +33,13 @@ namespace ws
             // TODO: optimize (?)
             // init with server config
             for (size_t j = 0; j < dirs.size(); j++)
+            {
+                // if (inheritableFromVServer(dirs[j].getKey()) == false)
+                //     continue;
+                if (dirs[j].getKey() == "redirect")
+                    continue;
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
+            }
 
             // override with location config
             for (size_t j = 0; j < loc_dirs.size(); j++)
@@ -60,7 +66,6 @@ namespace ws
 
     void VServer::prepareServerConfig(parser::Context const& context)
     {
-
         bool foundRoot = false;
         for (
             std::map<std::string, struct Location>::iterator it = _locations.begin();
@@ -75,7 +80,6 @@ namespace ws
                 break;
             }
         }
-
 
         if (!foundRoot)
         {
