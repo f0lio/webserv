@@ -81,6 +81,21 @@ bool is_readable_file(const std::string &path)
 	return false;
 }
 
+bool is_executable_file(struct stat &st)
+{
+	return st.st_mode & S_IEXEC;
+}
+
+bool is_executable_file(const std::string &path)
+{
+	struct stat st;
+
+	if (file_exists(path, st))
+		return is_executable_file(st);
+
+	return false;
+}
+
 const std::map<int, std::string> initStatusMessages()
 {
 	std::map<int, std::string> statusMessages;

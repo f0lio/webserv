@@ -20,6 +20,7 @@ public:
 private:
 	CGI();
 	int exec(std::string cgiPath);
+	std::string getDate();
 	void setEnvp(std::map<std::string, std::string> const &requestEnvp);
 	// std::string const &getCGI() const;
 };

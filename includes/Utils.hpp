@@ -123,3 +123,6 @@ bool is_regular_file(struct stat &st);
 
 bool is_readable_file(const std::string &path);
 bool is_readable_file(struct stat &st);
+
+bool is_executable_file(const std::string &path);
+bool is_executable_file(struct stat &st);

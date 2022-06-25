@@ -24,12 +24,15 @@ int CGI::run(std::string cgiPath, std::map<std::string, std::string> const &requ
 {
 	cgiPath = root + "/" + cgiPath;
 
-	if (!is_readable_file(cgiPath))
-		return 404; // file not found?
+	if (!is_regular_file(cgiPath))
+		return 404; // file not found
+
+	if (!is_executable_file(cgiPath))
+		return 403; // wrong permissions
 
 	setEnvp(requestEnvp);
 
-	return this->exec(cgiPath);
+	exec(cgiPath);
 }
 
 void CGI::setEnvp(std::map<std::string, std::string> const &requestEnvp)
@@ -42,6 +45,18 @@ void CGI::setEnvp(std::map<std::string, std::string> const &requestEnvp)
 	
 }
 
+std::string CGI::getDate()
+{
+	time_t rawtime;
+	struct tm* timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "%d_%m_%Y_%H_%M_%S", timeinfo);
+	return buffer;
+}
+
 int CGI::exec(std::string cgiPath)
 {
 	pid_t pid = fork();
@@ -50,6 +65,16 @@ int CGI::exec(std::string cgiPath)
 		return 1;
 	if (!pid)
 	{
+		char *tempFile = "/tmp/cgi_temp_file_XXXXXX";
+		int fd = mkstemp(tempFile);
+
+		if (fd == -1)
+			return 500; // internal server error
+
+		std::string const tempFilePath(tempFile);
+
+		
+
 		int ret = execle(binPath.c_str(), binPath.c_str(), cgiPath.c_str(), NULL, mapToArray(envp));
 		exit(1); // execve failed
 	}
