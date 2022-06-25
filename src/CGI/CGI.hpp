@@ -13,13 +13,13 @@ private:
 public:
 	CGI(const std::string &binPath, const std::string &root);
 	~CGI();
-	const CGI &operator=(const CGI &other);
+	// const CGI &operator=(const CGI &other);
 
-	int run(std::string cgiPath);
-	void setEnvp(std::map<std::string, std::string> &envp);
+	int run(std::string cgiPath, std::map<std::string, std::string> const &requestEnvp);
 
 private:
 	CGI();
 	int exec(std::string cgiPath);
+	void setEnvp(std::map<std::string, std::string> const &requestEnvp);
 	// std::string const &getCGI() const;
 };

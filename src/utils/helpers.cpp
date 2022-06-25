@@ -66,6 +66,21 @@ bool is_regular_file(const std::string &path)
 	return false;
 }
 
+bool is_readable_file(struct stat &st)
+{
+	return st.st_mode & S_IREAD;
+}
+
+bool is_readable_file(const std::string &path)
+{
+	struct stat st;
+
+	if (file_exists(path, st))
+		return is_readable_file(st);
+
+	return false;
+}
+
 const std::map<int, std::string> initStatusMessages()
 {
 	std::map<int, std::string> statusMessages;

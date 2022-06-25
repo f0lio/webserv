@@ -226,6 +226,9 @@ namespace ws
 			return 400; // Bad request
 		}
 
+		_vserver = resolveVServer();
+		_loc = &_vserver->resolveLocation(requestTarget);
+
 		if (ret) // first occurring non syntax error
 			return ret;
 
@@ -245,17 +248,31 @@ namespace ws
 			_content_length = 0;
 		}
 
-		_vserver = resolveVServer();
+		std::map<std::string, t_vec_str>::const_iterator it = _loc->config.find("methods");
 
-		if (std::find(_vserver->get("methods").begin(), _vserver->get("methods").end(), _method) == _vserver->get("methods").end())
+		if (it == _loc->config.end())
+		{
+			console.err("Invalid location: methods not found");
+			return 400; // Bad request
+		}
+
+		t_vec_str const &methods = it->second;
+
+		if (std::find(methods.begin(), methods.end(), _method) == methods.end()) //this should not err
 		{
 			console.err("Method not allowed: " + _method);
 			return 405; // Method not allowed
 		}
 
-		if (std::find(_vserver->get("max_body_size").begin(), _vserver->get("max_body_size").end(), _method) != _vserver->get("max_body_size").end())
+		it = _loc->config.find("max_body_size");
+
+		if (it != _loc->config.end())
 		{
-			max_body_size = std::atoi(_vserver->get("max_body_size")[0].c_str()); // **temporary
+			if (std::atoi(it->second[0].c_str()) < _content_length)
+			{
+				console.err("Invalid header: Content-Length too large");
+				return 413; // Request Entity Too Large
+			}
 		}
 
 		return OK_200; // OK
@@ -290,6 +307,7 @@ namespace ws
 		_body = _request.substr(pos + _delim_end.size());
 
 		_vserver = *_vservers.begin();
+		_loc = &_vserver->resolveLocation(requestTarget);
 
 		_status = processHeader();
 
@@ -439,12 +457,6 @@ namespace ws
 
 	int Request::setLoc() // TODO: WIP: implement functionality(?) in request
 	{
-		console.warn("Finding VServer...");
-		const VServer &vs = getVServer(); // if bad request (400) it is vservers.begin() same as host not found in resolvevserver()
-
-		console.warn("Finding location...");
-		_loc = &vs.resolveLocation(requestTarget);
-
 		// print location config
 		console.log("Location config: ");
 		for (auto const &it : _loc->config)
@@ -452,7 +464,7 @@ namespace ws
 			console.log("\t", it.first + ":");
 			for (auto const &it2 : it.second)
 				console.log(" \"", it2, "\"");
-			std::cout << std::endl;
+			console.log("");
 		}
 		return 0;
 	}
