@@ -57,7 +57,7 @@ namespace ws
         {
             console.log("Autoindexing...");
             setBody(::autoIndex(loc.config.at("root")[0], _request.getPath()));
-            setResponse(200, resolveContentType(_request.getPath()));
+            setResponse(200, "text/html");
 
         }
         // else if (status >= 400 && status < 500)
@@ -162,6 +162,8 @@ namespace ws
         std::string fileName;
 
         path = loc.config.at("root")[0] + _request.getPath();
+
+std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << std::endl;
 
         resolveIndexFile(loc, path, &fileName);
 
