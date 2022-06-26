@@ -11,8 +11,9 @@ namespace ws
 		~Request();
 
 		std::string const &getHeader() const;
+		std::map<std::string, std::string> const &getHeaders() const;
 		std::string const &getHeaderField(std::string const &key) const;
-		bool hasHeaderField(std::string const &key) const; // to avoid editing getHeaderField()
+		bool hasHeaderField(std::string const &key) const;
 		std::string const &getBody() const;
 		std::string const &getMethod() const;
 		std::string const &getPath() const;
@@ -31,12 +32,12 @@ namespace ws
 		int _client_fd;
 		std::string _request;
 		std::string _method;
-		std::string requestTarget;
+		std::string requestTarget; // pseudo-TODO: https://www.rfc-editor.org/rfc/rfc3986#section-2.1 // https://www.rfc-editor.org/rfc/rfc2396#section-2
 		std::string _query;
 		std::string _header;
 		std::string _body;
-		bool _isChunked = 0;
-		bool _isDone = 0;
+		bool chunked = 0;
+		bool done = 0;
 		size_t _content_length = -1;
 		size_t readIndex = 0;
 		size_t timeout = 0;
@@ -60,8 +61,6 @@ namespace ws
 		int chunkedBody();
 
 		const VServer *resolveVServer() const;
-		int resolveIndexFile(struct Location const &loc, std::string const &path, std::string &fileName);
-		int resolveIndexFile(struct Location const &loc, std::string const &path);
 	};
 
 } // namespace ws
