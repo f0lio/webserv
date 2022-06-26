@@ -12,6 +12,7 @@ namespace ws
 
 		std::string const &getHeader() const;
 		std::string const &getHeaderField(std::string const &key) const;
+		bool hasHeaderField(std::string const &key) const; // to avoid editing getHeaderField()
 		std::string const &getBody() const;
 		std::string const &getMethod() const;
 		std::string const &getPath() const;

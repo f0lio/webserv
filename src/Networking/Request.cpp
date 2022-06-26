@@ -23,6 +23,12 @@ namespace ws
 			return _headers.at(uppedKey);
 		return NULL; // this SEGVs in string implicit C-tor // open for ideas
 	}
+	
+	bool Request::hasHeaderField(std::string const &key) const
+	{
+		std::string uppedKey = toUpperStr(key);
+		return (_headers.find(uppedKey) != _headers.end());
+	}
 
 	std::string const &Request::getBody() const
 	{
@@ -246,12 +252,24 @@ namespace ws
 		}
 
 		_vserver = resolveVServer();
-
-		if (std::find(_vserver->get("methods").begin(), _vserver->get("methods").end(), _method) == _vserver->get("methods").end())
+console.log("1");
+        const struct Location& loc = _vserver->resolveLocation(
+			requestTarget
+		);
+console.log("2");
+		// if (std::find(_vserver->get("methods").begin(), _vserver->get("methods").end(), _method) == _vserver->get("methods").end())
+		if (
+			loc.config.find("methods") == loc.config.end()
+			|| std::find(
+				loc.config.at("methods").begin(),
+				loc.config.at("methods").end(),
+				_method) == loc.config.at("methods").end())
 		{
+			console.log("3");
 			console.err("Method not allowed: " + _method);
 			return 405; // Method not allowed
 		}
+		console.log("4");
 
 		if (std::find(_vserver->get("max_body_size").begin(), _vserver->get("max_body_size").end(), _method) != _vserver->get("max_body_size").end())
 		{
