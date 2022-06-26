@@ -50,7 +50,7 @@ int CGI::run(ws::Request const &request) // https://www.rfc-editor.org/rfc/rfc38
 
 	setEnvp(cgiPath, request);
 
-	exec(cgiPath);
+	exec(cgiPath, request);
 }
 
 std::string CGI::headerToMetaData(std::string header)
@@ -111,33 +111,52 @@ void CGI::setEnvp(std::string const &cgiPath, ws::Request const &request)
 	envp["SCRIPT_NAME"] = cgiPath;
 }
 
-int CGI::exec(std::string cgiPath)
+int CGI::exec(std::string cgiPath, ws::Request const &request)
 {
 	pid_t pid = fork();
 
-	char *tempFile = "/tmp/cgi_temp_file_XXXXXX";
+	char tempOFile[] = "/tmp/cgiOutFile_XXXXXX";
 
-	int fd = mkstemp(tempFile);
+	int fdo = mkstemp(tempOFile);
 
-	tempFilePath.assign(tempFile);
+	cgiOutFile.assign(tempOFile);
 
-	std::cout << "tempFile: " << tempFile << std::endl;
+	std::cout << "tempOFile: " << tempOFile << std::endl;
 
-	if (fd == -1)
+	if (fdo == -1)
 		return 500; // internal server error
 
-	if (pid > 0)
-		return 1;
+
+
+	char tempIfile[] = "/tmp/cgiInFile_XXXXXX";
+
+	int fdi = mkstemp(tempIfile);
+
+	if (fdi == -1)
+	{
+		close(fdo);
+		return 500; // internal server error
+	}
+
 
 	if (!pid)
 	{
-		dup2(fd, STDOUT_FILENO);
+	std::ofstream ofile(tempOFile);
+
+	ofile << request.getBody();
+
+		dup2(fdo, STDOUT_FILENO);
+		dup2(fdi, STDIN_FILENO);
 
 		int ret = execle(binPath.c_str(), binPath.c_str(), cgiPath.c_str(), NULL, mapToArray(envp));
 		exit(1); // execve failed
 	}
 
-	close(fd);
+	close(fdo);
+	close(fdi);
+
+	if (pid > 0)
+		return 1;
 
 	int status;
 	waitpid(pid, &status, 0);

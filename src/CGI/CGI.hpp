@@ -9,7 +9,7 @@ private:
 	std::map<std::string, std::string> envp;
 	std::string binPath;
 	std::string root;
-	std::string tempFilePath;
+	std::string cgiOutFile;
 
 public:
 	CGI(const std::string &binPath, const std::string &root);
@@ -20,7 +20,7 @@ public:
 
 private:
 	CGI();
-	int exec(std::string cgiPath);
+	int exec(std::string cgiPath, ws::Request const &request);
 	void setEnvp(std::string const &cgiPath, ws::Request const &request);
 	std::string CGI::headerToMetaData(std::string header);
 
