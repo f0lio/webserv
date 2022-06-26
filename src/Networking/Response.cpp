@@ -109,7 +109,7 @@ namespace ws
         }
 
         const std::string& root = loc.config.at("root").at(0);
-        const std::string path = root + req.getPath();
+        const std::string path = root.substr(0, root.size() - 1) + req.getPath(); // root always ends with '/'
 
         if (file_exists(path) == false)
             return 404;
@@ -276,10 +276,10 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
     {
         if (_isSent)
             return;
-        ::send(_request.getClientFd(), _response.c_str(), _response.size(), 0);
+        _sent += ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
         console.log("Response sent.");
         _isProcessed = true;
-        _isSent = true; // TODO: need to check if the response is fully sent
+		_isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
     }
 
     bool Response::isSent() const

@@ -377,44 +377,78 @@ size_t dbgCounter(size_t index)
 	return counter[index]++;
 }
 
+
+std::string convertSize(size_t size)
+{
+	static const char *SIZES[] = { "B", "KB", "MB", "GB" };
+	int div = 0;
+	size_t rem = 0;
+
+	while (size >= 1024 && div < (sizeof SIZES / sizeof *SIZES)) {
+		rem = (size % 1024);
+		div++;
+		size /= 1024;
+	}
+
+	std::string result = SSTR((size)) + (SIZES[div]);
+
+	if (size < 1024)
+		result.insert(0, 3 - result.size() / 2, ' ');
+
+	
+	return result;
+}
+
+
 const std::string& autoIndex(const std::string& root, const std::string& path)
 {
-	std::string dir_path = root + path;
+	std::string dir_path = root + path.substr(path.find_first_not_of('/')) + "/"; // root ends with '/' and path starts with '/', adding '/ at the end for consistency
 	console.log("dir_path: " + dir_path);
+	console.log("path: " + path);
 	DIR* dir = opendir(dir_path.c_str());
 	if (dir)
 	{
 		struct dirent* ent;
 		std::string sufix = "";
-		std::string dirContent = \
-			"<html><head><title>Index of " + path
-			+ "</title></head><body><h1>Index of "
-			+ path + "</h1><hr><pre>";
+		std::string dirContent = "<html><head><title>Index of " + path + "</title></head>\n<body>\n<h1>Index of " + path + "</h1>\n<hr><pre>";
 		while ((ent = readdir(dir)) != NULL)
 		{
-			std::string filePath(ent->d_name);
+			std::string filePath(dir_path + ent->d_name);
 			if (ent->d_name[0] == '.')
 			{
-				dirContent += "<a href=\"" + filePath + "\">" + filePath + "</a>\n";
+				dirContent += "<a href=\"";
+				dirContent += ent->d_name[1] == '.' ? path.substr(0, path.find_last_of('/')) : path;
+				dirContent += "\">";
+				dirContent += ent->d_name;
+				dirContent += "</a>\n";
 				continue;
 			}
 
 			struct stat st;
 			stat(filePath.c_str(), &st);
 
-			// if (is_directory(st))
 			if (is_directory(filePath))
 				sufix = "/";
 			else
 				sufix = "";
-			dirContent += "<a href=\"" + path + "/" + filePath + sufix + "\">" + filePath + "</a>";
-			std::string formattedDate = formatDate(st.st_mtime);
-			dirContent += "\t\t\t\t\t\t\t" + formattedDate + "\t\t\t\t";
+
+			{
+				std::string formattedDate = formatDate(st.st_mtime);
+
+				std::string filename = ent->d_name;
+
+				if (filename.size() >= 56)
+					filename = filename.substr(0, 52) + "...";
+
+				dirContent += "<a href=\"" + path + "/" + ent->d_name + "\">" + filename + sufix + "</a>";
+				dirContent += std::string(7 - filename.size() / 8, '\t') + formattedDate + std::string(4 - formattedDate.size() / 8, '\t');
+				// dirContent += "\t\t\t\t\t\t\t" + formattedDate + "\t\t\t\t";
+			}
 
 			if (sufix == "/")
-				dirContent += "-";
+				dirContent += "  --";
 			else
-				dirContent += SSTR(st.st_size) + " bytes\n";
+				dirContent += convertSize(st.st_size);
 			dirContent += "\n";
 		}
 		dirContent += "</pre><hr></body></html>";

@@ -34,6 +34,7 @@ namespace ws
         std::string _status;
         bool _isProcessed;
         bool _isSent;
+		size_t _sent = 0;
         const Configuration& _config; // (?)
 
         // private methods
