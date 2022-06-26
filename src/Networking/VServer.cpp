@@ -24,9 +24,6 @@ namespace ws
             }
         }
 
-        if (_config.find("redirect") == _config.end())
-            _config["redirect"].push_back("/");
-
         for (size_t i = 0; i < locs.size(); i++)
         {
             struct Location loc;
@@ -45,8 +42,6 @@ namespace ws
             loc.path = locs[i].getArgs()[0];
             if (loc.config.find("root") == loc.config.end())
                 loc.config["root"] = _config["root"];
-            if (loc.config.find("redirect") == loc.config.end())
-                loc.config["redirect"] = _config["redirect"];
             _locations[loc.path] = loc;
 
         }
