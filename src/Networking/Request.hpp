@@ -16,7 +16,7 @@ namespace ws
 		bool hasHeaderField(std::string const &key) const;
 		std::string const &getBody() const;
 		std::string const &getMethod() const;
-		std::string const &getPath() const;
+		std::string const getPath() const;
 		std::string const &getQuery() const;
 		VServer const &getVServer() const;
 		struct Location const &getLoc() const;

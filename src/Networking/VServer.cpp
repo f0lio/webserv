@@ -62,6 +62,8 @@ namespace ws
                         continue;
                     }
                 }
+				if (dirs[j].getKey() == "index") // because it overrides autoindex on
+					continue;
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
             }
 
@@ -260,6 +262,8 @@ namespace ws
     struct Location const& VServer::resolveLocation(std::string path) const
     {
         std::map<std::string, struct Location>::const_iterator it;
+
+		std::cout << "pathj: " << path << std::endl;
 
         while (path.size() > 0)
         {

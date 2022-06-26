@@ -377,7 +377,6 @@ size_t dbgCounter(size_t index)
 	return counter[index]++;
 }
 
-
 std::string convertSize(size_t size)
 {
 	static const char *SIZES[] = { "B", "KB", "MB", "GB" };
@@ -402,9 +401,10 @@ std::string convertSize(size_t size)
 
 const std::string& autoIndex(const std::string& root, const std::string& path)
 {
-	std::string dir_path = root + path.substr(path.find_first_not_of('/')) + "/"; // root ends with '/' and path starts with '/', adding '/ at the end for consistency
+	std::string dir_path = root.substr(0, root.find_last_not_of('/') + 1) + path + "/"; // root ends with '/' and path starts with '/', adding '/ at the end for consistency
 	console.log("dir_path: " + dir_path);
 	console.log("path: " + path);
+	console.log("root: " + root);
 	DIR* dir = opendir(dir_path.c_str());
 	if (dir)
 	{
@@ -457,4 +457,38 @@ const std::string& autoIndex(const std::string& root, const std::string& path)
 	}
 	return "AutoIndex: FAILED TO OPEN DIRECTORY";
 	// return g_errorPages[403]; // 403 Forbidden
+}
+
+//hexToChar
+char hexToChar(char c)
+{
+	if (c >= '0' && c <= '9')
+		return c - '0';
+	else if (c >= 'a' && c <= 'f')
+		return c - 'a' + 10;
+	else if (c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+	else
+		return 0;
+}
+
+std::string percentDecode(std::string const& str)
+{
+	std::string decodedStr;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] == '%')
+		{
+			if (i + 2 < str.size())
+			{
+				decodedStr += (hexToChar(str[i + 1]) << 4) | hexToChar(str[i + 2]);
+				i += 2;
+			}
+			else
+				decodedStr += str[i];
+		}
+		else
+			decodedStr += str[i];
+	}
+	return decodedStr;
 }

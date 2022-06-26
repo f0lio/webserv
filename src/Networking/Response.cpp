@@ -28,27 +28,28 @@ namespace ws
         **  thus, if found we respond with it, otherwise we respond with a 404 error.
         **  When the request's path is a directory, the very last else-block handles it.
         */
-        if (status == 200) // success
-        {
-            console.log("Precheck passed");
-            //open file and set body
-            std::string filePath = loc.config.at("root")[0] + _request.getPath();
-            console.log("File path: " + filePath);
-            std::ifstream file;
-            file.open(filePath.c_str());
-            if (file.is_open())
-            {
-                console.log("File opened");
-                std::stringstream buffer;
-                buffer << file.rdbuf();
-                setBody(buffer.str());
-                setResponse(status, resolveContentType(filePath));
-                file.close();
-            }
-            else
-                setErrorResponse(404), console.err("File not found");
-        }
-        else if (status == 301) // redirection
+	   // this is a duplicate of getRequestHandler()
+        // if (status == 200) // success
+        // {
+        //     console.warn("Precheck passed");
+        //     //open file and set body
+        //     std::string filePath = loc.config.at("root")[0] + _request.getPath();
+        //     console.log("File path: " + filePath);
+        //     std::ifstream file;
+        //     file.open(filePath.c_str());
+        //     if (file.is_open())
+        //     {
+        //         console.log("File opened");
+        //         std::stringstream buffer;
+        //         buffer << file.rdbuf();
+        //         setBody(buffer.str());
+        //         setResponse(status, resolveContentType(filePath));
+        //         file.close();
+        //     }
+        //     else
+        //         setErrorResponse(404), console.err("File not found");
+        // }
+    	if (status == 301) // redirection
         {
             setLocation(loc.config.at("redirect")[0]);
             setStatus(status);
@@ -100,7 +101,7 @@ namespace ws
         if (loc.config.find("redirect") != loc.config.end())
             return 301; // redirect to the correct location
 
-        // shud use Enums for fast checks? enum {GET, POST, DELETE}
+        // should use Enums for fast checks? enum {GET, POST, DELETE}
         if (_request.getMethod() == "POST" || _request.getMethod() == "DELETE")
         {
             if (is_directory(loc.config.at("root")[0] + loc.path) == false)
@@ -109,12 +110,15 @@ namespace ws
         }
 
         const std::string& root = loc.config.at("root").at(0);
-        const std::string path = root.substr(0, root.size() - 1) + req.getPath(); // root always ends with '/'
+        const std::string path = root.substr(0, root.find_last_not_of('/') + 1) + req.getPath(); // root does not always ends with '/'
+
+		std::cout << "path: " << path << std::endl;
+		std::cout << "root: " << root << std::endl;
 
         if (file_exists(path) == false)
             return 404;
         else if (is_regular_file(path))
-            return 200;
+            return 0;
 
         else if (loc.config.find("index") != loc.config.end())
         {
@@ -155,15 +159,16 @@ namespace ws
         const struct Location& loc = _request.getLoc();
 
         std::string path;
-        std::string fileName;
+        // std::string fileName;
 
         path = loc.config.at("root")[0] + _request.getPath();
 
-std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << std::endl;
+		std::cout << "root: " << loc.config.at("root")[0] << std::endl;
+		std::cout << "path: " << path << std::endl;
 
-        resolveIndexFile(loc, path, &fileName);
+        // resolveIndexFile(loc, path, &fileName);
 
-        path = fileName;
+        // path = fileName;
         console.log("Opening file: " + path);
 
         std::ifstream file;
@@ -277,8 +282,10 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
         if (_isSent)
             return;
         _sent += ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
-        console.log("Response sent.");
         _isProcessed = true;
+
+		std::cout << "Response sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
+
 		_isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
     }
 
