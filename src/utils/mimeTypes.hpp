@@ -6,7 +6,7 @@ class mimeTypes
 {
 public:
 	static const char *getType(const char *path);
-	static const char *getExtension(const char *type, int skip = 0);
+	static const char *getExtension(const char *type);// int skip = 0);
 
 private:
 	struct entry
@@ -14,6 +14,6 @@ private:
 		const char *fileExtension;
 		const char *mimeType;
 	};
-	static mimeTypes::entry types[347];
+	static const mimeTypes::entry types[347];
 	static int strcmpi(const char *s1, const char *s2);
 };
