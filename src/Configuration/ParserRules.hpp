@@ -51,10 +51,11 @@ static const char* _location_identifiers[] = {
     "root",
     "index",
     "cgi",
-    "redirect",
+    "redirection",
     "autoindex",
     "upload_dir",
     "upload_max_size", // could wait.
+    "redirect"
 };
 
 
@@ -203,7 +204,13 @@ static std::map<std::string, DirectiveRules> initLocationDirectiveRules()
         .max_args = 32, // monte carlo
         .occurrence = 1,
         .is_required = false };
-
+    locationDirectiveRulesMap["redirection"] = (DirectiveRules){
+        .name = "redirection",
+        .args_type = DIRECTIVE_ARG_TYPE_STRING,
+        .min_args = 1,
+        .max_args = 1,
+        .occurrence = 1,
+        .is_required = false };
     locationDirectiveRulesMap["autoindex"] = (DirectiveRules){
         .name = "autoindex",
         .args_type = DIRECTIVE_ARG_TYPE_STRING,
