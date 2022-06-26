@@ -100,6 +100,10 @@ const std::map<int, std::string> initStatusMessages()
 {
 	std::map<int, std::string> statusMessages;
 	statusMessages[200] = "OK";
+	statusMessages[201] = "Created";
+	statusMessages[202] = "Accepted";
+	statusMessages[203] = "Non-Authoritative Information";
+	statusMessages[204] = "No Content";
 	statusMessages[301] = "Moved Permanently";
 	statusMessages[302] = "Found";
 	statusMessages[304] = "Not Modified";

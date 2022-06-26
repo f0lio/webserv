@@ -18,7 +18,7 @@ namespace ws
             return;
 
         console.log("Formating response...");
-        const VServer& vs = _request.getVServer();
+
         const struct Location& loc = _request.getLoc();
         int status = this->precheck(this->_request);
 
@@ -65,9 +65,6 @@ namespace ws
             setErrorResponse(status), console.err("Precheck failed");
         else // status is zero (needs specific handlers)
         {
-            console.err("------------ inside ELSE -----------");
-            std::cout << "status: " << status << std::endl;
-
             if (_request.getMethod() == "POST")
                 postRequestHandler();
             else if (_request.getMethod() == "DELETE")
@@ -92,7 +89,6 @@ namespace ws
     **/
     int Response::precheck(Request const& req) // TODO: WIP: implement functionality(?) in request
     {
-        const VServer& vs = _request.getVServer();
         const struct Location& loc = _request.getLoc();
 
         if (_request.getStatus() != OK_200)
@@ -105,7 +101,7 @@ namespace ws
             return 301; // redirect to the correct location
 
         // shud use Enums for fast checks? enum {GET, POST, DELETE}
-        if (_request.getMethod() == "POST")
+        if (_request.getMethod() == "POST" || _request.getMethod() == "DELETE")
         {
             if (is_directory(loc.config.at("root")[0] + loc.path) == false)
                 return 500;
@@ -154,8 +150,8 @@ namespace ws
 
     void Response::getRequestHandler()
     {
-        console.err("Inside getRequestHandler()");
-        const VServer& vs = _request.getVServer();
+        console.warn("=> Inside getRequestHandler()");
+
         const struct Location& loc = _request.getLoc();
 
         std::string path;
@@ -188,7 +184,8 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
 
     void Response::postRequestHandler()
     {
-        console.err("Inside postRequestHandler()");
+        console.warn("=> Inside postRequestHandler()");
+        
         const VServer& vs = _request.getVServer();
         const struct Location& loc = _request.getLoc();
 
@@ -247,12 +244,32 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
 
     void Response::deleteRequestHandler()
     {
-        console.err("Inside deleteRequestHandler()");
+        console.warn("=> Inside deleteRequestHandler()");
+        const struct Location& loc = _request.getLoc();
+
+        std::string path = loc.config.at("root")[0];
+        path.pop_back();  // remove the last '/'
+        path += _request.getPath();
+
+        if (file_exists(path))
+        {
+            if (is_regular_file(path))
+            {
+                if (remove(path.c_str()) == 0)
+                    setStatus(204), console.log("File deleted");
+                else
+                    setErrorResponse(500), console.err("File not deleted");
+            }
+            else
+                setErrorResponse(403), console.err("Not a regular file");
+        }
+        else
+            setErrorResponse(404), console.err("File not found");
     }
 
     void Response::headRequestHandler()
     {
-        console.err("Inside headRequestHandler()");
+        console.warn("=> Inside headRequestHandler()");
     }
 
     void Response::send()
