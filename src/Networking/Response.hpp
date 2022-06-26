@@ -1,6 +1,10 @@
 #pragma once
 
+#include <iostream>
+#include <fstream>
 #include "Request.hpp"
+#include "../utils/mimeTypes.hpp"
+
 
 #define HTTP_VERSION "HTTP/1.1"
 #define SERVER_NAME "Shabalido"
@@ -30,6 +34,7 @@ namespace ws
         std::string _response;
         std::string _header;
         std::string _body;
+        bool        _bodyIsSet = false;
         std::string _status;
         bool _isProcessed;
         bool _isSent;
@@ -52,6 +57,11 @@ namespace ws
         void setResponse(int status, std::string& contentType, std::string& body);
         int setErrorResponse(int status);
         void endResponse();
+
+        void getRequestHandler();
+        void postRequestHandler();
+        void deleteRequestHandler();
+        void headRequestHandler();
         
         const char *resolveContentType(std::string const & file) const;
         //tmp

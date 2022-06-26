@@ -103,7 +103,11 @@ namespace parser
 		}
 		std::vector<BlockDirective>::iterator it_bdir;
 		for (it_bdir = _block_directives_vec.begin(); it_bdir != _block_directives_vec.end(); ++it_bdir)
+		{
+			if (it_bdir->getKey().back() != '/')
+				it_bdir->setKey(it_bdir->getKey() + '/');
 			it_bdir->check();
+		}
 
 		for (it = locationDirectiveRulesMap.begin(); it != locationDirectiveRulesMap.end(); ++it)
 		{

@@ -18,27 +18,17 @@ namespace ws
             return;
 
         console.log("Formating response...");
-
-        int status = 0;
-
-        status = this->precheck(this->_request);
-
         const VServer& vs = _request.getVServer();
         const struct Location& loc = _request.getLoc();
+        int status = this->precheck(this->_request);
 
-        if (status == 301) // redirection
-        {
-            setLocation(loc.config.at("redirect")[0]);
-            setStatus(status);
-        }
-        else if (status == -1) // autoindex is on
-        {
-            console.log("Autoindexing...");
-            setBody(::autoIndex(loc.config.at("root")[0], _request.getPath()));
-            setResponse(200, resolveContentType(_request.getPath()));
-            
-        }
-        else if (status == 200) // success
+        /*
+        **  The following conditional-block gets triggered
+        **  when the client GET-requests a specific file (e.g. "GET /image.png HTTP/1.1")
+        **  thus, if found we respond with it, otherwise we respond with a 404 error.
+        **  When the request's path is a directory, the very last else-block handles it.
+        */
+        if (status == 200) // success
         {
             console.log("Precheck passed");
             //open file and set body
@@ -58,58 +48,36 @@ namespace ws
             else
                 setErrorResponse(404), console.err("File not found");
         }
+        else if (status == 301) // redirection
+        {
+            setLocation(loc.config.at("redirect")[0]);
+            setStatus(status);
+        }
+        else if (status == -1) // autoindex is on
+        {
+            console.log("Autoindexing...");
+            setBody(::autoIndex(loc.config.at("root")[0], _request.getPath()));
+            setResponse(200, resolveContentType(_request.getPath()));
+
+        }
         // else if (status >= 400 && status < 500)
         else if (status) // error
             setErrorResponse(status), console.err("Precheck failed");
-        else
+        else // status is zero (needs specific handlers)
         {
             console.err("------------ inside ELSE -----------");
             std::cout << "status: " << status << std::endl;
 
-            std::string path;
-            std::string fileName;
-            try
-            {
-                path = loc.config.at("root")[0] + _request.getPath();
-            }
-            catch (const std::exception& e)
-            {
-                std::cerr << e.what() << '\n';
-            }
-
-            console.warn("Inside process");
-
-            resolveIndexFile(loc, path, &fileName);
-
-            path = fileName;
-            console.log("Opening file: " + path);
-
-            std::ifstream file;
-            file.open(path.c_str(), std::ios::in | std::ios::binary);
-            if (file.is_open())
-            {
-                console.log("File opened");
-                std::stringstream ss;
-                ss << file.rdbuf();
-                setBody(ss.str());
-                // setBody(file);
-                file.close();
-                setResponse(200, resolveContentType(path));
-            }
-            else
-            {
-                console.err("[" + path + "] not found");
-                try
-                {
-                    console.err("[" + path + "] not found");
-                    setStatus(404); // ...
-                }
-                catch (const std::exception& e)
-                {
-                    std::cerr << e.what() << '\n';
-                }
-                setErrorResponse(404);
-            }
+            if (_request.getMethod() == "POST")
+                postRequestHandler();
+            else if (_request.getMethod() == "DELETE")
+                deleteRequestHandler();
+            else if (_request.getMethod() == "HEAD")
+                headRequestHandler();
+            else if (_request.getMethod() == "GET")
+                getRequestHandler();
+            // else 
+            //     setErrorResponse(405), console.err("Method not allowed");
         }
         endResponse();
     }
@@ -124,57 +92,34 @@ namespace ws
     **/
     int Response::precheck(Request const& req) // TODO: WIP: implement functionality(?) in request
     {
-        /*
-        ** TODO:
-        **  - get vs, and loc from request
-        */
-
         const VServer& vs = _request.getVServer();
-
         const struct Location& loc = _request.getLoc();
 
-        console.warn("Checking if should redirect...");
-        if (loc.config.find("redirect") != loc.config.end())
-        {
-            std::cout << "------------------------------" << std::endl;
-            std::cout << "Redirecting ..." << std::endl;
-            std::cout << "Path: " << req.getPath() << std::endl;
-            std::cout << "Location: " << loc.config.at("redirect")[0] << std::endl;
-            std::cout << "------------------------------" << std::endl;
-
-            return 301; // redirect to the correct location
-        }
-
-        std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
-
         if (_request.getStatus() != OK_200)
+        {
+            std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
             return _request.getStatus();
-
-        try
-        {
-            console.log("=> LOCATION ROOT: [" + loc.config.at("root")[0] + "]");
         }
-        catch (const std::exception& e)
+
+        if (loc.config.find("redirect") != loc.config.end())
+            return 301; // redirect to the correct location
+
+        // shud use Enums for fast checks? enum {GET, POST, DELETE}
+        if (_request.getMethod() == "POST")
         {
-            std::cerr << e.what() << '\n';
+            if (is_directory(loc.config.at("root")[0] + loc.path) == false)
+                return 500;
+            return 0;
         }
 
         const std::string& root = loc.config.at("root").at(0);
         const std::string path = root + req.getPath();
 
-        console.log("=> ROOT: [" + root + "]");
-        console.log("=> PATH: [" + path + "]");
-
         if (file_exists(path) == false)
-        {
-            console.warn("[" + path + "] not found");
             return 404;
-        }
         else if (is_regular_file(path))
-        {
-            console.warn("[" + path + "] is a regular file");
             return 200;
-        }
+
         else if (loc.config.find("index") != loc.config.end())
         {
             std::string fileName;
@@ -205,6 +150,107 @@ namespace ws
             }
         }
         return 404; // not found
+    }
+
+    void Response::getRequestHandler()
+    {
+        console.err("Inside getRequestHandler()");
+        const VServer& vs = _request.getVServer();
+        const struct Location& loc = _request.getLoc();
+
+        std::string path;
+        std::string fileName;
+
+        path = loc.config.at("root")[0] + _request.getPath();
+
+        resolveIndexFile(loc, path, &fileName);
+
+        path = fileName;
+        console.log("Opening file: " + path);
+
+        std::ifstream file;
+        file.open(path.c_str(), std::ios::in | std::ios::binary);
+        if (file.is_open())
+        {
+            console.log("File opened");
+            std::stringstream ss;
+            ss << file.rdbuf();
+            setBody(ss.str());
+            file.close();
+            setResponse(200, resolveContentType(path));
+        }
+        else
+            setErrorResponse(404), console.err("[" + path + "] not found");
+
+    }
+
+    void Response::postRequestHandler()
+    {
+        console.err("Inside postRequestHandler()");
+        const VServer& vs = _request.getVServer();
+        const struct Location& loc = _request.getLoc();
+
+        std::string fileName;
+        std::string filePath = loc.config.at("root")[0] + loc.path;
+        std::string type = _request.getHeaderField("Content-Type");
+
+        if (filePath.back() != '/')
+            filePath += '/';
+        
+        if (_request.hasHeaderField("filename"))
+        {
+            if (isFileNameValid(_request.getHeaderField("filename")))
+                fileName = ::sanitizeFilename(_request.getHeaderField("filename"));
+            else
+            {
+                setErrorResponse(400), console.err("Invalid file name");
+                return;
+            }
+        }
+        else
+        {
+            const char* ext = mimeTypes::getExtension(type.c_str());
+            if (ext == NULL)
+            {
+                setErrorResponse(415), console.err("Unsupported Media Type");
+                return;
+            }
+
+            char tmp[] = "XXXXXXXX";
+            mkstemp(tmp);
+
+            fileName = tmp;
+            fileName += '.';
+            fileName += ext;
+
+        }
+        filePath += fileName;
+        
+        console.log("Saving file: " + filePath);
+        
+        std::ofstream file;
+        file.open(filePath.c_str(), std::ios::out | std::ios::binary);
+        if (file.is_open())
+        {
+            file << _request.getBody();
+            file.close();
+            console.log("File saved: " + filePath);
+            // setHeader("Content-Location", loc.path + fileName);
+            setHeader("Location", loc.path + fileName);
+            setResponse(201, resolveContentType(filePath));
+        }
+        else
+            setErrorResponse(500), console.err("File not created");
+    }
+
+    void Response::deleteRequestHandler()
+    {
+        console.err("Inside deleteRequestHandler()");
+    }
+
+    void Response::headRequestHandler()
+    {
+        console.err("Inside headRequestHandler()");
     }
 
     void Response::send()
@@ -256,6 +302,7 @@ namespace ws
     void Response::setBody(std::string const& body)
     {
         _body = body;
+        _bodyIsSet = true;
     }
 
     void Response::setContentType(std::string const& contentType)
@@ -320,7 +367,9 @@ namespace ws
             return;
         setDate();
         setHeader("Server", SERVER_NAME);
-        _response = _status + CRLF + _header + CRLF + _body +  CRLF;
+        _response = _status + CRLF + _header + CRLF;
+        if (_bodyIsSet)
+            _response += _body + CRLF;
         _isProcessed = true;
         console.log("Response formated.");
     }
@@ -339,9 +388,9 @@ namespace ws
         return -1;
     }
 
-    const char *Response::resolveContentType(std::string const & file) const
+    const char* Response::resolveContentType(std::string const& file) const
     {
-        const char *type = mimeTypes::getType(file.c_str());
+        const char* type = mimeTypes::getType(file.c_str());
         if (type)
             return type;
         else

@@ -176,6 +176,7 @@ namespace parser
 
     void Parser::checkArgs(const std::string &key, const std::vector<std::string> &args) const
     {
+        // 
         if (directiveRulesMap.find(key) == directiveRulesMap.end())
             throw std::runtime_error("Directive \"" + key + "\" has no rules");
         // else if ((args.size() < directiveRulesMap.at(key).min_args) || (args.size() > directiveRulesMap.at(key).max_args))

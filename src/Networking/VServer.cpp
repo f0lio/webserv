@@ -20,6 +20,18 @@ namespace ws
                 // if (parser::directiveRulesMap[dirs[i].getKey()].occurrence == parser::OCCURENCE_MULTIPLE)
                 //     _config[dirs[i].getKey()] = dirs[i].getArgs();
                 // else
+                if (dirs[i].getKey() == "root")
+                {
+                    if (dirs[i].getArgs()[0] == "")
+                        PASS;
+                    else if (dirs[i].getArgs()[0][dirs[i].getArgs()[0].size() - 1] != '/')
+                    {
+                        std::vector<std::string> new_args;
+                        new_args.push_back(dirs[i].getArgs()[0] + "/");
+                        _config[dirs[i].getKey()] = new_args;
+                        continue;
+                    }
+                }
                 _config[dirs[i].getKey()] = dirs[i].getArgs();
             }
         }
@@ -33,7 +45,25 @@ namespace ws
             // TODO: optimize (?)
             // init with server config
             for (size_t j = 0; j < dirs.size(); j++)
+            {
+                // if (inheritableFromVServer(dirs[j].getKey()) == false)
+                if (dirs[j].getKey() == "redirect")
+                    continue;
+                // if (directiveIsDirectory(dirs[j].getKey()) == true)
+                else if (dirs[i].getKey() == "root")
+                {
+                    if (dirs[i].getArgs()[0] == "")
+                        PASS;
+                    else if (dirs[i].getArgs()[0][dirs[i].getArgs()[0].size() - 1] != '/')
+                    {
+                        std::vector<std::string> new_args;
+                        new_args.push_back(dirs[i].getArgs()[0] + "/");
+                        _config[dirs[i].getKey()] = new_args;
+                        continue;
+                    }
+                }
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
+            }
 
             // override with location config
             for (size_t j = 0; j < loc_dirs.size(); j++)
@@ -60,7 +90,6 @@ namespace ws
 
     void VServer::prepareServerConfig(parser::Context const& context)
     {
-
         bool foundRoot = false;
         for (
             std::map<std::string, struct Location>::iterator it = _locations.begin();
@@ -75,7 +104,6 @@ namespace ws
                 break;
             }
         }
-
 
         if (!foundRoot)
         {
@@ -239,12 +267,17 @@ namespace ws
             it = _locations.find(path);
             if (it != _locations.end())
                 return it->second;
-            if (path.size() > 1 && path[path.size() - 1] == '/')
-                path.erase(path.size() - 1);
+            // if (path.size() > 1 && path[path.size() - 1] == '/')
+            //     path.erase(path.size() - 1);
+            // if (path.size() > 1 && path[path.size() - 1] == '/')
+            //     path.erase(path.size() - 1);
+            // else
+            //     path = path.substr(0, path.find_last_of('/'));
             size_t pos = path.find_last_of('/');
             if (pos == std::string::npos)
                 break;
-            path = path.substr(0, pos + 1);
+            // path = path.substr(0, pos + 1);
+            path = path.substr(0, pos );
         }
         it = _locations.find(path);
 

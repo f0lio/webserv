@@ -62,6 +62,8 @@ namespace parser
         std::string const& getKey() const;
         std::vector<std::string> const& getArgs() const;
 
+        void setKey(const std::string& key);
+        
         // std::map<std::string, SimpleDirective> const & getDirectives() const;
         std::vector<SimpleDirective> const& getDirectives() const;
 

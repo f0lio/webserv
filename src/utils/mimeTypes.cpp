@@ -1,8 +1,9 @@
 #include "mimeTypes.hpp"
+#include <iostream>
 
-const char *mimeTypes::getType(const char *fileName)
+const char* mimeTypes::getType(const char* fileName)
 {
-	const char *dot = strrchr(fileName, '.');
+	const char* dot = strrchr(fileName, '.');
 	if (dot)
 	{
 		if (dot != fileName)
@@ -28,42 +29,43 @@ const char *mimeTypes::getType(const char *fileName)
 	return NULL;
 }
 
-const char *mimeTypes::getExtension(const char *type, int skip)
+const char* mimeTypes::getExtension(const char* type)
 {
-	int length = (sizeof(types) / sizeof(*types));
-
-	for (int i = 0; i < length; i++)
+	const char* ext = NULL;
+	// can't use binary search because the mimetypes are not sorted
+	for (int i = 0; i < sizeof(types) / sizeof(*types); i++)
 	{
 		if (strcmpi(type, types[i].mimeType) == 0)
-			if (skip-- <= 0)
-				return types[i].fileExtension;
-	}
-
-	return NULL;
-}
-
-int mimeTypes::strcmpi(const char *s1, const char *s2)
-{
-	int i;
-
-	for (i = 0; s1[i] && s2[i]; ++i)
-	{
-		if (s1[i] == s2[i] || (s1[i] ^ 32) == s2[i])
-			continue;
-		else
+		{
+			ext = types[i].fileExtension;
+			ext += ext[0] == '*';
 			break;
+		}
 	}
-
-	if (s1[i] == s2[i])
-		return 0;
-
-	if ((s1[i] | 32) < (s2[i] | 32))
-		return -1;
-
-	return 1;
+	return ext;
 }
 
-mimeTypes::entry mimeTypes::types[] = {
+int mimeTypes::strcmpi(const char* s1, const char* s2)
+{
+	size_t i = 0;
+
+	while (s1[i] && s2[i] && (s1[i] | 32) == (s2[i] | 32))
+		++i;
+	return s1[i] - s2[i];
+
+	// for (i = 0; s1[i] && s2[i]; ++i)
+	// 	if (s1[i] != s2[i] || (s1[i] ^ 32) != s2[i])
+	// 		break;
+	// if (s1[i] == s2[i])
+	// 	return 0;
+
+	// if ((s1[i] | 32) < (s2[i] | 32))
+	// 	return -1;
+
+	// return 1;
+}
+
+const mimeTypes::entry mimeTypes::types[] = {
 	{"*3gpp", "audio/3gpp"},
 	{"*jpm", "video/jpm"},
 	{"*mp3", "audio/mp3"},

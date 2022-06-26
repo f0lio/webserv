@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
 #include "../src/utils/mimeTypes.hpp"
@@ -32,15 +33,18 @@
 #define ARRAY_SIZE(X_X) (sizeof(X_X) / sizeof(X_X[0]))
 
 #define SSTR(x) static_cast<std::ostringstream &>(           \
-					(std::ostringstream() << std::dec << x)) \
-					.str()
+                    (std::ostringstream() << std::dec << x)) \
+                    .str()
 
 #define PRINT_TOKEN(TOKEN) printf("%3.zu, %-15s=  [%s]\n",       \
-								  TOKEN._line,                   \
-								  TokenTypeStrings[TOKEN._type], \
-								  TOKEN._value.c_str());
+                                  TOKEN._line,                   \
+                                  TokenTypeStrings[TOKEN._type], \
+                                  TOKEN._value.c_str());
 
 #define PASS 0
+
+#define PRINT_COUNTER(counter_index) \
+	std::cout << "[LINE: " << __LINE__ << "]\t: " << dbgCounter(counter_index) << std::endl;
 
 // for request
 #define READING_HEADER 0
@@ -68,61 +72,52 @@ const std::map<int, std::string> initErrorPages();
 const std::set<std::string> initImplementedMethods();
 
 static const std::map<int, std::string>
-	g_statusMessages = initStatusMessages();
+g_statusMessages = initStatusMessages();
 
 static const std::map<int, std::string>
-	g_errorPages = initErrorPages();
+g_errorPages = initErrorPages();
 
 // no need for all methods as per RFC see: https://www.rfc-editor.org/rfc/rfc9112#section-3-4
 
 static const std::set<std::string>
-	ImplementedMethods = initImplementedMethods();
+ImplementedMethods = initImplementedMethods();
 
 static const std::map<std::string, DirectiveRules>
-	directiveRulesMap = initDirectiveRules();
+directiveRulesMap = initDirectiveRules();
 
 static const std::map<std::string, DirectiveRules>
-	locationDirectiveRulesMap = initLocationDirectiveRules();
+locationDirectiveRulesMap = initLocationDirectiveRules();
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
 
 struct Listen
 {
-	struct sockaddr_in addr_in;
-	std::string host;
-	port_t port;
-	int fd;
+    struct sockaddr_in addr_in;
+    std::string host;
+    port_t port;
+    int fd;
 };
 
 struct Location
 {
-	std::string path;
-	std::map<std::string, t_vec_str> config;
+    std::string path;
+    std::map<std::string, t_vec_str> config;
 };
 
 // function prototypes
-bool is_included(char c, char *str);
-bool is_number(const std::string &s);
-bool is_number(const char *s);
-
-std::string toUpperStr(std::string const &str);
-std::string showWhiteSpaces(std::string const &str);
-
-const std::string &autoIndex(
-	const std::string &root, const std::string &path);
-
-bool file_exists(const std::string &name);
-bool file_exists(const std::string &path, struct stat &st);
-
-bool is_directory(const std::string &path);
-bool is_directory(struct stat &st);
-
-bool is_regular_file(const std::string &path);
-bool is_regular_file(struct stat &st);
-
-bool is_readable_file(const std::string &path);
-bool is_readable_file(struct stat &st);
-
-bool is_executable_file(const std::string &path);
-bool is_executable_file(struct stat &st);
+bool is_included(char c, char* str);
+bool is_number(const std::string& s);
+bool is_number(const char* s);
+const std::string& autoIndex(
+    const std::string& root, const std::string& path);
+bool file_exists(const std::string& name);
+bool is_directory(const std::string& path);
+bool is_directory(struct stat& st);
+bool is_regular_file(const std::string& path);
+bool is_regular_file(struct stat& st);
+std::string toUpperStr(std::string const & str);
+std::string showWhiteSpaces(std::string const & str);
+const std::string sanitizeFilename(std::string const& filename);
+bool isFileNameValid(std::string const& filename);
+size_t dbgCounter(size_t counter_index);

@@ -1,7 +1,7 @@
 
 #include "Utils.hpp"
 
-bool is_included(char c, char *str)
+bool  is_included(char c, char* str)
 {
 	while (str)
 		if (c == *str++)
@@ -9,15 +9,14 @@ bool is_included(char c, char *str)
 	return false;
 }
 
-bool is_number(const std::string &s)
+bool is_number(const std::string& s)
 {
 	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it))
-		++it;
+	while (it != s.end() && std::isdigit(*it)) ++it;
 	return !s.empty() && it == s.end();
 }
 
-bool is_number(const char *s)
+bool is_number(const char* s)
 {
 	while (*s)
 		if (!std::isdigit(*s++))
@@ -25,81 +24,38 @@ bool is_number(const char *s)
 	return true;
 }
 
-bool file_exists(const std::string &path)
+bool file_exists(const std::string& name)
+{
+	return access(name.c_str(), F_OK) != -1;
+}
+
+bool is_directory(const std::string& path)
 {
 	struct stat st;
-	return stat(path.c_str(), &st) == 0;
+	return stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
 }
 
-bool file_exists(const std::string &path, struct stat &st)
-{
-	return stat(path.c_str(), &st) == 0;
-}
-
-bool is_directory(struct stat &st)
+bool is_directory(struct stat& st)
 {
 	return S_ISDIR(st.st_mode);
 }
 
-bool is_directory(const std::string &path)
+bool is_regular_file(const std::string& path)
 {
 	struct stat st;
-
-	if (file_exists(path, st))
-		return is_directory(st);
-
-	return false;
+	return stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode);
 }
 
-bool is_regular_file(struct stat &st)
+bool is_regular_file(struct stat& st)
 {
 	return S_ISREG(st.st_mode);
-}
-
-bool is_regular_file(const std::string &path)
-{
-	struct stat st;
-
-	if (file_exists(path, st))
-		return is_regular_file(st);
-
-	return false;
-}
-
-bool is_readable_file(struct stat &st)
-{
-	return st.st_mode & S_IREAD;
-}
-
-bool is_readable_file(const std::string &path)
-{
-	struct stat st;
-
-	if (file_exists(path, st))
-		return is_readable_file(st);
-
-	return false;
-}
-
-bool is_executable_file(struct stat &st)
-{
-	return st.st_mode & S_IEXEC;
-}
-
-bool is_executable_file(const std::string &path)
-{
-	struct stat st;
-
-	if (file_exists(path, st))
-		return is_executable_file(st);
-
-	return false;
 }
 
 const std::map<int, std::string> initStatusMessages()
 {
 	std::map<int, std::string> statusMessages;
 	statusMessages[200] = "OK";
+	statusMessages[201] = "Created";
 	statusMessages[301] = "Moved Permanently";
 	statusMessages[302] = "Found";
 	statusMessages[304] = "Not Modified";
@@ -283,7 +239,7 @@ const std::set<std::string> initImplementedMethods()
 	return tmp;
 }
 
-std::string toUpperStr(std::string const &str)
+std::string toUpperStr(std::string const& str)
 {
 	std::string uppedStr(str);
 
@@ -302,7 +258,7 @@ std::string charToHex(char c)
 }
 
 // string to url-encoded string
-std::string showWhiteSpaces(std::string const &str)
+std::string showWhiteSpaces(std::string const& str)
 {
 	std::string encodedStr;
 	for (size_t i = 0; i < str.size(); i++)
@@ -311,7 +267,7 @@ std::string showWhiteSpaces(std::string const &str)
 			encodedStr += '+';
 
 		else if (str[i] == '\n')
-			encodedStr += "\\n\n";
+			encodedStr += "\\n";
 		else if (str[i] == '\r')
 			encodedStr += "\\r";
 
@@ -323,25 +279,69 @@ std::string showWhiteSpaces(std::string const &str)
 	return encodedStr;
 }
 
-const std::string &formatDate(time_t time)
+const std::string& formatDate(time_t time)
 {
-	struct tm *tm = gmtime(&time);
+	struct tm* tm = gmtime(&time);
 	char buffer[80];
 	strftime(buffer, 80, "%d-%b-%Y %H:%M", tm);
 	return buffer;
 }
 
-const std::string &autoIndex(const std::string &root, const std::string &path)
+// chwia dial sikiriti
+const std::string sanitizeFilename(std::string const& filename)
+{
+	std::string sanitizedFilename(filename);
+	for (size_t i = 0; i < sanitizedFilename.size(); i++)
+	{
+		if (sanitizedFilename[i] == '.'
+		&& i + 1 < sanitizedFilename.size() && sanitizedFilename[i + 1] != '.')
+			continue; // dots are allowed, but not consecutive (e.g. extension)
+		if (sanitizedFilename[i] == '.'
+			|| sanitizedFilename[i] == ' '
+			|| sanitizedFilename[i] == '\''
+			|| sanitizedFilename[i] == '\"'
+			|| sanitizedFilename[i] == '\\'
+			|| sanitizedFilename[i] == '/')
+			sanitizedFilename[i] = '_';
+	}
+	return sanitizedFilename;
+}
+
+bool isFileNameValid(std::string const& filename)
+{
+	if (filename.size() == 0 || filename.size() > 255)
+		return false;
+	else if (filename[0] == '/') // no absolute path
+		return false;
+	else if (filename[0] == '.') // no hidden files, no . and ..
+		return false;
+	else if (filename[filename.size() - 1] == '.')
+		return false;
+	return true;
+}
+
+// this is for debugging purposes
+#define DBG_COUNTERS_COUNT 10
+
+size_t dbgCounter(size_t index)
+{
+	static size_t counter[DBG_COUNTERS_COUNT] = { 0 };
+	return counter[index]++;
+}
+
+const std::string& autoIndex(const std::string& root, const std::string& path)
 {
 	std::string dir_path = root + path;
 	console.log("dir_path: " + dir_path);
-	DIR *dir = opendir(dir_path.c_str());
+	DIR* dir = opendir(dir_path.c_str());
 	if (dir)
 	{
-		struct dirent *ent;
+		struct dirent* ent;
 		std::string sufix = "";
-		std::string dirContent =
-			"<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre>";
+		std::string dirContent = \
+			"<html><head><title>Index of " + path
+			+ "</title></head><body><h1>Index of "
+			+ path + "</h1><hr><pre>";
 		while ((ent = readdir(dir)) != NULL)
 		{
 			std::string filePath(ent->d_name);
@@ -368,6 +368,7 @@ const std::string &autoIndex(const std::string &root, const std::string &path)
 			else
 				dirContent += SSTR(st.st_size) + " bytes\n";
 			dirContent += "\n";
+
 		}
 		dirContent += "</pre><hr></body></html>";
 		closedir(dir);

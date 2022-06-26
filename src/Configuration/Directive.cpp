@@ -57,7 +57,6 @@ namespace parser
         if (_args.size() > directiveRulesMap.at(_key).max_args)
             throw std::runtime_error("Directive " + _key + " has too many arguments");
 
-
         if (_key == "methods")
         {
             std::vector<std::string>::const_iterator it = _args.begin();
@@ -66,7 +65,7 @@ namespace parser
                 if (*it != "GET" && *it != "POST" && *it != "HEAD"
                     && *it != "PUT" && *it != "DELETE" && *it != "OPTIONS"
                     && *it != "TRACE" && *it != "CONNECT")
-                    throw std::runtime_error("Invalid method " + *it);
+                    throw std::runtime_error("Invalid method \"" + *it + "\"");
 
                 if (ImplementedMethods.find(*it) == ImplementedMethods.end())
                     throw std::runtime_error("Method " + *it + " is not implemented");
@@ -130,14 +129,17 @@ namespace parser
     {
         return _key;
     }
+
     std::vector<std::string> const& BlockDirective::getArgs() const
     {
         return _args;
     }
-    // std::map<std::string, SimpleDirective> const &  BlockDirective::getDirectives() const
-    // {
-    //     return _directives;
-    // }
+    
+    void BlockDirective::setKey(const std::string& key)
+    {
+        _key = key;
+    }
+
     std::vector<SimpleDirective> const& BlockDirective::getDirectives() const
     {
         return _directives_vec;
@@ -147,6 +149,7 @@ namespace parser
     {
         std::vector<SimpleDirective>::const_iterator it = this->_directives_vec.begin();
         std::map<std::string, int> loaded_directives;
+
         for (; it != this->_directives_vec.end(); ++it)
         {
             it->check_occurrence(loaded_directives, it->getKey());
