@@ -43,6 +43,9 @@
 
 #define PASS 0
 
+#define PRINT_COUNTER(counter_index) \
+	std::cout << "[LINE: " << __LINE__ << "]\t: " << dbgCounter(counter_index) << std::endl;
+
 // for request
 #define READING_HEADER 0
 #define READING_BODY 1
@@ -115,3 +118,6 @@ bool is_regular_file(const std::string& path);
 bool is_regular_file(struct stat& st);
 std::string toUpperStr(std::string const & str);
 std::string showWhiteSpaces(std::string const & str);
+const std::string sanitizeFilename(std::string const& filename);
+bool isFileNameValid(std::string const& filename);
+size_t dbgCounter(size_t counter_index);

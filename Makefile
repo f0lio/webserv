@@ -35,6 +35,7 @@ TEST_DIR_A 			= /tmp/ws/a
 TEST_DIR_B			= /tmp/ws/b
 TEST_DIR_C			= /tmp/ws/c
 TEST_DIR_INSIDE_A 	= /tmp/ws/a/inside
+TEST_DIR_UPLOAD	= /tmp/ws/upload
 
 ## rules
 $(NAME): $(SRCS) $(HEADERS)
@@ -81,7 +82,9 @@ strace: $(NAME)
 
 setup-dirs:
 #Lazy shells forced me to be explicit at dirs' names	
-	@mkdir -p $(TEST_DIR_DEFAULT) $(TEST_DIR_A) $(TEST_DIR_B) $(TEST_DIR_C) $(TEST_DIR_INSIDE_A)
+	@mkdir -p $(TEST_DIR_DEFAULT) $(TEST_DIR_A) $(TEST_DIR_B) $(TEST_DIR_C)\
+		$(TEST_DIR_INSIDE_A) $(TEST_DIR_UPLOAD)
+
 	@tar -xzf ./other/static-website.tar.gz -C $(TEST_DIR_DEFAULT) --strip-components 1
 	@echo "<html><body><h1>Hello From $(TEST_DIR_A)</h1></body></html>" > $(TEST_DIR_A)/index.html
 	@echo "<html><body><h1>Hello From $(TEST_DIR_B)</h1></body></html>" > $(TEST_DIR_B)/index.html

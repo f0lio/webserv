@@ -40,3 +40,6 @@
 *.tldr
 .strace
 *.sh
+
+*.asm
+*.s

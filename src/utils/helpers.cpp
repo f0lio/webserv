@@ -55,6 +55,7 @@ const std::map<int, std::string> initStatusMessages()
 {
 	std::map<int, std::string> statusMessages;
 	statusMessages[200] = "OK";
+	statusMessages[201] = "Created";
 	statusMessages[301] = "Moved Permanently";
 	statusMessages[302] = "Found";
 	statusMessages[304] = "Not Modified";
@@ -238,13 +239,13 @@ const std::set<std::string> initImplementedMethods()
 	return tmp;
 }
 
-std::string toUpperStr(std::string const & str)
+std::string toUpperStr(std::string const& str)
 {
 	std::string uppedStr(str);
 
 	for (size_t i = 0; i < uppedStr.size(); i++)
 		uppedStr[i] -= 32 * (uppedStr[i] >= 'a' && uppedStr[i] <= 'z');
-	
+
 	return uppedStr;
 }
 
@@ -257,7 +258,7 @@ std::string charToHex(char c)
 }
 
 // string to url-encoded string
-std::string showWhiteSpaces(std::string const & str)
+std::string showWhiteSpaces(std::string const& str)
 {
 	std::string encodedStr;
 	for (size_t i = 0; i < str.size(); i++)
@@ -286,6 +287,47 @@ const std::string& formatDate(time_t time)
 	return buffer;
 }
 
+// chwia dial sikiriti
+const std::string sanitizeFilename(std::string const& filename)
+{
+	std::string sanitizedFilename(filename);
+	for (size_t i = 0; i < sanitizedFilename.size(); i++)
+	{
+		if (sanitizedFilename[i] == '.'
+		&& i + 1 < sanitizedFilename.size() && sanitizedFilename[i + 1] != '.')
+			continue; // dots are allowed, but not consecutive (e.g. extension)
+		if (sanitizedFilename[i] == '.'
+			|| sanitizedFilename[i] == ' '
+			|| sanitizedFilename[i] == '\''
+			|| sanitizedFilename[i] == '\"'
+			|| sanitizedFilename[i] == '\\'
+			|| sanitizedFilename[i] == '/')
+			sanitizedFilename[i] = '_';
+	}
+	return sanitizedFilename;
+}
+
+bool isFileNameValid(std::string const& filename)
+{
+	if (filename.size() == 0 || filename.size() > 255)
+		return false;
+	else if (filename[0] == '/') // no absolute path
+		return false;
+	else if (filename[0] == '.') // no hidden files, no . and ..
+		return false;
+	else if (filename[filename.size() - 1] == '.')
+		return false;
+	return true;
+}
+
+// this is for debugging purposes
+#define DBG_COUNTERS_COUNT 10
+
+size_t dbgCounter(size_t index)
+{
+	static size_t counter[DBG_COUNTERS_COUNT] = { 0 };
+	return counter[index]++;
+}
 
 const std::string& autoIndex(const std::string& root, const std::string& path)
 {

@@ -46,6 +46,7 @@ int main(int argc, const char* argv[])
     {
         ws::Configuration config(argc == 2 ? argv[1] : DEFAULT_CONFIG_FILE);
         config.setup();
+        config.print();
 
         ws::Cluster cluster(config);
         cluster.setup();
