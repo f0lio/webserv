@@ -16,6 +16,11 @@ namespace ws
 		return _header;
 	}
 
+	std::map<std::string, std::string> const &Request::getHeaders() const
+	{
+		return _headers;
+	}
+
 	std::string const &Request::getHeaderField(std::string const &key) const
 	{
 		std::string uppedKey = toUpperStr(key);
@@ -23,7 +28,7 @@ namespace ws
 			return _headers.at(uppedKey);
 		return NULL; // this SEGVs in string implicit C-tor // open for ideas
 	}
-	
+
 	bool Request::hasHeaderField(std::string const &key) const
 	{
 		std::string uppedKey = toUpperStr(key);
@@ -89,7 +94,7 @@ namespace ws
 
 	bool Request::isComplete() const
 	{
-		return _isDone;
+		return done;
 	}
 
 	int Request::requestLineParse()
@@ -212,7 +217,7 @@ namespace ws
 			else if (key == "TRANSFER-ENCODING")
 			{
 				if (value == "chunked")
-					_isChunked = true;
+					chunked = true;
 				else
 				{
 					if (!ret)
@@ -232,16 +237,19 @@ namespace ws
 			return 400; // Bad request
 		}
 
+		_vserver = resolveVServer();
+		_loc = &_vserver->resolveLocation(requestTarget);
+
 		if (ret) // first occurring non syntax error
 			return ret;
 
-		if (_content_length == -1 && !_isChunked && _method == "POST")
+		if (_content_length == -1 && !chunked && _method == "POST")
 		{
 			console.err("Invalid header: neither Content-Length nor Transfer-Encoding: chunked found with POST method");
 			return 411; // Length Required
 		}
 
-		if (_isChunked)
+		if (chunked)
 		{
 			if (_content_length != -1) // https://www.rfc-editor.org/rfc/rfc9112#section-6.1-14
 			{
@@ -251,29 +259,31 @@ namespace ws
 			_content_length = 0;
 		}
 
-		_vserver = resolveVServer();
-console.log("1");
-        const struct Location& loc = _vserver->resolveLocation(
-			requestTarget
-		);
-console.log("2");
-		// if (std::find(_vserver->get("methods").begin(), _vserver->get("methods").end(), _method) == _vserver->get("methods").end())
-		if (
-			loc.config.find("methods") == loc.config.end()
-			|| std::find(
-				loc.config.at("methods").begin(),
-				loc.config.at("methods").end(),
-				_method) == loc.config.at("methods").end())
+		std::map<std::string, t_vec_str>::const_iterator it = _loc->config.find("methods");
+
+		if (it == _loc->config.end())
 		{
-			console.log("3");
+			console.err("Invalid location: methods not found");
+			return 400; // Bad request
+		}
+
+		t_vec_str const &methods = it->second;
+
+		if (std::find(methods.begin(), methods.end(), _method) == methods.end()) //this should not err
+		{
 			console.err("Method not allowed: " + _method);
 			return 405; // Method not allowed
 		}
-		console.log("4");
 
-		if (std::find(_vserver->get("max_body_size").begin(), _vserver->get("max_body_size").end(), _method) != _vserver->get("max_body_size").end())
+		it = _loc->config.find("max_body_size");
+
+		if (it != _loc->config.end())
 		{
-			max_body_size = std::atoi(_vserver->get("max_body_size")[0].c_str()); // **temporary
+			if (std::atoi(it->second[0].c_str()) < _content_length)
+			{
+				console.err("Invalid header: Content-Length too large");
+				return 413; // Request Entity Too Large
+			}
 		}
 
 		return OK_200; // OK
@@ -302,23 +312,21 @@ console.log("2");
 				return 431; // Request Header Fields Too Large
 			}
 		}
-		size_t pos = _request.find(_delim_end, prevSize);
+		size_t pos = _request.find(_delim_end, prevSize); // potential problems
 
 		_header = _request.substr(0, pos);
 		_body = _request.substr(pos + _delim_end.size());
 
 		_vserver = *_vservers.begin();
+		_loc = &_vserver->resolveLocation(requestTarget);
 
 		_status = processHeader();
 
-		std::cout << ((_status == OK_200 && _method == "POST") || _status) << " - " << _status << std::endl; // testing 123
-
 		setLoc(); // there MUST be checks on when to precheck
-
 
 		if (_status == OK_200 && _method == "POST")
 			_status = READING_BODY;
-		
+
 		return _status;
 	}
 
@@ -364,7 +372,7 @@ console.log("2");
 
 		std::cout << "chunk_length: " << chunk_length << " - cl_start: " << cl_start << " - cl_end: " << cl_end << " - _body.size(): " << _body.size() << std::endl;
 
-		if (chunk_length == 0) // eof
+		if (chunk_length == 0) // trailer header not implemented see: https://www.rfc-editor.org/rfc/rfc9112#name-chunked-trailer-section
 		{
 			if (_body.find(_delim + _delim, delimPos) != delimPos) // bad delimiter (not \r\n\r\n)
 			{
@@ -374,6 +382,8 @@ console.log("2");
 			else
 			{
 				_body.erase(cl_start);
+				std::cout << "_content_length: " << _content_length << std::endl;
+				_headers["CONTENT-LENGTH"] = SSTR(_content_length);
 				return OK_200; // end of body
 			}
 		}
@@ -419,7 +429,7 @@ console.log("2");
 
 	int Request::parseBody()
 	{
-		if (!_isChunked)
+		if (!chunked)
 		{
 			if (_body.capacity() < _content_length)
 				_body.reserve(_content_length);
@@ -451,31 +461,23 @@ console.log("2");
 			_status = parseBody();
 		// else go to error page
 
-		if (_status != OK_200)
-			console.err("Error: " + SSTR(_status));
 		if (_status < OK_200)
 			return;
 		// if (_status == OK_200)
 		// 	std::cout << "SUCCESS _body: '" << showWhiteSpaces(_body) << "'" << std::endl;
-		_isDone = true; // this is wrong!!! change it
+		done = true;
 	}
 
 	int Request::setLoc() // TODO: WIP: implement functionality(?) in request
 	{
-		console.warn("Finding VServer...");
-		const VServer &vs = getVServer(); // if bad request (400) it is vservers.begin() same as host not found in resolvevserver()
-
-		console.warn("Finding location...");
-		_loc = &vs.resolveLocation(requestTarget);
-
 		// print location config
 		console.log("Location config: ");
 		for (auto const &it : _loc->config)
 		{
 			console.log("\t", it.first + ":");
 			for (auto const &it2 : it.second)
-				console.log(" ", it2);
-			std::cout << std::endl;
+				console.log(" \"", it2, "\"");
+			console.log("");
 		}
 		return 0;
 	}
