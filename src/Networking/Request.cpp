@@ -16,6 +16,11 @@ namespace ws
 		return _header;
 	}
 
+	std::map<std::string, std::string> const &Request::getHeaders() const
+	{
+		return _headers;
+	}
+
 	std::string const &Request::getHeaderField(std::string const &key) const
 	{
 		std::string uppedKey = toUpperStr(key);
@@ -371,6 +376,8 @@ namespace ws
 			else
 			{
 				_body.erase(cl_start);
+				std::cout << "_content_length: " << _content_length << std::endl;
+				_headers["CONTENT-LENGTH"] = SSTR(_content_length);
 				return OK_200; // end of body
 			}
 		}

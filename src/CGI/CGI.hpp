@@ -9,18 +9,19 @@ private:
 	std::map<std::string, std::string> envp;
 	std::string binPath;
 	std::string root;
+	std::string tempFilePath;
 
 public:
 	CGI(const std::string &binPath, const std::string &root);
 	~CGI();
 	// const CGI &operator=(const CGI &other);
 
-	int run(std::string cgiPath, std::map<std::string, std::string> const &requestEnvp);
+	int run(ws::Request const &request);
 
 private:
 	CGI();
 	int exec(std::string cgiPath);
-	std::string getDate();
-	void setEnvp(std::map<std::string, std::string> const &requestEnvp);
-	// std::string const &getCGI() const;
+	void setEnvp(std::string const &cgiPath, ws::Request const &request);
+	std::string CGI::headerToMetaData(std::string header);
+
 };

@@ -11,6 +11,7 @@ namespace ws
 		~Request();
 
 		std::string const &getHeader() const;
+		std::map<std::string, std::string> const &getHeaders() const;
 		std::string const &getHeaderField(std::string const &key) const;
 		std::string const &getBody() const;
 		std::string const &getMethod() const;
@@ -59,8 +60,6 @@ namespace ws
 		int chunkedBody();
 
 		const VServer *resolveVServer() const;
-		int resolveIndexFile(struct Location const &loc, std::string const &path, std::string &fileName);
-		int resolveIndexFile(struct Location const &loc, std::string const &path);
 	};
 
 } // namespace ws
