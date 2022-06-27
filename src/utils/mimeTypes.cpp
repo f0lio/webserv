@@ -231,6 +231,7 @@ const mimeTypes::entry mimeTypes::types[] = {
 	{"mj2", "video/mj2"},
 	{"mjp2", "video/mj2"},
 	{"mjs", "application/javascript"},
+	{"mkv", "video/x-matroska"},
 	{"mml", "text/mathml"},
 	{"mods", "application/mods+xml"},
 	{"mov", "video/quicktime"},

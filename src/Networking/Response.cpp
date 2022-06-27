@@ -28,27 +28,28 @@ namespace ws
         **  thus, if found we respond with it, otherwise we respond with a 404 error.
         **  When the request's path is a directory, the very last else-block handles it.
         */
-        if (status == 200) // success
-        {
-            console.log("Precheck passed");
-            //open file and set body
-            std::string filePath = loc.config.at("root")[0] + _request.getPath();
-            console.log("File path: " + filePath);
-            std::ifstream file;
-            file.open(filePath.c_str());
-            if (file.is_open())
-            {
-                console.log("File opened");
-                std::stringstream buffer;
-                buffer << file.rdbuf();
-                setBody(buffer.str());
-                setResponse(status, resolveContentType(filePath));
-                file.close();
-            }
-            else
-                setErrorResponse(404), console.err("File not found");
-        }
-        else if (status == 301) // redirection
+	   // this is a duplicate of getRequestHandler()
+        // if (status == 200) // success
+        // {
+        //     console.warn("Precheck passed");
+        //     //open file and set body
+        //     std::string filePath = loc.config.at("root")[0] + _request.getPath();
+        //     console.log("File path: " + filePath);
+        //     std::ifstream file;
+        //     file.open(filePath.c_str());
+        //     if (file.is_open())
+        //     {
+        //         console.log("File opened");
+        //         std::stringstream buffer;
+        //         buffer << file.rdbuf();
+        //         setBody(buffer.str());
+        //         setResponse(status, resolveContentType(filePath));
+        //         file.close();
+        //     }
+        //     else
+        //         setErrorResponse(404), console.err("File not found");
+        // }
+    	if (status == 301) // redirection
         {
             setLocation(loc.config.at("redirect")[0]);
             setStatus(status);
@@ -100,7 +101,7 @@ namespace ws
         if (loc.config.find("redirect") != loc.config.end())
             return 301; // redirect to the correct location
 
-        // shud use Enums for fast checks? enum {GET, POST, DELETE}
+        // should use Enums for fast checks? enum {GET, POST, DELETE}
         if (_request.getMethod() == "POST" || _request.getMethod() == "DELETE")
         {
             if (is_directory(loc.config.at("root")[0] + loc.path) == false)
@@ -109,18 +110,21 @@ namespace ws
         }
 
         const std::string& root = loc.config.at("root").at(0);
-        const std::string path = root + req.getPath();
+        const std::string path = root.substr(0, root.find_last_not_of('/') + 1) + req.getPath(); // root does not always ends with '/'
+
+		std::cout << "path: " << path << std::endl;
+		std::cout << "root: " << root << std::endl;
 
         if (file_exists(path) == false)
             return 404;
         else if (is_regular_file(path))
-            return 200;
+            return 0;
 
         else if (loc.config.find("index") != loc.config.end())
         {
             std::string fileName;
             console.warn("Inside precheck()");
-            int status = resolveIndexFile(loc, path, &fileName);
+            int status = resolveIndexFile(loc, path, fileName);
             if (status != 404)
             {
                 console.log("Found index file: " + fileName);
@@ -159,11 +163,16 @@ namespace ws
 
         path = loc.config.at("root")[0] + _request.getPath();
 
-std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << std::endl;
+		std::cout << "root: " << loc.config.at("root")[0] << std::endl;
+		std::cout << "path: " << path << std::endl;
+		std::cout << "_request.getPath(): " << _request.getPath() << std::endl;
 
-        resolveIndexFile(loc, path, &fileName);
-
-        path = fileName;
+		if (!is_regular_file(path))
+		{
+	        resolveIndexFile(loc, path, fileName);
+			path = fileName;
+		}
+		
         console.log("Opening file: " + path);
 
         std::ifstream file;
@@ -215,15 +224,25 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
                 return;
             }
 
-            char tmp[] = "XXXXXXXX";
-            mkstemp(tmp);
+            char tmp[] = "/tmp/XXXXXXXX";
+            int fd = mkstemp(tmp);
 
             fileName = tmp;
             fileName += '.';
             fileName += ext;
 
+			if (fd != -1)
+			{
+				close(fd);
+				unlink(tmp);
+			}
+			else
+			{
+				std::cout << "tmp was not created: " << tmp << std::endl;
+				// maybe doesnt give random string then
+			}
         }
-        filePath += fileName;
+        filePath += fileName.substr(5); // skip 
         
         console.log("Saving file: " + filePath);
         
@@ -239,7 +258,7 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
             setResponse(201, resolveContentType(filePath));
         }
         else
-            setErrorResponse(500), console.err("File not created");
+            setErrorResponse(500), console.err("File not created[" + filePath + "]");
     }
 
     void Response::deleteRequestHandler()
@@ -276,10 +295,16 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
     {
         if (_isSent)
             return;
-        ::send(_request.getClientFd(), _response.c_str(), _response.size(), 0);
-        console.log("Response sent.");
+		int ret = 0;
+
+		while (ret != -1 && !_isSent)
+		{
+			_sent += ret;
+			std::cout << "Response sent: " << convertSize(ret) << " - Total sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
+	        ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
+			_isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
+		}
         _isProcessed = true;
-        _isSent = true; // TODO: need to check if the response is fully sent
     }
 
     bool Response::isSent() const
@@ -426,11 +451,11 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
     int Response::resolveIndexFile(
         struct Location const& loc,
         std::string const& path,
-        std::string* fileName
+        std::string &fileName
     )
     {
         console.warn("Resolving index file...");
-        fileName->assign(path); // to check if changed
+        fileName.assign(path); // to check if changed
         t_vec_str::const_iterator it;
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
@@ -450,7 +475,7 @@ std::cout << std::endl << "ROOT: " << loc.config.at("root")[0] << std::endl << s
                 return 403; // forbidden
             }
             std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
-            fileName->assign(indexPath);
+            fileName.assign(indexPath);
             return 0; // index found
         }
         return 404; // index not found

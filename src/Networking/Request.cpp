@@ -45,9 +45,10 @@ namespace ws
 		return _method;
 	}
 
-	std::string const &Request::getPath() const
+	std::string const Request::getPath() const
 	{
-		return requestTarget;
+		// return requestTarget;
+		return percentDecode(requestTarget);
 	}
 
 	std::string const &Request::getQuery() const
@@ -138,6 +139,9 @@ namespace ws
 		if (requestTarget.find_first_not_of(PATH_VALID_CHARS) != std::string::npos)
 			return 400; // Bad request
 
+		if (requestTarget.size() != 1)
+			requestTarget.erase(requestTarget.find_last_not_of('/') + 1);
+
 		size_t protocolStart = pathEnd + 1;
 
 		if (protocolStart >= requestLine.size())
@@ -153,6 +157,8 @@ namespace ws
 			_query = requestTarget.substr(queryStart + 1);
 			requestTarget = requestTarget.substr(0, queryStart);
 		}
+		std::cout << "requestLine: " << requestLine << std::endl;
+		std::cout << "requestTarget: " << requestTarget << std::endl;
 		return 0;
 	}
 
@@ -237,8 +243,14 @@ namespace ws
 			return 400; // Bad request
 		}
 
+		if (_method == "POST" && this->hasHeaderField("Content-Type"))
+		{
+			console.err("Invalid header: Content-Type not found with POST method");
+			return 400; // Bad request
+		}
+
 		_vserver = resolveVServer();
-		_loc = &_vserver->resolveLocation(requestTarget);
+		_loc = &_vserver->resolveLocation(getPath());
 
 		if (ret) // first occurring non syntax error
 			return ret;
@@ -472,6 +484,7 @@ namespace ws
 	{
 		// print location config
 		console.log("Location config: ");
+		console.log("\tloc: " + _loc->path);
 		for (auto const &it : _loc->config)
 		{
 			console.log("\t", it.first + ":");

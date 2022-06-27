@@ -34,6 +34,7 @@ namespace ws
         std::string _status;
         bool _isProcessed;
         bool _isSent;
+		size_t _sent = 0;
         const Configuration& _config; // (?)
 
         // private methods
@@ -64,7 +65,7 @@ namespace ws
         int resolveIndexFile(
             struct Location const& loc,
             std::string const& path,
-            std::string* fileName);
+            std::string &fileName);
 
         int resolveIndexFile(
             struct Location const& loc,
