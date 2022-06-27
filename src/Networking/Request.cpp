@@ -243,7 +243,7 @@ namespace ws
 			return 400; // Bad request
 		}
 
-		if (_method == "POST" && this->hasHeaderField("Content-Type"))
+		if (_method == "POST" && this->hasHeaderField("Content-Type") == false)
 		{
 			console.err("Invalid header: Content-Type not found with POST method");
 			return 400; // Bad request

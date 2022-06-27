@@ -62,8 +62,8 @@ namespace ws
                         continue;
                     }
                 }
-				if (dirs[j].getKey() == "index") // because it overrides autoindex on
-					continue;
+				// if (dirs[j].getKey() == "index") // because it overrides autoindex on
+				// 	continue;
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
             }
 

@@ -42,8 +42,10 @@ static const char* _simple_identifiers[] = {
     "max_body_size",
     "methods",
     "redirect",
-    "autoindex",    // better keep it only for location block.
-                    // as it could lead to ambiguity. (idk)
+    // "autoindex",     // better keep it only for location block.
+                        // as it could lead to ambiguity. (idk)
+                        // well, u can define a location block with path "/" and autoindex it.
+                        // ¯\_(ツ)_/¯
 };
 
 static const char* _location_identifiers[] = {

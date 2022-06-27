@@ -4,7 +4,8 @@
 namespace ws
 {
     Response::Response(Request const& request, const Configuration& config)
-        : _request(request), _config(config), _isProcessed(false), _isSent(false)
+        : _request(request), _config(config), _isProcessed(false), _isSent(false),
+        _vs(_request.getVServer()), _loc(_request.getLoc())
     {
     }
 
@@ -28,28 +29,28 @@ namespace ws
         **  thus, if found we respond with it, otherwise we respond with a 404 error.
         **  When the request's path is a directory, the very last else-block handles it.
         */
-	   // this is a duplicate of getRequestHandler()
-        // if (status == 200) // success
-        // {
-        //     console.warn("Precheck passed");
-        //     //open file and set body
-        //     std::string filePath = loc.config.at("root")[0] + _request.getPath();
-        //     console.log("File path: " + filePath);
-        //     std::ifstream file;
-        //     file.open(filePath.c_str());
-        //     if (file.is_open())
-        //     {
-        //         console.log("File opened");
-        //         std::stringstream buffer;
-        //         buffer << file.rdbuf();
-        //         setBody(buffer.str());
-        //         setResponse(status, resolveContentType(filePath));
-        //         file.close();
-        //     }
-        //     else
-        //         setErrorResponse(404), console.err("File not found");
-        // }
-    	if (status == 301) // redirection
+        // this is a duplicate of getRequestHandler()
+         // if (status == 200) // success
+         // {
+         //     console.warn("Precheck passed");
+         //     //open file and set body
+         //     std::string filePath = loc.config.at("root")[0] + _request.getPath();
+         //     console.log("File path: " + filePath);
+         //     std::ifstream file;
+         //     file.open(filePath.c_str());
+         //     if (file.is_open())
+         //     {
+         //         console.log("File opened");
+         //         std::stringstream buffer;
+         //         buffer << file.rdbuf();
+         //         setBody(buffer.str());
+         //         setResponse(status, resolveContentType(filePath));
+         //         file.close();
+         //     }
+         //     else
+         //         setErrorResponse(404), console.err("File not found");
+         // }
+        if (status == 301) // redirection
         {
             setLocation(loc.config.at("redirect")[0]);
             setStatus(status);
@@ -62,7 +63,7 @@ namespace ws
 
         }
         // else if (status >= 400 && status < 500)
-        else if (status) // error
+        else if (status && status != 200) // error
             setErrorResponse(status), console.err("Precheck failed");
         else // status is zero (needs specific handlers)
         {
@@ -112,14 +113,13 @@ namespace ws
         const std::string& root = loc.config.at("root").at(0);
         const std::string path = root.substr(0, root.find_last_not_of('/') + 1) + req.getPath(); // root does not always ends with '/'
 
-		std::cout << "path: " << path << std::endl;
-		std::cout << "root: " << root << std::endl;
+        std::cout << "path: " << path << std::endl;
+        std::cout << "root: " << root << std::endl;
 
         if (file_exists(path) == false)
             return 404;
         else if (is_regular_file(path))
             return 0;
-
         else if (loc.config.find("index") != loc.config.end())
         {
             std::string fileName;
@@ -131,23 +131,12 @@ namespace ws
                 return status;
             }
         }
-        else
+        if (is_directory(path))
         {
-            if (is_directory(path))
-            {
-                console.warn("[" + path + "] is a directory");
-                if (loc.config.find("autoindex") != loc.config.end())
-                {
-                    console.warn("checking if autoindex is on");
-                    if (loc.config.at("autoindex")[0] == "on")
-                    {
-                        console.warn("+++ autoindex is ON +++");
-                        return -1; // autoindex is on
-                    }
-                    console.warn("--- autoindex is OFF ---");
-                }
-                return 403; // forbidden
-            }
+            console.warn("[" + path + "] is a directory");
+            if (isAutoIndexEnabled())
+                return -1; // autoindex is on
+            return 403; // forbidden
         }
         return 404; // not found
     }
@@ -163,16 +152,16 @@ namespace ws
 
         path = loc.config.at("root")[0] + _request.getPath();
 
-		std::cout << "root: " << loc.config.at("root")[0] << std::endl;
-		std::cout << "path: " << path << std::endl;
-		std::cout << "_request.getPath(): " << _request.getPath() << std::endl;
+        std::cout << "root: " << loc.config.at("root")[0] << std::endl;
+        std::cout << "path: " << path << std::endl;
+        std::cout << "_request.getPath(): " << _request.getPath() << std::endl;
 
-		if (!is_regular_file(path))
-		{
-	        resolveIndexFile(loc, path, fileName);
-			path = fileName;
-		}
-		
+        if (!is_regular_file(path))
+        {
+            resolveIndexFile(loc, path, fileName);
+            path = fileName;
+        }
+
         console.log("Opening file: " + path);
 
         std::ifstream file;
@@ -194,7 +183,7 @@ namespace ws
     void Response::postRequestHandler()
     {
         console.warn("=> Inside postRequestHandler()");
-        
+
         const VServer& vs = _request.getVServer();
         const struct Location& loc = _request.getLoc();
 
@@ -204,7 +193,7 @@ namespace ws
 
         if (filePath.back() != '/')
             filePath += '/';
-        
+
         if (_request.hasHeaderField("filename"))
         {
             if (isFileNameValid(_request.getHeaderField("filename")))
@@ -231,21 +220,21 @@ namespace ws
             fileName += '.';
             fileName += ext;
 
-			if (fd != -1)
-			{
-				close(fd);
-				unlink(tmp);
-			}
-			else
-			{
-				std::cout << "tmp was not created: " << tmp << std::endl;
-				// maybe doesnt give random string then
-			}
+            if (fd != -1)
+            {
+                close(fd);
+                unlink(tmp);
+            }
+            else
+            {
+                std::cout << "tmp was not created: " << tmp << std::endl;
+                // maybe doesnt give random string then
+            }
         }
         filePath += fileName.substr(5); // skip 
-        
+
         console.log("Saving file: " + filePath);
-        
+
         std::ofstream file;
         file.open(filePath.c_str(), std::ios::out | std::ios::binary);
         if (file.is_open())
@@ -295,15 +284,15 @@ namespace ws
     {
         if (_isSent)
             return;
-		int ret = 0;
+        int ret = 0;
 
-		while (ret != -1 && !_isSent)
-		{
-			_sent += ret;
-			std::cout << "Response sent: " << convertSize(ret) << " - Total sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
-	        ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
-			_isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
-		}
+        while (ret != -1 && !_isSent)
+        {
+            _sent += ret;
+            std::cout << "Response sent: " << convertSize(ret) << " - Total sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
+            ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
+            _isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
+        }
         _isProcessed = true;
     }
 
@@ -441,6 +430,13 @@ namespace ws
             return "text/plain";
     }
 
+    bool Response::isAutoIndexEnabled() const
+    {
+        if (_loc.config.find("autoindex") != _loc.config.end())
+            return _loc.config.at("autoindex")[0] == "on";
+        return false;
+    }
+
     /*
     ** this is called after reading the body of the request
     ** RETURN:
@@ -451,7 +447,7 @@ namespace ws
     int Response::resolveIndexFile(
         struct Location const& loc,
         std::string const& path,
-        std::string &fileName
+        std::string& fileName
     )
     {
         console.warn("Resolving index file...");

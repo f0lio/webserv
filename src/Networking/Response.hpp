@@ -27,6 +27,8 @@ namespace ws
 
     private:
         Request const& _request;
+        const VServer &_vs;
+        const Location &_loc;
         std::string _response;
         std::string _header;
         std::string _body;
@@ -60,6 +62,7 @@ namespace ws
         void deleteRequestHandler();
         void headRequestHandler();
         
+        bool isAutoIndexEnabled() const;
         const char *resolveContentType(std::string const & file) const;
         //tmp
         int resolveIndexFile(
