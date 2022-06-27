@@ -220,7 +220,8 @@ namespace ws
             fileName = tmp;
             fileName += '.';
             fileName += ext;
-            filePath += fileName.substr(5);
+            fileName.erase(0, 5);
+            filePath += fileName;
 
             if (fd != -1)
             {
@@ -233,7 +234,7 @@ namespace ws
         }
         
         console.log("Saving file: " + filePath);
-        
+
         std::ofstream file;
         file.open(filePath.c_str(), std::ios::out | std::ios::binary);
         if (file.is_open())
@@ -290,6 +291,7 @@ namespace ws
             _sent += ret;
             std::cout << "Response sent: " << convertSize(ret) << " - Total sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
             ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
+            std::cout << "\n\n# " << ret << std::endl << std::endl;
             _isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
         }
         _isProcessed = true;
