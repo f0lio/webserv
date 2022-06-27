@@ -203,9 +203,10 @@ namespace ws
                 setErrorResponse(400), console.err("Invalid file name");
                 return;
             }
+            filePath += fileName;
         }
         else
-        {
+        {   
             const char* ext = mimeTypes::getExtension(type.c_str());
             if (ext == NULL)
             {
@@ -219,6 +220,7 @@ namespace ws
             fileName = tmp;
             fileName += '.';
             fileName += ext;
+            filePath += fileName.substr(5);
 
             if (fd != -1)
             {
@@ -226,15 +228,12 @@ namespace ws
                 unlink(tmp);
             }
             else
-            {
-                std::cout << "tmp was not created: " << tmp << std::endl;
                 // maybe doesnt give random string then
-            }
+                std::cout << "tmp was not created: " << tmp << std::endl;
         }
-        filePath += fileName.substr(5); // skip 
-
+        
         console.log("Saving file: " + filePath);
-
+        
         std::ofstream file;
         file.open(filePath.c_str(), std::ios::out | std::ios::binary);
         if (file.is_open())
