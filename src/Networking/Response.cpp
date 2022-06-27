@@ -124,7 +124,7 @@ namespace ws
         {
             std::string fileName;
             console.warn("Inside precheck()");
-            int status = resolveIndexFile(loc, path, &fileName);
+            int status = resolveIndexFile(loc, path, fileName);
             if (status != 404)
             {
                 console.log("Found index file: " + fileName);
@@ -159,16 +159,20 @@ namespace ws
         const struct Location& loc = _request.getLoc();
 
         std::string path;
-        // std::string fileName;
+        std::string fileName;
 
         path = loc.config.at("root")[0] + _request.getPath();
 
 		std::cout << "root: " << loc.config.at("root")[0] << std::endl;
 		std::cout << "path: " << path << std::endl;
+		std::cout << "_request.getPath(): " << _request.getPath() << std::endl;
 
-        // resolveIndexFile(loc, path, &fileName);
-
-        // path = fileName;
+		if (!is_regular_file(path))
+		{
+	        resolveIndexFile(loc, path, fileName);
+			path = fileName;
+		}
+		
         console.log("Opening file: " + path);
 
         std::ifstream file;
@@ -220,15 +224,25 @@ namespace ws
                 return;
             }
 
-            char tmp[] = "XXXXXXXX";
-            mkstemp(tmp);
+            char tmp[] = "/tmp/XXXXXXXX";
+            int fd = mkstemp(tmp);
 
             fileName = tmp;
             fileName += '.';
             fileName += ext;
 
+			if (fd != -1)
+			{
+				close(fd);
+				unlink(tmp);
+			}
+			else
+			{
+				std::cout << "tmp was not created: " << tmp << std::endl;
+				// maybe doesnt give random string then
+			}
         }
-        filePath += fileName;
+        filePath += fileName.substr(5); // skip 
         
         console.log("Saving file: " + filePath);
         
@@ -244,7 +258,7 @@ namespace ws
             setResponse(201, resolveContentType(filePath));
         }
         else
-            setErrorResponse(500), console.err("File not created");
+            setErrorResponse(500), console.err("File not created[" + filePath + "]");
     }
 
     void Response::deleteRequestHandler()
@@ -281,12 +295,16 @@ namespace ws
     {
         if (_isSent)
             return;
-        _sent += ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
+		int ret = 0;
+
+		while (ret != -1 && !_isSent)
+		{
+			_sent += ret;
+			std::cout << "Response sent: " << convertSize(ret) << " - Total sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
+	        ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
+			_isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
+		}
         _isProcessed = true;
-
-		std::cout << "Response sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
-
-		_isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
     }
 
     bool Response::isSent() const
@@ -433,11 +451,11 @@ namespace ws
     int Response::resolveIndexFile(
         struct Location const& loc,
         std::string const& path,
-        std::string* fileName
+        std::string &fileName
     )
     {
         console.warn("Resolving index file...");
-        fileName->assign(path); // to check if changed
+        fileName.assign(path); // to check if changed
         t_vec_str::const_iterator it;
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
@@ -457,7 +475,7 @@ namespace ws
                 return 403; // forbidden
             }
             std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
-            fileName->assign(indexPath);
+            fileName.assign(indexPath);
             return 0; // index found
         }
         return 404; // index not found

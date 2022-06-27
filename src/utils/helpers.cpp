@@ -399,7 +399,7 @@ std::string convertSize(size_t size)
 }
 
 
-const std::string& autoIndex(const std::string& root, const std::string& path)
+const std::string autoIndex(const std::string& root, const std::string& path)
 {
 	std::string dir_path = root.substr(0, root.find_last_not_of('/') + 1) + path + "/"; // root ends with '/' and path starts with '/', adding '/ at the end for consistency
 	console.log("dir_path: " + dir_path);

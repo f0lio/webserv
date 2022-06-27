@@ -115,14 +115,14 @@ namespace ws
 		_running = true;
 		while (_running)
 		{
-			console.log("monitoring...");
+			// console.log("monitoring...");
 			int ret = _io.monitor();
-			console.log("monitoring done");
+			// console.log("monitoring done");
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : monitor() failed");
 			else if (ret == 0)
 			{
-				console.warn("-- CONTINUE --" + __COUNTER__);
+				console.log("-- CONTINUE --", __COUNTER__, "\r");
 				continue;
 			}
 			for (size_t i = 0; i < _io.size(); i++)

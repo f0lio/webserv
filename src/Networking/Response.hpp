@@ -65,7 +65,7 @@ namespace ws
         int resolveIndexFile(
             struct Location const& loc,
             std::string const& path,
-            std::string* fileName);
+            std::string &fileName);
 
         int resolveIndexFile(
             struct Location const& loc,

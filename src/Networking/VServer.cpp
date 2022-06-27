@@ -263,8 +263,6 @@ namespace ws
     {
         std::map<std::string, struct Location>::const_iterator it;
 
-		std::cout << "pathj: " << path << std::endl;
-
         while (path.size() > 0)
         {
             console.warn("resolveLocation: [" + path + "]");

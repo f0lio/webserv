@@ -111,7 +111,7 @@ std::string showWhiteSpaces(std::string const &str);
 std::string percentDecode(std::string const& str);
 std::string convertSize(size_t size);
 
-const std::string &autoIndex(
+const std::string autoIndex(
 	const std::string &root, const std::string &path);
 
 bool file_exists(const std::string &name);
