@@ -374,8 +374,6 @@ const mimeTypes::entry mimeTypes::types[] = {
 	{"war", "application/java-archive"},
 	{"wasm", "application/wasm"},
 	{"wav", "audio/wav"},
-	{"weba", "audio/webm"},
-	{"webm", "video/webm"},
 	{"webmanifest", "application/manifest+json"},
 	{"webp", "image/webp"},
 	{"wgt", "application/widget"},
