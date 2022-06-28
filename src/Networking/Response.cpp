@@ -249,17 +249,16 @@ namespace ws
                 std::cout << "tmp was not created: " << tmp << std::endl;
         }
 
-        console.log("Saving file: " + filePath);
-
         std::ofstream file;
         file.open(filePath.c_str(), std::ios::out | std::ios::binary);
         if (file.is_open())
         {
             file << _request.getBody();
             file.close();
-            console.log("File saved: " + filePath);
-            // setHeader("Content-Location", loc.path + fileName);
-            setHeader("Location", loc.path + fileName);
+            if (loc.path.back() != '/')
+                setHeader("Content-Location", loc.path + '/' + fileName);
+            else
+                setHeader("Content-Location", loc.path + fileName);
             setResponse(201, resolveContentType(filePath));
         }
         else
@@ -358,9 +357,9 @@ namespace ws
         while (ret != -1 && !_isSent)
         {
             _sent += ret;
-            std::cout << "Response sent: " << convertSize(ret) << " - Total sent: " << convertSize(_sent) << " -  left: " << convertSize(_response.size() - _sent) << std::endl;
+            console.log("Response sent: ", convertSize(ret) , " - Total sent: " , convertSize(_sent) , " -  left: " , convertSize(_response.size() - _sent));
             ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
-            std::cout << "\n\n# " << ret << std::endl << std::endl;
+            console.log("\n\n# ", ret, " #\n\n");
             _isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
         }
         _isProcessed = true;
