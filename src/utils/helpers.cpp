@@ -416,12 +416,11 @@ const std::string autoIndex(const std::string& root, const std::string& path)
 			std::string filePath(dir_path + ent->d_name);
 			if (ent->d_name[0] == '.')
 			{
-				dirContent += "<a href=\".\">.</a>\n";
-				continue;
-			}
-			else if (ent->d_name[0] == '.' && ent->d_name[1] == '.')
-			{
-				dirContent += "<a href=\"..\">..</a>\n";
+				dirContent += "<a href=\"";
+				dirContent += ent->d_name[1] == '.' ? path.substr(0, path.find_last_of('/')) : path;
+				dirContent += "\">";
+				dirContent += ent->d_name;
+				dirContent += "</a>\n";
 				continue;
 			}
 
