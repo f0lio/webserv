@@ -17,11 +17,9 @@ namespace ws
                 setupListen(dirs[i].getArgs());
             else
             {
-                // if (parser::directiveRulesMap[dirs[i].getKey()].occurrence == parser::OCCURENCE_MULTIPLE)
-                //     _config[dirs[i].getKey()] = dirs[i].getArgs();
-                // else
                 if (dirs[i].getKey() == "root")
                 {
+                    console.log("BEFORE: ", dirs[i].getArgs()[0]);
                     if (dirs[i].getArgs()[0] == "")
                         PASS;
                     else if (dirs[i].getArgs()[0][dirs[i].getArgs()[0].size() - 1] != '/')
@@ -29,6 +27,7 @@ namespace ws
                         std::vector<std::string> new_args;
                         new_args.push_back(dirs[i].getArgs()[0] + "/");
                         _config[dirs[i].getKey()] = new_args;
+                        continue;
                     }
                 }
                 else if (dirs[i].getKey() == "error_page")
@@ -41,8 +40,7 @@ namespace ws
                     else
                         _customErrorsPages[code] = dirs[i].getArgs()[1];
                 }
-                else
-                    _config[dirs[i].getKey()] = dirs[i].getArgs();
+                _config[dirs[i].getKey()] = dirs[i].getArgs();
             }
         }
 
@@ -68,7 +66,7 @@ namespace ws
                     {
                         std::vector<std::string> new_args;
                         new_args.push_back(dirs[i].getArgs()[0] + "/");
-                        _config[dirs[i].getKey()] = new_args;
+                        loc.config[dirs[i].getKey()] = new_args;
                         continue;
                     }
                 }
