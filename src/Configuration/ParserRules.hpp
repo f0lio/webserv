@@ -126,7 +126,7 @@ static std::map<std::string, DirectiveRules> initDirectiveRules()
         .min_args = 1,
         .max_args = 3,
         .occurrence = 1,
-        .is_required = false };
+        .is_required = true };
 
     directiveRulesMap["location"] = (DirectiveRules){
         .name = "location",
