@@ -9,7 +9,7 @@ private:
 	std::map<std::string, std::string> envp;
 	std::string binPath;
 	std::string root;
-	std::string cgiOutFile;
+	std::string outputFile;
 
 public:
 	CGI(const std::string &binPath, const std::string &root);
@@ -17,11 +17,12 @@ public:
 	// const CGI &operator=(const CGI &other);
 
 	int run(ws::Request const &request);
+	std::string const & getOutputFile() const;
 
 private:
 	CGI();
 	int exec(std::string cgiPath, ws::Request const &request);
 	void setEnvp(std::string const &cgiPath, ws::Request const &request);
-	std::string CGI::headerToMetaData(std::string header);
+	std::string headerToMetaData(std::string header);
 
 };

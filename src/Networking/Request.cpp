@@ -209,7 +209,7 @@ namespace ws
 			_headers[key] = value;
 
 			// print key and value
-			console.log("Header: " + key + ": " + value);
+			// console.log("Header: " + key + ": " + value);
 
 			if (key == "CONTENT-LENGTH")
 			{

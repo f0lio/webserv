@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Request.hpp"
+#include "../CGI/CGI.hpp"
 
 #define HTTP_VERSION "HTTP/1.1"
 #define SERVER_NAME "Shabalido"
@@ -61,6 +62,7 @@ namespace ws
         void postRequestHandler();
         void deleteRequestHandler();
         void headRequestHandler();
+        void cgiHandler();
         
         bool isAutoIndexEnabled() const;
         const char *resolveContentType(std::string const & file) const;

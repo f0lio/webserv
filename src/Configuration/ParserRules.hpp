@@ -201,7 +201,7 @@ static std::map<std::string, DirectiveRules> initLocationDirectiveRules()
         .name = "cgi",
         .args_type = DIRECTIVE_ARG_TYPE_STRING,
         .min_args = 1,
-        .max_args = 32, // monte carlo
+        .max_args = 2,
         .occurrence = 1,
         .is_required = false };
 

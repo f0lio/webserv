@@ -10,6 +10,7 @@ INCLUDES= includes
 UTILS	= helpers.cpp mimeTypes.cpp
 CONFIG	= Configuration.cpp Parser.cpp Tokenizer.cpp Directive.cpp Context.cpp
 SERVER	= Cluster.cpp VServer.cpp Socket.cpp Request.cpp Response.cpp
+CGI		= CGI.cpp CGI_utils.cpp
 
 KQUEUE_FLAGS	= ./src/EventMonitors/KQueue.cpp -D WITH_KQUEUE
 EPOLL_FLAGS	= ./src/EventMonitors/EPoll.cpp -D WITH_EPOLL
@@ -19,7 +20,8 @@ SRCS    = 	./src/webserv.cpp \
 			$(UTILS:%.cpp=./src/utils/%.cpp)\
 			$(CONFIG:%.cpp=./src/Configuration/%.cpp)\
 			$(SERVER:%.cpp=./src/Networking/%.cpp)\
-			$(EVENT-MONITORS:%.cpp=./src/EventMonitors/%.cpp)
+			$(EVENT-MONITORS:%.cpp=./src/EventMonitors/%.cpp)\
+			$(CGI:%.cpp=./src/CGI/%.cpp)
 
 HEADERS =	$(CONFIG:%.cpp=./src/Configuration/%.hpp)\
 			$(SERVER:%.cpp=./src/Networking/%.hpp)\

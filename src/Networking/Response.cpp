@@ -117,7 +117,10 @@ namespace ws
         std::cout << "root: " << root << std::endl;
 
         if (file_exists(path) == false)
+        {
+            std::cout << "0 - File not found" << std::endl;
             return 404;
+        }
         else if (is_regular_file(path))
             return 0;
         else if (loc.config.find("index") != loc.config.end())
@@ -138,6 +141,7 @@ namespace ws
                 return -1; // autoindex is on
             return 403; // forbidden
         }
+        std::cout << "2 - File not found" << std::endl;
         return 404; // not found
     }
 
@@ -151,6 +155,12 @@ namespace ws
         std::string fileName;
 
         path = loc.config.at("root")[0] + _request.getPath();
+
+        if (loc.config.find("cgi") != loc.config.end())
+        {
+            cgiHandler();
+            return;
+        }
 
         std::cout << "root: " << loc.config.at("root")[0] << std::endl;
         std::cout << "path: " << path << std::endl;
@@ -194,6 +204,12 @@ namespace ws
         if (filePath.back() != '/')
             filePath += '/';
 
+        if (loc.config.find("cgi") != loc.config.end())
+        {
+            cgiHandler();
+            return;
+        }
+
         if (_request.hasHeaderField("filename"))
         {
             if (isFileNameValid(_request.getHeaderField("filename")))
@@ -206,7 +222,7 @@ namespace ws
             filePath += fileName;
         }
         else
-        {   
+        {
             const char* ext = mimeTypes::getExtension(type.c_str());
             if (ext == NULL)
             {
@@ -232,7 +248,7 @@ namespace ws
                 // maybe doesnt give random string then
                 std::cout << "tmp was not created: " << tmp << std::endl;
         }
-        
+
         console.log("Saving file: " + filePath);
 
         std::ofstream file;
@@ -278,6 +294,59 @@ namespace ws
     void Response::headRequestHandler()
     {
         console.warn("=> Inside headRequestHandler()");
+    }
+
+    void Response::cgiHandler()
+    {
+        console.log("CGI is enabled");
+        CGI cgi(_loc.config.at("cgi")[1], _loc.config.at("root")[0]);
+
+        int status = cgi.run(_request);
+        if (status == 200)
+        {
+            //open file to read from
+            std::ifstream file(cgi.getOutputFile().c_str());
+            if (file.is_open())
+            {
+                std::stringstream ss;
+                ss << file.rdbuf();
+                std::string output = ss.str();
+                std::cout << "Output: " << (output) << std::endl;
+                if (output.find("\r\n\r\n") != std::string::npos)
+                {
+                    console.log("has");
+                    _header = output.substr(0, output.find("\r\n\r\n"));
+                    _body = output.substr(output.find("\r\n\r\n") + 4);
+                }
+                else
+                {
+                    console.log("haaaalalkashalkdhsads");
+                    _header = output;
+                    _body = "";
+                }
+                file.close();
+                setResponse(200, "text/html");
+            }
+            else
+                setErrorResponse(500), console.err("CGI output file not found");
+            //set body
+            // std::string output = ss.str();
+            // console.log("output: ", output, "\n");
+
+            // if (output.find("\r\n\r\n") != std::string::npos)
+            // {
+            //     _header = output.substr(0, output.find("\r\n\r\n"));
+            //     _body = output.substr(output.find("\r\n\r\n") + 4);
+            //     console.log("_body: ", _body);
+            // }
+            // else
+            //     setBody(output);
+            
+            // setResponse(status, "text/html");
+        }
+        else
+            setErrorResponse(status);
+        return;
     }
 
     void Response::send()

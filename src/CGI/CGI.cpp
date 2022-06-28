@@ -9,15 +9,14 @@ CGI::CGI() : binPath()
 {
 }
 
-// const CGI &CGI::operator=(const CGI &other)
-// {
-// 	this->binPath = other.binPath;
-// 	// this->name = other.name;
-// 	return *this;
-// }
-
 CGI::~CGI()
 {
+}
+// std::string const & CGI::getOutputFile() const
+
+std::string const & CGI::getOutputFile() const
+{
+	return outputFile;
 }
 
 int CGI::run(ws::Request const &request) // https://www.rfc-editor.org/rfc/rfc3875.html#section-4
@@ -30,15 +29,23 @@ int CGI::run(ws::Request const &request) // https://www.rfc-editor.org/rfc/rfc38
 
 	std::string cgiPath = request.getPath();
 
-	std::cout << "cgiPath: " << cgiPath << std::endl;
+	size_t pointPos = cgiPath.find_last_of('.');
 
-	if (cgiPath.find("/", 1) != std::string::npos)
-		cgiPath = cgiPath.substr(0, cgiPath.find("/", 1));
+	std::cout << "pointPos: " << pointPos << std::endl;
 
-	std::cout << "cgiPath: " << cgiPath << std::endl;
+	if (!pointPos || pointPos == std::string::npos)
+		return 404;
 
-	if (cgiPath.find("..") != std::string::npos)
-		return 403; // bad boy hacker
+	{
+		std::string ext = cgiPath.substr(pointPos);
+		std::cout << "ext: " << ext << std::endl;
+		// if (ext.compare(".php") != 0)
+		// {
+		// 	std::cout << "CGI: only .php files are supported" << std::endl;
+		// 	return 404;
+		// }
+		std::cout << "222ext: " << ext << std::endl;
+	}
 
 	cgiPath = root + "/" + cgiPath;
 
@@ -51,6 +58,7 @@ int CGI::run(ws::Request const &request) // https://www.rfc-editor.org/rfc/rfc38
 	setEnvp(cgiPath, request);
 
 	exec(cgiPath, request);
+	return 200;
 }
 
 std::string CGI::headerToMetaData(std::string header)
@@ -79,7 +87,7 @@ void CGI::setEnvp(std::string const &cgiPath, ws::Request const &request)
 	if (envp["HTTP_HOST"].find(":") != std::string::npos)
 	{
 		envp["SERVER_NAME"] = envp["HTTP_HOST"].substr(0, envp["HTTP_HOST"].find(":"));
-		envp["PORT"] = envp["HTTP_HOST"].substr(envp["HTTP_HOST"].find(":"));
+		envp["PORT"] = envp["HTTP_HOST"].substr(envp["HTTP_HOST"].find(":") + 1);
 	}
 	else
 	{
@@ -92,43 +100,41 @@ void CGI::setEnvp(std::string const &cgiPath, ws::Request const &request)
 
 	std::cout << "request.getPath(): " << request.getPath() << std::endl;
 
-	if (request.getPath() != cgiPath)
-	{
-		envp["PATH_INFO"] = request.getPath().substr(cgiPath.size());
-		envp["PATH_TRANSLATED"] = root + envp["PATH_INFO"];
-	}
-	else
-	{
-		envp["PATH_INFO"] = "";
-		envp["PATH_TRANSLATED"] = root + envp["PATH_INFO"];
-	}
-
-	std::cout << "envp[\"PATH_INFO\"]: " << envp["PATH_INFO"] << std::endl;
+	// if (request.getPath() != cgiPath)
+	// {
+	// 	console.log("[cgiPath]", cgiPath);
+	// 	envp["PATH_INFO"] = request.getPath().substr(cgiPath.size());
+	// 	envp["PATH_TRANSLATED"] = root + envp["PATH_INFO"];
+	// }
+	// else
+	// {
+	// 	envp["PATH_INFO"] = "";
+	// 	envp["PATH_TRANSLATED"] = root + envp["PATH_INFO"];
+	// }
 
 	envp["QUERY_STRING"] = request.getQuery();
 	envp["REMOTE_HOST"] = "";
 	envp["REQUEST_METHOD"] = request.getMethod();
 	envp["SCRIPT_NAME"] = cgiPath;
+	envp["LES_PATH_ABDOMINO"] = cgiPath;
+	envp["PATH_TRANSLATED"] = cgiPath;
+	envp["PATH_INFO"] = cgiPath;
 }
 
 int CGI::exec(std::string cgiPath, ws::Request const &request)
 {
-	pid_t pid = fork();
-
-	char tempOFile[] = "/tmp/cgiOutFile_XXXXXX";
+	char tempOFile[] = "/tmp/outputFile_XXXXXX";
 
 	int fdo = mkstemp(tempOFile);
 
-	cgiOutFile.assign(tempOFile);
+	outputFile.assign(tempOFile);
 
 	std::cout << "tempOFile: " << tempOFile << std::endl;
 
 	if (fdo == -1)
 		return 500; // internal server error
 
-
-
-	char tempIfile[] = "/tmp/cgiInFile_XXXXXX";
+	char tempIfile[] = "/tmp/inputFile_XXXXXX";
 
 	int fdi = mkstemp(tempIfile);
 
@@ -138,16 +144,21 @@ int CGI::exec(std::string cgiPath, ws::Request const &request)
 		return 500; // internal server error
 	}
 
-
+	pid_t pid = fork();
 	if (!pid)
 	{
-	std::ofstream ofile(tempOFile);
+		std::ofstream ifile(tempIfile);
 
-	ofile << request.getBody();
+		ifile << request.getBody();
+		ifile.close();
+		console.log("request.getBody(): ", request.getBody(), '\n');
+		// console.log("ifile: ", ifile, '\n');
+		// ddp body 
 
 		dup2(fdo, STDOUT_FILENO);
-		dup2(fdi, STDIN_FILENO);
 
+		dup2(fdi, STDIN_FILENO);
+		close(fdo);
 		int ret = execle(binPath.c_str(), binPath.c_str(), cgiPath.c_str(), NULL, mapToArray(envp));
 		exit(1); // execve failed
 	}
@@ -155,13 +166,20 @@ int CGI::exec(std::string cgiPath, ws::Request const &request)
 	close(fdo);
 	close(fdi);
 
-	if (pid > 0)
+	if (pid < 0)
 		return 1;
-
+	// wait 5s for child process to finish
 	int status;
+
+	// get timestamp from now
+
 	waitpid(pid, &status, 0);
-	if (WIFEXITED(status))
-		return WEXITSTATUS(status);
+
+
+
+	//check for response headers 
+	// unlink(tempOFile);
+	unlink(tempIfile);
 
 	return 0;
 }
