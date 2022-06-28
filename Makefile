@@ -91,8 +91,14 @@ setup-dirs:
 	@cp -r ./other/hello.* $(TEST_DIR_CGI)
 	@cp -r ./other/form.html $(TEST_DIR_C)
 	@echo "<html><body><h1>Hello From $(TEST_DIR_A)</h1></body></html>" > $(TEST_DIR_A)/index.html
-	@echo "<html><body><h1>Hello From $(TEST_DIR_B)</h1></body></html>" > $(TEST_DIR_B)/index.html
+# @echo "<html><body><h1>Hello From $(TEST_DIR_B)</h1></body></html>" > $(TEST_DIR_B)/index.html
 	@echo "<html><body><h1>Hello From $(TEST_DIR_C)</h1></body></html>" > $(TEST_DIR_C)/index.html
 	@echo "<html><body><h1>Hello From $(TEST_DIR_INSIDE_A)</h1></body></html>" > $(TEST_DIR_INSIDE_A)/index.html
 	@echo "<html><body><h1>Hello From $(TEST_DIR_INSIDE_A)/file.txt</h1></body></html>" > $(TEST_DIR_INSIDE_A)file.txt
+# custom error pages
+	@echo "<html><head><title>404 Not Found</title></head><body style=\"background-color:#c9d1c9;color:#000000;text-align:center;\">\
+		<h1 style=\"padding:12px;border-bottom:1px solid gray;\">404 - Page not found</h1></body></html>" > $(TEST_DIR_DEFAULT)/404.html
+	@echo "<html><head><title>403 Forbidden</title></head><body style=\"background-color:#c9d1c9;color:#000000;text-align:center;\">\
+		<h1 style=\"padding:12px;border-bottom:1px solid gray;\">403 - Forbidden</h1></body></html>" > $(TEST_DIR_DEFAULT)/403.html
+
 	@chmod -R 777 $(TEST_DIR_ROOT)

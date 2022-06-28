@@ -29,10 +29,20 @@ namespace ws
                         std::vector<std::string> new_args;
                         new_args.push_back(dirs[i].getArgs()[0] + "/");
                         _config[dirs[i].getKey()] = new_args;
-                        continue;
                     }
                 }
-                _config[dirs[i].getKey()] = dirs[i].getArgs();
+                else if (dirs[i].getKey() == "error_page")
+                {
+                    int code = std::stoi(dirs[i].getArgs()[0]);
+                    if (code < 400 || code > 599)
+                        throw std::runtime_error("error_page: code must be between 400 and 599");
+                    else if (dirs[i].getArgs()[1] == "")
+                        throw std::runtime_error("error_page: path is empty");
+                    else
+                        _customErrorsPages[code] = dirs[i].getArgs()[1];
+                }
+                else
+                    _config[dirs[i].getKey()] = dirs[i].getArgs();
             }
         }
 
@@ -119,12 +129,6 @@ namespace ws
             }
             _locations["/"] = loc;
         }
-
-        // for (std::map<int, std::string>::iterator it = g_errorPages.begin(); it != g_errorPages.end(); it++)
-        // {
-        //     // if (this->get("error_page")[it->first] == "")
-        //     //     continue;
-        // }
     }
 
     t_vec_str const& VServer::get(const std::string& key) const
@@ -167,6 +171,18 @@ namespace ws
     int VServer::getIndex() const
     {
         return _ctx_index;
+    }
+
+    // bool VServer::hasErrorPage(int code) const
+    // {
+    //     return _customErrorsPages.find(code) != _customErrorsPages.end();
+    // }
+
+    std::string const& VServer::getErrorPage(int code) const
+    {
+        if (_customErrorsPages.find(code) != _customErrorsPages.end())
+            return _customErrorsPages.find(code)->second;
+        return std::string();
     }
 
     void VServer::_checkConfig(parser::Context const& context) const

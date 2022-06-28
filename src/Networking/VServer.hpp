@@ -22,6 +22,7 @@ namespace ws
         std::set<int> const& getFds() const;
 
         t_vec_str const &get(const std::string &key) const;
+        std::string const& getErrorPage(int code) const;
 
         void start(std::vector<struct Listen> & _binded_listens);
         void print() const;
@@ -35,6 +36,7 @@ namespace ws
         std::vector<struct Listen> _listens;
         std::map<std::string, port_t> _hostPortMap;
         std::map<const std::string, t_vec_str> _config;
+        std::map<const int, std::string> _customErrorsPages;
         std::map<std::string, struct Location> _locations;
         struct sockaddr_in addr;
         bool            _started;

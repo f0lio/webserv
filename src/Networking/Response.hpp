@@ -56,6 +56,7 @@ namespace ws
         void setResponse(int status, std::string& contentType);
         void setResponse(int status, std::string& contentType, std::string& body);
         int setErrorResponse(int status);
+        int setDefaultErrorPage(int status);
         void endResponse();
 
         void getRequestHandler();

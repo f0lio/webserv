@@ -341,7 +341,7 @@ namespace ws
             // }
             // else
             //     setBody(output);
-            
+
             // setResponse(status, "text/html");
         }
         else
@@ -479,7 +479,29 @@ namespace ws
 
     int Response::setErrorResponse(int status)
     {
-        // use a Set for faster lookup?
+        std::string errorPagePath = _vs.getErrorPage(status);
+        if (errorPagePath.empty())
+            return setDefaultErrorPage(status);
+        else
+        {
+            std::ifstream file(errorPagePath);
+            if (file.is_open())
+            {
+                std::stringstream ss;
+                ss << file.rdbuf();
+                setBody(ss.str());
+                setResponse(status, "text/html");
+                file.close();
+                return 0;
+            }
+            else // in case of err, fallback to default error page
+                return setDefaultErrorPage(status);
+        }
+        return -1;
+    }
+
+    int Response::setDefaultErrorPage(int status)
+    {
         if (g_errorPages.find(status) != g_errorPages.end())
         {
             setStatus(status);
