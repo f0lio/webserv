@@ -1,7 +1,7 @@
 
 #include "CGI.hpp"
 
-CGI::CGI(const std::string &binPath, const std::string &root) : binPath(binPath), root(root)
+CGI::CGI(const std::string& binPath, const std::string& root) : binPath(binPath), root(root)
 {
 }
 
@@ -14,12 +14,12 @@ CGI::~CGI()
 }
 // std::string const & CGI::getOutputFile() const
 
-std::string const & CGI::getOutputFile() const
+std::string const& CGI::getOutputFile() const
 {
 	return outputFile;
 }
 
-int CGI::run(ws::Request const &request) // https://www.rfc-editor.org/rfc/rfc3875.html#section-4
+int CGI::run(ws::Request const& request) // https://www.rfc-editor.org/rfc/rfc3875.html#section-4
 {
 	if (!is_regular_file(binPath))
 		return 404;
@@ -57,8 +57,7 @@ int CGI::run(ws::Request const &request) // https://www.rfc-editor.org/rfc/rfc38
 
 	setEnvp(cgiPath, request);
 
-	exec(cgiPath, request);
-	return 200;
+	return exec(cgiPath, request);
 }
 
 std::string CGI::headerToMetaData(std::string header)
@@ -73,9 +72,9 @@ std::string CGI::headerToMetaData(std::string header)
 	return header;
 }
 
-void CGI::setEnvp(std::string const &cgiPath, ws::Request const &request)
+void CGI::setEnvp(std::string const& cgiPath, ws::Request const& request)
 {
-	std::map<std::string, std::string> const &reqenvp = request.getHeaders();
+	std::map<std::string, std::string> const& reqenvp = request.getHeaders();
 
 	for (std::map<std::string, std::string>::const_iterator it = reqenvp.begin(); it != reqenvp.end(); ++it)
 		envp[headerToMetaData(it->first)] = it->second;
@@ -121,11 +120,12 @@ void CGI::setEnvp(std::string const &cgiPath, ws::Request const &request)
 	envp["PATH_INFO"] = cgiPath;
 }
 
-int CGI::exec(std::string cgiPath, ws::Request const &request)
+int CGI::exec(std::string cgiPath, ws::Request const& request)
 {
 	char tempOFile[] = "/tmp/outputFile_XXXXXX";
 
 	int fdo = mkstemp(tempOFile);
+	int fdi = 0;
 
 	outputFile.assign(tempOFile);
 
@@ -134,31 +134,32 @@ int CGI::exec(std::string cgiPath, ws::Request const &request)
 	if (fdo == -1)
 		return 500; // internal server error
 
-	char tempIfile[] = "/tmp/inputFile_XXXXXX";
-
-	int fdi = mkstemp(tempIfile);
-
-	if (fdi == -1)
+	if (!request.getBody().empty()) // IsHasBody()
 	{
-		close(fdo);
-		return 500; // internal server error
+		char tempIfile[] = "/tmp/inputFile_XXXXXX";
+
+		fdi = mkstemp(tempIfile);
+
+		if (fdi == -1)
+		{
+			close(fdo);
+			return 500; // internal server error
+		}
+
+		std::ofstream ifile(tempIfile);
+
+		ifile << request.getBody();
+		ifile.close();
 	}
 
 	pid_t pid = fork();
 	if (!pid)
 	{
-		std::ofstream ifile(tempIfile);
-
-		ifile << request.getBody();
-		ifile.close();
-		console.log("request.getBody(): ", request.getBody(), '\n');
-		// console.log("ifile: ", ifile, '\n');
-		// ddp body 
-
 		dup2(fdo, STDOUT_FILENO);
-
 		dup2(fdi, STDIN_FILENO);
-		close(fdo);
+		// close(fdo);
+		// close(fdi);
+
 		int ret = execle(binPath.c_str(), binPath.c_str(), cgiPath.c_str(), NULL, mapToArray(envp));
 		exit(1); // execve failed
 	}
@@ -166,20 +167,35 @@ int CGI::exec(std::string cgiPath, ws::Request const &request)
 	close(fdo);
 	close(fdi);
 
-	if (pid < 0)
-		return 1;
+	console.log("@@@@@ HERE @@@@@");
+	{ { { { { { { { {if (pid < 0) return 1;}}}}}}}}}
 	// wait 5s for child process to finish
+	console.log("@@@@@ waiting for child process to finish");
 	int status;
-
-	// get timestamp from now
 
 	waitpid(pid, &status, 0);
 
+	if (WIFEXITED(status))
+	{
+		console.log("@@@@@ WIFEXITED(status)");
+	}
+	else if (WIFSIGNALED(status))
+	{
+		console.log("@@@@@ WIFSIGNALED(status)");
+	}
+	else
+	{
+		console.log("@@@@@ WIFSTOPPED(status)");
+	}
 
+	console.log("Done!");
+
+	// get timestamp from now
+	
 
 	//check for response headers 
 	// unlink(tempOFile);
-	unlink(tempIfile);
+	// unlink(tempIfile);
 
-	return 0;
+	return 200;
 }

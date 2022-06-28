@@ -310,7 +310,7 @@ namespace ws
                 std::stringstream ss;
                 ss << file.rdbuf();
                 std::string output = ss.str();
-                std::cout << "Output: " << (output) << std::endl;
+                std::cout << "Output: " << showWhiteSpaces(output) << std::endl;
                 if (output.find("\r\n\r\n") != std::string::npos)
                 {
                     console.log("has");
@@ -324,6 +324,7 @@ namespace ws
                     _body = "";
                 }
                 file.close();
+                // unlink(cgi.getOutputFile().c_str());
                 setResponse(200, "text/html");
             }
             else
