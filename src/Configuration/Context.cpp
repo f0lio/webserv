@@ -1,7 +1,5 @@
-#pragma once
 
 #include "Context.hpp"
-
 
 namespace parser
 {

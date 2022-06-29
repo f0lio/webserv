@@ -327,7 +327,7 @@ std::string showWhiteSpaces(std::string const &str)
 	return encodedStr;
 }
 
-const std::string &formatDate(time_t time)
+const std::string formatDate(time_t time)
 {
 	struct tm *tm = gmtime(&time);
 	char buffer[80];
@@ -402,9 +402,9 @@ std::string convertSize(size_t size)
 const std::string autoIndex(const std::string& root, const std::string& path)
 {
 	std::string dir_path = root.substr(0, root.find_last_not_of('/') + 1) + path + "/"; // root ends with '/' and path starts with '/', adding '/ at the end for consistency
-	console.log("dir_path: " + dir_path);
-	console.log("path: " + path);
-	console.log("root: " + root);
+	// console.log("dir_path: " + dir_path);
+	// console.log("path: " + path);
+	// console.log("root: " + root);
 	DIR* dir = opendir(dir_path.c_str());
 	if (dir)
 	{

@@ -44,6 +44,9 @@ namespace ws
         for (size_t i = 0; i < _contexts.size(); i++)
             _vservers.push_back(new VServer(_contexts[i]));
 
+        if (_vservers.size() == 0)
+            throw std::runtime_error("No vserver found");
+
         struct sockaddr_in addr;
 
         for (size_t i = 0; i < _vservers.size(); i++)
@@ -84,36 +87,36 @@ namespace ws
 
     void Configuration::print() const
     {
-        console.log("Resolver tree:", "\n");
+        // console.log("Resolver tree:", "\n");
 
-        std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it;
-        for (it = _serversTree.begin(); it != _serversTree.end(); it++)
-        {
-            sockaddr_in addr_;
-            inet_aton(_tmp_map.find(it->first)->second.c_str(), &addr_.sin_addr);
+        // std::map<in_addr_t, std::map<port_t, struct ServerName> >::const_iterator it;
+        // for (it = _serversTree.begin(); it != _serversTree.end(); it++)
+        // {
+        //     sockaddr_in addr_;
+        //     inet_aton(_tmp_map.find(it->first)->second.c_str(), &addr_.sin_addr);
             
-            console.log("	IP: ", _tmp_map.find(it->first)->second, ": ", addr_.sin_addr.s_addr, "\n");
+        //     console.log("	IP: ", _tmp_map.find(it->first)->second, ": ", addr_.sin_addr.s_addr, "\n");
             
 
 
-            console.log("		Ports:", "\n");
-            std::map<port_t, struct ServerName>::const_iterator it2;
-            for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
-            {
-                console.log("			Port: ", it2->first, "\n");
-                console.log("			ServerNames:", "\n");
-                std::map<std::string, VServer*>::const_iterator it3;
-                for (it3 = it2->second.vservers.begin(); it3 != it2->second.vservers.end(); it3++)
-                {
-                    console.log("				ServerName: ", it3->first);
-                    console.log(": ", it3->second->getIndex());
-                    if (it3->second->hasName())
-                        console.log(" (", it3->second->getName(), ")");
-                    console.log("\n");
-                }
-            }
-            console.log("\n");
-        }
+        //     console.log("		Ports:", "\n");
+        //     std::map<port_t, struct ServerName>::const_iterator it2;
+        //     for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
+        //     {
+        //         console.log("			Port: ", it2->first, "\n");
+        //         console.log("			ServerNames:", "\n");
+        //         std::map<std::string, VServer*>::const_iterator it3;
+        //         for (it3 = it2->second.vservers.begin(); it3 != it2->second.vservers.end(); it3++)
+        //         {
+        //             console.log("				ServerName: ", it3->first);
+        //             console.log(": ", it3->second->getIndex());
+        //             if (it3->second->hasName())
+        //                 console.log(" (", it3->second->getName(), ")");
+        //             console.log("\n");
+        //         }
+        //     }
+        //     console.log("\n");
+        // }
     }
 
     std::vector<VServer*> const& Configuration::getVServers() const

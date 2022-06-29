@@ -4,6 +4,7 @@ namespace ws
 {
 	Cluster::Cluster(Configuration const &config) : _config(config), _running(false), _setup(false)
 	{
+		_client_addr_len = sizeof(_client_addr);
 	}
 
 	Cluster::~Cluster()
@@ -16,9 +17,10 @@ namespace ws
 		return _server_fds.find(fd) != _server_fds.end();
 	}
 
-	VServer &Cluster::getClientVServer(int client_fd)
-	{
-	}
+	// VServer &Cluster::getClientVServer(int client_fd)
+	// {
+	// 	return *_fd_to_vserver[_client_to_server[client_fd]];
+	// }
 
 	/// Event handlers ///
 	void Cluster::connectionHandler(int fd_index)
@@ -35,15 +37,15 @@ namespace ws
 	{
 		if (_fd_to_request.find(_io.getFd(fd_index)) == _fd_to_request.end())
 		{
-			console.log("Cluster::run() : new request", ": ", _io.getFd(fd_index), "\n");
+			// console.log("Cluster::run() : new request", ": ", _io.getFd(fd_index), "\n");
 
 			Request *request = new Request(
 				_io.getFd(fd_index), _fd_to_vserver[_client_to_server[_io.getFd(fd_index)]]);
 			_fd_to_request[_io.getFd(fd_index)] = request;
 		}
-		// console.log("Request handler");
+		// // console.log("Request handler");
 		_fd_to_request[_io.getFd(fd_index)]->process();
-		// console.log("Request processed");
+		// // console.log("Request processed");
 
 		if (_fd_to_request[_io.getFd(fd_index)]->isComplete())
 			_io.setWriteEvent(fd_index);
@@ -51,28 +53,28 @@ namespace ws
 
 	void Cluster::responseHandler(int fd_index)
 	{
-		// console.log("Response handler");
+		// // console.log("Response handler");
 		if (_fd_to_request[_io.getFd(fd_index)]->isComplete())
 		{	
 			if (_fd_to_response.find(_io.getFd(fd_index)) == _fd_to_response.end())
 			{
-				console.log("Cluster::run() : new response", ": ", _io.getFd(fd_index), "\n");
+				// console.log("Cluster::run() : new response", ": ", _io.getFd(fd_index), "\n");
 				Response *response = new Response(*_fd_to_request[_io.getFd(fd_index)], this->_config);
 				_fd_to_response[_io.getFd(fd_index)] = response;
 			}
 		}
 		else
 		{
-			// console.log("Response handler : request not complete");
+			// // console.log("Response handler : request not complete");
 			// close(_io.getFd(fd_index));
 			return;
 		}
-		// console.log("Response handler : request complete");
+		// // console.log("Response handler : request complete");
 
-		// console.log("Response handler : checking if response is sent");
+		// // console.log("Response handler : checking if response is sent");
 		if (_fd_to_response.find(_io.getFd(fd_index))->second->isSent())
 		{
-			// console.log("Cluster::responseHandler() : response sent", "\n");
+			// // console.log("Cluster::responseHandler() : response sent", "\n");
 
 			delete _fd_to_request[_io.getFd(fd_index)];
 			_fd_to_request.erase(_io.getFd(fd_index));
@@ -115,14 +117,14 @@ namespace ws
 		_running = true;
 		while (_running)
 		{
-			// console.log("monitoring...");
+			// // console.log("monitoring...");
 			int ret = _io.monitor();
-			// console.log("monitoring done");
+			// // console.log("monitoring done");
 			if (ret == -1)
 				throw std::runtime_error("Cluster::run() : monitor() failed");
 			else if (ret == 0)
 			{
-				console.log("-- CONTINUE --", __COUNTER__, "\r");
+				// console.log("-- CONTINUE --", __COUNTER__, "\r");
 				continue;
 			}
 			for (size_t i = 0; i < _io.size(); i++)

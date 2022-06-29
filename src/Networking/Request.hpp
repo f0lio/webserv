@@ -36,21 +36,21 @@ namespace ws
 		std::string _query;
 		std::string _header;
 		std::string _body;
-		bool chunked = 0;
-		bool done = 0;
-		size_t _content_length = -1;
-		size_t readIndex = 0;
-		size_t timeout = 0;
-		size_t max_body_size = -1;
-		int _status = 0;
+		bool chunked;
+		bool done;
+		size_t _content_length;
+		size_t readIndex;
+		size_t timeout;
+		size_t max_body_size;
+		int _status;
 		char buffer[REQUEST_BUFFER_SIZE];
 		std::map<std::string, std::string> _headers; // capitalise with toUpperStr() before searching, header fields are case-insensitive
 		std::vector<VServer *> &_vservers;
 		const VServer *_vserver;
 		const struct Location *_loc;
 
-		const std::string _delim = CRLF;
-		const std::string _delim_end = CRLF CRLF;
+		const std::string _delim;
+		const std::string _delim_end;
 
 		int setLoc();
 		int parseHeader();

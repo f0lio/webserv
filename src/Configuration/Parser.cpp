@@ -283,15 +283,15 @@ namespace parser
     void Parser::print() const
     {
         // console.log("# Parser - Printing");
-        for (auto ctx : _contexts)
-        {
-            // console.log("## Simple Directives ##");
-            for (auto smp : ctx.getSimpleDirectives())
-                smp.print();
-            // console.log("\n## Block Directives ##");
-            for (auto dir : ctx.getBlockDirectives())
-                dir.print();
-        }
+        // for (auto ctx : _contexts)
+        // {
+        //     // console.log("## Simple Directives ##");
+        //     for (auto smp : ctx.getSimpleDirectives())
+        //         smp.print();
+        //     // console.log("\n## Block Directives ##");
+        //     for (auto dir : ctx.getBlockDirectives())
+        //         dir.print();
+        // }
     }
 
     std::vector<Context> const &Parser::getContexts() const

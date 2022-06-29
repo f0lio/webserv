@@ -12,7 +12,7 @@
 struct DirectiveRules
 {
     std::string name;
-    char* args_type; // NUMBER | STRING | ANY
+    std::string args_type; // NUMBER | STRING | ANY
     size_t min_args;
     size_t max_args;
     int occurrence;
@@ -151,6 +151,7 @@ static std::map<std::string, DirectiveRules> initDirectiveRules()
         .max_args = 32, // monte carlo
         .occurrence = 1,
         .is_required = false };
+
     directiveRulesMap["autoindex"] = (DirectiveRules){
         .name = "autoindex",
         .args_type = DIRECTIVE_ARG_TYPE_STRING,

@@ -33,11 +33,11 @@ namespace ws
         std::string _response;
         std::string _header;
         std::string _body;
-        bool        _bodyIsSet = false;
+        bool        _bodyIsSet;
         std::string _status;
         bool _isProcessed;
         bool _isSent;
-		size_t _sent = 0;
+		size_t _sent;
         const Configuration& _config; // (?)
 
         // private methods

@@ -37,31 +37,31 @@ public:
 #endif
     }
 
-	template <typename T>
-	void superlog(T t) 
-	{
-#ifdef CONSOLE_ON
-		std::cout << t ;
-#endif
-	}
+// 	template <typename T>
+// 	void superlog(T t) 
+// 	{
+// #ifdef CONSOLE_ON
+// 		std::cout << t ;
+// #endif
+// 	}
 
-	template<typename T, typename... Args>
-	void superlog(T t, Args... args)
-	{
-#ifdef CONSOLE_ON
-		std::cout << t ;
-#endif
+// 	template<typename T, typename... Args>
+// 	void superlog(T t, Args... args)
+// 	{
+// #ifdef CONSOLE_ON
+// 		std::cout << t ;
+// #endif
 
-		superlog(args...) ;
-	}
+// 		superlog(args...) ;
+// 	}
 	
-	template<typename T, typename... Args>
-	void log(T t, Args... args)
-	{
-#ifdef CONSOLE_ON
-		std::cout << t ;
-#endif
+// 	template<typename T, typename... Args>
+// 	void log(T t, Args... args)
+// 	{
+// #ifdef CONSOLE_ON
+// 		std::cout << t ;
+// #endif
 
-		superlog(args...) ;
-	}
+// 		superlog(args...) ;
+// 	}
 };

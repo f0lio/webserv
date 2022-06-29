@@ -50,7 +50,7 @@ namespace ws
 
 		int                         _client_fd;
 		struct sockaddr_in          _client_addr;
-		socklen_t                   _client_addr_len = sizeof(_client_addr);
+		socklen_t                   _client_addr_len;
 
 		// 
 		void initPollFds();
@@ -58,7 +58,7 @@ namespace ws
 		void requestHandler(int fd_index);
 		void responseHandler(int fd_index);
 		bool isServerFd(int fd);
-		VServer& getClientVServer(int client_fd);
+		// VServer& getClientVServer(int client_fd);
 	};
 
 } // namespace ws

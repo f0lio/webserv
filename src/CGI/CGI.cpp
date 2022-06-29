@@ -213,8 +213,6 @@ int CGI::exec(std::string cgiPath, ws::Request const& request)
 		}
 	}
 
-	console.log("Done!");
-
 	// unlink(tempOFile);
 
 	if (!request.getBody().empty()) // IsHasBody()

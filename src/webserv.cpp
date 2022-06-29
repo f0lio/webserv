@@ -2,7 +2,7 @@
 
 void print_usage()
 {
-    console.log("usage: ./webserv [config_file]");
+    std::cout << "usage: ./webserv [config_file]" << std::endl;
 }
 
 void handle_flags(int argc, const char* argv[])
@@ -39,10 +39,10 @@ void handle_flags(int argc, const char* argv[])
             console.err(e.what());
             exit(1);
         }
-        console.log(SERVER_NAME ": the configuration file ",
-            config_file, " syntax is ok\n");
-        console.log(SERVER_NAME ": the configuration file ",
-            config_file, " test is successful\n");
+        // console.log(SERVER_NAME ": the configuration file ",
+        //     config_file, " syntax is ok\n");
+        // console.log(SERVER_NAME ": the configuration file ",
+        //     config_file, " test is successful\n");
         exit(0);
     }
 }
@@ -61,7 +61,7 @@ int main(int argc, const char* argv[])
 
         ws::Cluster cluster(config);
         cluster.setup();
-        console.log("Loaded [" + config.getPath() + "]");
+        std::cout << "Loaded [" << config.getPath() << "]" << std::endl;
         cluster.run();
     }
     catch (const std::exception& e)

@@ -103,12 +103,12 @@ namespace parser
 
     void SimpleDirective::print() const
     {
-        std::cout << _key << "\t:";
-        for (auto arg : _args)
-        {
-            std::cout << " " << arg;
-        }
-        std::cout << std::endl;
+        // std::cout << _key << "\t:";
+        // for (auto arg : _args)
+        // {
+        //     std::cout << " " << arg;
+        // }
+        // std::cout << std::endl;
     }
 
     ///////////////////
@@ -159,14 +159,14 @@ namespace parser
 
     void BlockDirective::print() const
     {
-        std::cout << _key << ":";
-        for (auto arg : _args)
-        {
-            std::cout << " " << arg;
-        }
-        std::cout << std::endl;
-        for (auto smp : _directives_vec)
-            smp.print();
+        // std::cout << _key << ":";
+        // for (auto arg : _args)
+        // {
+        //     std::cout << " " << arg;
+        // }
+        // std::cout << std::endl;
+        // for (auto smp : _directives_vec)
+        //     smp.print();
     }
 
 } // namespace parser

@@ -133,7 +133,10 @@ namespace ws
         if (_config.find(key) != _config.end())
             return _config.find(key)->second;
         else
-            return t_vec_str();
+        {
+            static t_vec_str empty;
+            return empty;
+        }
     }
 
     std::map<std::string, struct Location> const& VServer::getLocations() const
@@ -157,7 +160,8 @@ namespace ws
         it = _config.find("name");
         if (it != _config.end())
             return it->second[0];
-        return "";
+        static std::string empty;
+        return empty;
     }
 
     bool VServer::hasName() const
@@ -179,7 +183,8 @@ namespace ws
     {
         if (_customErrorsPages.find(code) != _customErrorsPages.end())
             return _customErrorsPages.find(code)->second;
-        return std::string();
+        static std::string empty;
+        return empty;
     }
 
     void VServer::_checkConfig(parser::Context const& context) const
@@ -304,39 +309,39 @@ namespace ws
 
     void VServer::print() const
     {
-        std::cout << "## VServer ##" << std::endl;
+        // std::cout << "## VServer ##" << std::endl;
 
-        for (size_t i = 0; i < _listens.size(); i++)
-        {
-            std::cout << "Listen: " << _listens[i].host << ":" << _listens[i].port << std::endl;
-        }
+        // for (size_t i = 0; i < _listens.size(); i++)
+        // {
+        //     std::cout << "Listen: " << _listens[i].host << ":" << _listens[i].port << std::endl;
+        // }
 
-        for (auto const& it : _config)
-        {
-            std::cout << it.first << ": ";
-            for (auto const& it2 : it.second)
-            {
-                std::cout << it2 << " ";
-            }
-            std::cout << std::endl;
-        }
+        // for (auto const& it : _config)
+        // {
+        //     std::cout << it.first << ": ";
+        //     for (auto const& it2 : it.second)
+        //     {
+        //         std::cout << it2 << " ";
+        //     }
+        //     std::cout << std::endl;
+        // }
 
-        std::cout << "-> Locations" << std::endl;
-        for (auto const& it : _locations)
-        {
-            std::cout << it.first << ": ";
-            for (auto const& it2 : it.second.config)
-            {
-                std::cout << it2.first << ": ";
-                for (auto const& it3 : it2.second)
-                {
-                    std::cout << it3 << " ";
-                }
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
+        // std::cout << "-> Locations" << std::endl;
+        // for (auto const& it : _locations)
+        // {
+        //     std::cout << it.first << ": ";
+        //     for (auto const& it2 : it.second.config)
+        //     {
+        //         std::cout << it2.first << ": ";
+        //         for (auto const& it3 : it2.second)
+        //         {
+        //             std::cout << it3 << " ";
+        //         }
+        //         std::cout << std::endl;
+        //     }
+        //     std::cout << std::endl;
+        // }
+        // std::cout << std::endl;
     } // print
 
     // helper function(s?)

@@ -7,6 +7,8 @@ namespace ws
         : _request(request), _config(config), _isProcessed(false), _isSent(false),
         _vs(_request.getVServer()), _loc(_request.getLoc())
     {
+        _sent = 0;
+        _bodyIsSet = false;
     }
 
     Response::~Response()
@@ -18,7 +20,7 @@ namespace ws
         if (isProcessed())
             return;
 
-        console.log("Formating response...");
+        // console.log("Formating response...");
 
         const struct Location& loc = _request.getLoc();
         int status = this->precheck(this->_request);
@@ -35,12 +37,12 @@ namespace ws
          //     console.warn("Precheck passed");
          //     //open file and set body
          //     std::string filePath = loc.config.at("root")[0] + _request.getPath();
-         //     console.log("File path: " + filePath);
+        //  //     console.log("File path: " + filePath);
          //     std::ifstream file;
          //     file.open(filePath.c_str());
          //     if (file.is_open())
          //     {
-         //         console.log("File opened");
+        //  //         console.log("File opened");
          //         std::stringstream buffer;
          //         buffer << file.rdbuf();
          //         setBody(buffer.str());
@@ -57,7 +59,7 @@ namespace ws
         }
         else if (status == -1) // autoindex is on
         {
-            console.log("Autoindexing...");
+            // console.log("Autoindexing...");
             setBody(::autoIndex(loc.config.at("root")[0], _request.getPath()));
             setResponse(200, "text/html");
 
@@ -130,7 +132,7 @@ namespace ws
             int status = resolveIndexFile(loc, path, fileName);
             if (status != 404)
             {
-                console.log("Found index file: " + fileName);
+                // console.log("Found index file: " + fileName);
                 return status;
             }
         }
@@ -172,13 +174,13 @@ namespace ws
             path = fileName;
         }
 
-        console.log("Opening file: " + path);
+        // console.log("Opening file: " + path);
 
         std::ifstream file;
         file.open(path.c_str(), std::ios::in | std::ios::binary);
         if (file.is_open())
         {
-            console.log("File opened");
+            // console.log("File opened");
             std::stringstream ss;
             ss << file.rdbuf();
             setBody(ss.str());
@@ -279,7 +281,7 @@ namespace ws
             if (is_regular_file(path))
             {
                 if (remove(path.c_str()) == 0)
-                    setStatus(204), console.log("File deleted");
+                    setStatus(204);
                 else
                     setErrorResponse(500), console.err("File not deleted");
             }
@@ -297,7 +299,7 @@ namespace ws
 
     void Response::cgiHandler()
     {
-        console.log("CGI is enabled: binary is: " + _loc.config.at("cgi")[1]);
+        // console.log("CGI is enabled: binary is: " + _loc.config.at("cgi")[1]);
         CGI cgi(_loc.config.at("cgi")[1], _loc.config.at("root")[0]);
 
         int status = cgi.run(_request);
@@ -332,9 +334,9 @@ namespace ws
         while (ret != -1 && !_isSent)
         {
             _sent += ret;
-            console.log("Response sent: ", convertSize(ret) , " - Total sent: " , convertSize(_sent) , " -  left: " , convertSize(_response.size() - _sent));
+            // console.log("Response sent: ", convertSize(ret) , " - Total sent: " , convertSize(_sent) , " -  left: " , convertSize(_response.size() - _sent));
             ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
-            console.log("\n\n# ", ret, " #\n\n");
+            // console.log("\n\n# ", ret, " #\n\n");
             _isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
         }
 		if (_isSent)
@@ -450,7 +452,7 @@ namespace ws
         if (_bodyIsSet)
             _response += _body + CRLF;
         _isProcessed = true;
-        console.log("Response formated.");
+        // console.log("Response formated.");
     }
 
     int Response::setErrorResponse(int status)

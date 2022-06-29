@@ -3,8 +3,16 @@
 namespace ws
 {
 	Request::Request(int client_fd, std::vector<VServer *> &vservers)
-		: _client_fd(client_fd), _vservers(vservers)
+		: _client_fd(client_fd), _vservers(vservers),
+		_delim(CRLF), _delim_end(CRLF CRLF)
 	{
+		chunked = 0;
+		done = 0;
+		_content_length = -1;
+		readIndex = 0;
+		timeout = 0;
+		max_body_size = -1;
+		_status = 0;
 	}
 
 	Request::~Request()
@@ -26,7 +34,8 @@ namespace ws
 		std::string uppedKey = toUpperStr(key);
 		if (_headers.find(uppedKey) != _headers.end())
 			return _headers.at(uppedKey);
-		return NULL; // this SEGVs in string implicit C-tor // open for ideas
+		static std::string empty;
+		return empty;
 	}
 
 	bool Request::hasHeaderField(std::string const &key) const
@@ -291,7 +300,7 @@ namespace ws
 
 		if (it != _loc->config.end())
 		{
-			if (std::atoi(it->second[0].c_str()) < _content_length)
+			if (_method == "POST" && std::atoll(it->second[0].c_str()) < _content_length)
 			{
 				console.err("Invalid header: Content-Length too large");
 				return 413; // Request Entity Too Large
@@ -483,15 +492,15 @@ namespace ws
 	int Request::setLoc() // TODO: WIP: implement functionality(?) in request
 	{
 		// print location config
-		console.log("Location config: ");
-		console.log("\tloc: " + _loc->path);
-		for (auto const &it : _loc->config)
-		{
-			console.log("\t", it.first + ":");
-			for (auto const &it2 : it.second)
-				console.log(" \"", it2, "\"");
-			console.log("");
-		}
+		// console.log("Location config: ");
+		// console.log("\tloc: " + _loc->path);
+		// for (auto const &it : _loc->config)
+		// {
+		// 	console.log("\t", it.first + ":");
+		// 	for (auto const &it2 : it.second)
+		// 		console.log(" \"", it2, "\"");
+		// 	console.log("");
+		// }
 		return 0;
 	}
 
