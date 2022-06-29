@@ -297,7 +297,7 @@ namespace ws
 
     void Response::cgiHandler()
     {
-        console.log("CGI is enabled");
+        console.log("CGI is enabled: binary is: " + _loc.config.at("cgi")[1]);
         CGI cgi(_loc.config.at("cgi")[1], _loc.config.at("root")[0]);
 
         int status = cgi.run(_request);
@@ -309,40 +309,14 @@ namespace ws
             {
                 std::stringstream ss;
                 ss << file.rdbuf();
-                std::string output = ss.str();
-                std::cout << "Output: " << showWhiteSpaces(output) << std::endl;
-                if (output.find("\r\n\r\n") != std::string::npos)
-                {
-                    console.log("has");
-                    _header = output.substr(0, output.find("\r\n\r\n"));
-                    _body = output.substr(output.find("\r\n\r\n") + 4);
-                }
-                else
-                {
-                    console.log("haaaalalkashalkdhsads");
-                    _header = output;
-                    _body = "";
-                }
+                _body = ss.str();
+				std::cout << "Output: \n" << showWhiteSpaces(_body) << std::endl;
                 file.close();
                 // unlink(cgi.getOutputFile().c_str());
                 setResponse(200, "text/html");
             }
             else
                 setErrorResponse(500), console.err("CGI output file not found");
-            //set body
-            // std::string output = ss.str();
-            // console.log("output: ", output, "\n");
-
-            // if (output.find("\r\n\r\n") != std::string::npos)
-            // {
-            //     _header = output.substr(0, output.find("\r\n\r\n"));
-            //     _body = output.substr(output.find("\r\n\r\n") + 4);
-            //     console.log("_body: ", _body);
-            // }
-            // else
-            //     setBody(output);
-
-            // setResponse(status, "text/html");
         }
         else
             setErrorResponse(status);
@@ -363,6 +337,8 @@ namespace ws
             console.log("\n\n# ", ret, " #\n\n");
             _isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
         }
+		if (_isSent)
+			console.warn("Response sent");
         _isProcessed = true;
     }
 

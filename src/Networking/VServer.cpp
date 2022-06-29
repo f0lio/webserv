@@ -19,7 +19,6 @@ namespace ws
             {
                 if (dirs[i].getKey() == "root")
                 {
-                    console.log("BEFORE: ", dirs[i].getArgs()[0]);
                     if (dirs[i].getArgs()[0] == "")
                         PASS;
                     else if (dirs[i].getArgs()[0][dirs[i].getArgs()[0].size() - 1] != '/')
