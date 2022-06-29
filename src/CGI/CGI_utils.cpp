@@ -11,25 +11,25 @@
 // 	return 1;
 // }
 
-char**	mapToArray(std::map<std::string, std::string> &strings)
+void	mapToArray(std::map<std::string, std::string> &strings)
 {
-	char	**array = new char*[strings.size()];
+	// char	**array = new char*[strings.size()];
 	int		i = 0;
 
 	for (std::map<std::string, std::string>::iterator it = strings.begin(); it != strings.end(); ++i, ++it)
-	{
-		array[i] = new char[it->second.size() + it->first.size() + 2];
-		strcpy(array[i], (it->first + "=" + it->second).c_str());
-		std::cout << array[i] << std::endl;
-	}
-	return array;
+		setenv(it->first.c_str(), it->second.c_str(), 1);
+	// return array;
 }
 
-char**	paths(std::string path)
+char**	paths(std::string path, std::string script)
 {
-	char	**array = new char*[2];
+	char	**array = new char*[3];
 	array[0] = new char[path.size() + 1];
+	array[1] = new char[script.size() + 1];
 	strcpy(array[0], path.c_str());
-	array[1] = NULL;
+	
+	strcpy(array[1], script.c_str());
+	
+	array[2] = NULL;
 	return array;
 } 

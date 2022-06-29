@@ -1,8 +1,9 @@
-import cgi, time
+import cgi, time, os
 
 def main():
 	form = cgi.FieldStorage()
-	print("Content-type: text/html\r\n\r")
+	print("<p>Hello, world!</p>")
+	print("<p>The time is: " + time.ctime() + "</p>")
 	print("<html><body>")
 	if not "name" in form:
 		print("<h1>Hello!</h1>")

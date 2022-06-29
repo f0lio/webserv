@@ -22,10 +22,16 @@ std::string const& CGI::getOutputFile() const
 int CGI::run(ws::Request const& request) // https://www.rfc-editor.org/rfc/rfc3875.html#section-4
 {
 	if (!is_regular_file(binPath))
+	{
+		console.err("CGI::run: binPath " + binPath + " is not a file");
 		return 404;
+	}
 
 	if (!is_executable_file(binPath))
+	{
+		console.err("CGI::run: binPath " + binPath + " is not executable");
 		return 403;
+	}
 
 	std::string cgiPath = request.getPath();
 
@@ -34,7 +40,10 @@ int CGI::run(ws::Request const& request) // https://www.rfc-editor.org/rfc/rfc38
 	std::cout << "pointPos: " << pointPos << std::endl;
 
 	if (!pointPos || pointPos == std::string::npos)
+	{
+		console.err("CGI::run: cgiPath " + cgiPath + " has no extension");
 		return 404;
+	}
 
 	{
 		std::string ext = cgiPath.substr(pointPos);
@@ -50,10 +59,16 @@ int CGI::run(ws::Request const& request) // https://www.rfc-editor.org/rfc/rfc38
 	cgiPath = root + "/" + cgiPath;
 
 	if (!is_regular_file(cgiPath))
+	{
+		console.err("CGI::run: cgiPath " + cgiPath + " is not a file");
 		return 404;
+	}
 
 	if (!is_readable_file(cgiPath))
+	{
+		console.err("CGI::run: cgiPath " + cgiPath + " is not readable");
 		return 403;
+	}
 
 	setEnvp(cgiPath, request);
 
@@ -99,18 +114,6 @@ void CGI::setEnvp(std::string const& cgiPath, ws::Request const& request)
 
 	std::cout << "request.getPath(): " << request.getPath() << std::endl;
 
-	// if (request.getPath() != cgiPath)
-	// {
-	// 	console.log("[cgiPath]", cgiPath);
-	// 	envp["PATH_INFO"] = request.getPath().substr(cgiPath.size());
-	// 	envp["PATH_TRANSLATED"] = root + envp["PATH_INFO"];
-	// }
-	// else
-	// {
-	// 	envp["PATH_INFO"] = "";
-	// 	envp["PATH_TRANSLATED"] = root + envp["PATH_INFO"];
-	// }
-
 	envp["QUERY_STRING"] = request.getQuery();
 	envp["REMOTE_HOST"] = "";
 	envp["REQUEST_METHOD"] = request.getMethod();
@@ -132,16 +135,20 @@ int CGI::exec(std::string cgiPath, ws::Request const& request)
 	std::cout << "tempOFile: " << tempOFile << std::endl;
 
 	if (fdo == -1)
+	{
+		console.err("CGI::exec: mkstemp failed");
 		return 500; // internal server error
+	}
 
+	char tempIfile[] = "/tmp/inputFile_XXXXXX";
 	if (!request.getBody().empty()) // IsHasBody()
 	{
-		char tempIfile[] = "/tmp/inputFile_XXXXXX";
 
 		fdi = mkstemp(tempIfile);
 
 		if (fdi == -1)
 		{
+			console.err("CGI::exec: mkstemp failed");
 			close(fdo);
 			return 500; // internal server error
 		}
@@ -155,47 +162,63 @@ int CGI::exec(std::string cgiPath, ws::Request const& request)
 	pid_t pid = fork();
 	if (!pid)
 	{
+		std::cout << "request.getBody(): " << request.getBody() << std::endl;
 		dup2(fdo, STDOUT_FILENO);
 		dup2(fdi, STDIN_FILENO);
+		char **pth = paths(binPath, cgiPath);
+
+		mapToArray(envp);
+
+		// std::cout << "pth[0]: [" << pth[0] << "]" << std::endl;
+		// std::cout << "pth[1]: [" << pth[1] << "]" << std::endl;
 		// close(fdo);
 		// close(fdi);
 
-		int ret = execle(binPath.c_str(), binPath.c_str(), cgiPath.c_str(), NULL, mapToArray(envp));
-		exit(1); // execve failed
+		int ret = execvp(pth[0], pth);
+		{
+			perror("CGI::exec: execve failed");
+			// console.err("CGI::exec: execve failed");
+		}
+		exit(2); // execve failed
 	}
 
 	close(fdo);
 	close(fdi);
 
-	console.log("@@@@@ HERE @@@@@");
-	{ { { { { { { { {if (pid < 0) return 1;}}}}}}}}}
-	// wait 5s for child process to finish
-	console.log("@@@@@ waiting for child process to finish");
+	if (pid < 0)
+		return 1;
+
 	int status;
-
-	waitpid(pid, &status, 0);
-
-	if (WIFEXITED(status))
+	time_t start = time(NULL);
+	while (time(NULL) - start < 3)
 	{
-		console.log("@@@@@ WIFEXITED(status)");
+		pid_t ret = waitpid(pid, &status, WNOHANG);
+		if (ret == pid)
+			break;
+		usleep(100);
 	}
-	else if (WIFSIGNALED(status))
+
+	if (!WIFEXITED(status))
 	{
-		console.log("@@@@@ WIFSIGNALED(status)");
+		console.err("CGI::exec: child process did not exit");
+		return 408; // internal server error
 	}
 	else
 	{
-		console.log("@@@@@ WIFSTOPPED(status)");
+		int ret = WEXITSTATUS(status);
+		if (ret != 0)
+		{
+			console.err("CGI::exec: child process exited with status " + SSTR(ret));
+			return 500; // internal server error
+		}
 	}
 
 	console.log("Done!");
 
-	// get timestamp from now
-	
-
-	//check for response headers 
 	// unlink(tempOFile);
-	// unlink(tempIfile);
+
+	if (!request.getBody().empty()) // IsHasBody()
+		unlink(tempIfile);
 
 	return 200;
 }
