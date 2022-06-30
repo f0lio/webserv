@@ -166,8 +166,8 @@ namespace ws
 			_query = requestTarget.substr(queryStart + 1);
 			requestTarget = requestTarget.substr(0, queryStart);
 		}
-		std::cout << "requestLine: " << requestLine << std::endl;
-		std::cout << "requestTarget: " << requestTarget << std::endl;
+		// std::cout << "requestLine: " << requestLine << std::endl;
+		// std::cout << "requestTarget: " << requestTarget << std::endl;
 		return 0;
 	}
 
@@ -391,7 +391,7 @@ namespace ws
 
 		size_t chunk_length = strtol(_body.c_str() + cl_start, NULL, 16);
 
-		std::cout << "chunk_length: " << chunk_length << " - cl_start: " << cl_start << " - cl_end: " << cl_end << " - _body.size(): " << _body.size() << std::endl;
+		// std::cout << "chunk_length: " << chunk_length << " - cl_start: " << cl_start << " - cl_end: " << cl_end << " - _body.size(): " << _body.size() << std::endl;
 
 		if (chunk_length == 0) // trailer header not implemented see: https://www.rfc-editor.org/rfc/rfc9112#name-chunked-trailer-section
 		{
@@ -403,7 +403,7 @@ namespace ws
 			else
 			{
 				_body.erase(cl_start);
-				std::cout << "_content_length: " << _content_length << std::endl;
+				// std::cout << "_content_length: " << _content_length << std::endl;
 				_headers["CONTENT-LENGTH"] = SSTR(_content_length);
 				return OK_200; // end of body
 			}

@@ -37,7 +37,7 @@ int CGI::run(ws::Request const& request) // https://www.rfc-editor.org/rfc/rfc38
 
 	size_t pointPos = cgiPath.find_last_of('.');
 
-	std::cout << "pointPos: " << pointPos << std::endl;
+	// std::cout << "pointPos: " << pointPos << std::endl;
 
 	if (!pointPos || pointPos == std::string::npos)
 	{
@@ -47,13 +47,8 @@ int CGI::run(ws::Request const& request) // https://www.rfc-editor.org/rfc/rfc38
 
 	{
 		std::string ext = cgiPath.substr(pointPos);
-		std::cout << "ext: " << ext << std::endl;
-		// if (ext.compare(".php") != 0)
-		// {
-		// 	std::cout << "CGI: only .php files are supported" << std::endl;
-		// 	return 404;
-		// }
-		std::cout << "222ext: " << ext << std::endl;
+		if (ext.compare(".py") != 0)
+			return 404;
 	}
 
 	cgiPath = root + "/" + cgiPath;
@@ -112,7 +107,7 @@ void CGI::setEnvp(std::string const& cgiPath, ws::Request const& request)
 	envp["GATEWAY_INTERFACE"] = "CGI/1.1";
 	envp["SERVER_PROTOCOL"] = "HTTP/1.1";
 
-	std::cout << "request.getPath(): " << request.getPath() << std::endl;
+	// std::cout << "request.getPath(): " << request.getPath() << std::endl;
 
 	envp["QUERY_STRING"] = request.getQuery();
 	envp["REMOTE_HOST"] = "";
@@ -132,7 +127,7 @@ int CGI::exec(std::string cgiPath, ws::Request const& request)
 
 	outputFile.assign(tempOFile);
 
-	std::cout << "tempOFile: " << tempOFile << std::endl;
+	// std::cout << "tempOFile: " << tempOFile << std::endl;
 
 	if (fdo == -1)
 	{
@@ -162,15 +157,15 @@ int CGI::exec(std::string cgiPath, ws::Request const& request)
 	pid_t pid = fork();
 	if (!pid)
 	{
-		std::cout << "request.getBody(): " << request.getBody() << std::endl;
+		// std::cout << "request.getBody(): " << request.getBody() << std::endl;
 		dup2(fdo, STDOUT_FILENO);
 		dup2(fdi, STDIN_FILENO);
 		char **pth = paths(binPath, cgiPath);
 
 		mapToArray(envp);
 
-		// std::cout << "pth[0]: [" << pth[0] << "]" << std::endl;
-		// std::cout << "pth[1]: [" << pth[1] << "]" << std::endl;
+		// // std::cout << "pth[0]: [" << pth[0] << "]" << std::endl;
+		// // std::cout << "pth[1]: [" << pth[1] << "]" << std::endl;
 		// close(fdo);
 		// close(fdi);
 

@@ -3,7 +3,7 @@
 
 NAME    = webserv
 CC		= clang++
-FLAGS   =  -std=c++98 -D DEBUG -D CONSOLE_ON
+FLAGS   =  -std=c++98 -D DEBUG
 #-Wall -Werror -Wextra
 INCLUDES= includes 
 
@@ -69,13 +69,13 @@ clean:
 fclean: clean
 	@rm -rf $(NAME)
 
-re:
+re: fclean
 	@echo "Re-building..."
-	@make fclean
 	@make
 
 run: $(NAME)
 	@./$(NAME) $(CONFIG_FILE)
+
 
 TRACE=network
 strace: $(NAME)

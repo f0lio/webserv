@@ -97,7 +97,7 @@ namespace ws
 
         if (_request.getStatus() != OK_200)
         {
-            std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
+            // std::cout << "_request.getStatus(): " << _request.getStatus() << std::endl;
             return _request.getStatus();
         }
 
@@ -115,12 +115,12 @@ namespace ws
         const std::string& root = loc.config.at("root").at(0);
         const std::string path = root.substr(0, root.find_last_not_of('/') + 1) + req.getPath(); // root does not always ends with '/'
 
-        std::cout << "path: " << path << std::endl;
-        std::cout << "root: " << root << std::endl;
+        // std::cout << "path: " << path << std::endl;
+        // std::cout << "root: " << root << std::endl;
 
         if (file_exists(path) == false)
         {
-            std::cout << "0 - File not found" << std::endl;
+            // std::cout << "0 - File not found" << std::endl;
             return 404;
         }
         else if (is_regular_file(path))
@@ -143,7 +143,7 @@ namespace ws
                 return -1; // autoindex is on
             return 403; // forbidden
         }
-        std::cout << "2 - File not found" << std::endl;
+        // std::cout << "2 - File not found" << std::endl;
         return 404; // not found
     }
 
@@ -164,9 +164,9 @@ namespace ws
             return;
         }
 
-        std::cout << "root: " << loc.config.at("root")[0] << std::endl;
-        std::cout << "path: " << path << std::endl;
-        std::cout << "_request.getPath(): " << _request.getPath() << std::endl;
+        // std::cout << "root: " << loc.config.at("root")[0] << std::endl;
+        // std::cout << "path: " << path << std::endl;
+        // std::cout << "_request.getPath(): " << _request.getPath() << std::endl;
 
         if (!is_regular_file(path))
         {
@@ -246,9 +246,9 @@ namespace ws
                 close(fd);
                 unlink(tmp);
             }
-            else
+            // else
                 // maybe doesnt give random string then
-                std::cout << "tmp was not created: " << tmp << std::endl;
+                // std::cout << "tmp was not created: " << tmp << std::endl;
         }
 
         std::ofstream file;
@@ -312,7 +312,7 @@ namespace ws
                 std::stringstream ss;
                 ss << file.rdbuf();
                 _body = ss.str();
-				std::cout << "Output: \n" << showWhiteSpaces(_body) << std::endl;
+				// std::cout << "Output: \n" << showWhiteSpaces(_body) << std::endl;
                 file.close();
                 // unlink(cgi.getOutputFile().c_str());
                 setResponse(200, "text/html");
@@ -532,7 +532,7 @@ namespace ws
                 indexPath = path + "/" + *it;
             if (access(indexPath.c_str(), F_OK) == -1)
             {
-                std::cout << "=> INDEX: [" << indexPath << "] not found" << std::endl;
+                // std::cout << "=> INDEX: [" << indexPath << "] not found" << std::endl;
                 continue;
             }
             if (access(indexPath.c_str(), R_OK) == -1)
@@ -540,7 +540,7 @@ namespace ws
                 console.warn("[" + indexPath + "] is not readable.");
                 return 403; // forbidden
             }
-            std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
+            // std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
             fileName.assign(indexPath);
             return 0; // index found
         }
@@ -565,7 +565,7 @@ namespace ws
                 indexPath = path + "/" + *it;
             if (access(indexPath.c_str(), F_OK) == -1)
             {
-                std::cout << "=> INDEX: [" << indexPath << "] not found" << std::endl;
+                // std::cout << "=> INDEX: [" << indexPath << "] not found" << std::endl;
                 continue;
             }
             if (access(indexPath.c_str(), R_OK) == -1)
@@ -573,7 +573,7 @@ namespace ws
                 console.warn("[" + indexPath + "] is not readable.");
                 return 403; // forbidden
             }
-            std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
+            // std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
             return 0; // index found
         }
         return 404; // index not found

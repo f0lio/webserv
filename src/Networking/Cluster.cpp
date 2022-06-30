@@ -9,6 +9,13 @@ namespace ws
 
 	Cluster::~Cluster()
 	{
+		std::map<int, Request*>::iterator it;
+		for (it = _fd_to_request.begin(); it != _fd_to_request.end(); ++it)
+			delete it->second;
+
+		std::map<int, Response*>::iterator it2;
+		for (it2 = _fd_to_response.begin(); it2 != _fd_to_response.end(); ++it2)
+			delete it2->second;
 	}
 
 	/// helper functions ///
