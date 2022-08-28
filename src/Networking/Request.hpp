@@ -7,23 +7,23 @@ namespace ws
 	class Request
 	{
 	public:
-		Request(int client_fd, std::vector<VServer *> &vservers);
+		Request(int client_fd, std::vector<VServer*>& vservers);
 		~Request();
 
-		std::string const &getHeader() const;
-		std::map<std::string, std::string> const &getHeaders() const;
-		std::string const &getHeaderField(std::string const &key) const;
-		bool hasHeaderField(std::string const &key) const;
-		std::string const &getBody() const;
-		std::string const &getMethod() const;
+		std::string const& getHeader() const;
+		std::map<std::string, std::string> const& getHeaders() const;
+		std::string const& getHeaderField(std::string const& key) const;
+		bool hasHeaderField(std::string const& key) const;
+		std::string const& getBody() const;
+		std::string const& getMethod() const;
 		std::string const getPath() const;
-		std::string const &getQuery() const;
-		VServer const &getVServer() const;
-		struct Location const &getLoc() const;
-		int const &getStatus() const;
-		int const &getClientFd() const;
+		std::string const& getQuery() const;
+		VServer const& getVServer() const;
+		struct Location const& getLoc() const;
+		int const& getStatus() const;
+		int const& getClientFd() const;
 
-		std::vector<VServer *> &getVServers() const;
+		std::vector<VServer*>& getVServers() const;
 
 		void process();
 		bool isComplete() const;
@@ -39,15 +39,16 @@ namespace ws
 		bool chunked;
 		bool done;
 		size_t _content_length;
+		bool _has_content_length;
 		size_t readIndex;
 		size_t timeout;
 		size_t max_body_size;
 		int _status;
 		char buffer[REQUEST_BUFFER_SIZE];
 		std::map<std::string, std::string> _headers; // capitalise with toUpperStr() before searching, header fields are case-insensitive
-		std::vector<VServer *> &_vservers;
-		const VServer *_vserver;
-		const struct Location *_loc;
+		std::vector<VServer*>& _vservers;
+		const VServer* _vserver;
+		const struct Location* _loc;
 
 		const std::string _delim;
 		const std::string _delim_end;
@@ -60,7 +61,7 @@ namespace ws
 		int parseBody();
 		int chunkedBody();
 
-		const VServer *resolveVServer() const;
+		const VServer* resolveVServer() const;
 	};
 
 } // namespace ws

@@ -13,7 +13,7 @@ namespace ws
     class Response
     {
     public:
-        Response(Request const& request, const Configuration& config);
+        Response(Request const& request);
         ~Response();
 
         std::string const& getBody() const;
@@ -28,8 +28,8 @@ namespace ws
 
     private:
         Request const& _request;
-        const VServer &_vs;
-        const Location &_loc;
+        const VServer& _vs;
+        const Location& _loc;
         std::string _response;
         std::string _header;
         std::string _body;
@@ -37,8 +37,7 @@ namespace ws
         std::string _status;
         bool _isProcessed;
         bool _isSent;
-		size_t _sent;
-        const Configuration& _config; // (?)
+        size_t _sent;
 
         // private methods
         int precheck(Request const& request); // to be moved to request class
@@ -64,14 +63,14 @@ namespace ws
         void deleteRequestHandler();
         void headRequestHandler();
         void cgiHandler();
-        
+
         bool isAutoIndexEnabled() const;
-        const char *resolveContentType(std::string const & file) const;
+        const char* resolveContentType(std::string const& file) const;
         //tmp
         int resolveIndexFile(
             struct Location const& loc,
             std::string const& path,
-            std::string &fileName);
+            std::string& fileName);
 
         int resolveIndexFile(
             struct Location const& loc,

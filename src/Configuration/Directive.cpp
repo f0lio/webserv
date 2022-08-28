@@ -53,7 +53,7 @@ namespace parser
 
         if (_args.size() < directiveRulesMap.at(_key).min_args)
             throw std::runtime_error("Directive " + _key + " has too few arguments");
-            
+
         if (_args.size() > directiveRulesMap.at(_key).max_args)
             throw std::runtime_error("Directive " + _key + " has too many arguments");
 
@@ -78,27 +78,26 @@ namespace parser
             {
                 if (*it != "on" && *it != "off")
                     throw std::runtime_error(
-                        "Invalid autoindex argument \""+ *it 
+                        "Invalid autoindex argument \"" + *it
                         + "\". Must be \"on\" or \"off\"");
             }
         }
     }
-    
+
     void SimpleDirective::check_occurrence(
-		std::map<std::string, int>& loaded_directives, std::string const& key) const
-	{
-		loaded_directives[key]++;
+        std::map<std::string, int>& loaded_directives, std::string const& key) const
+    {
+        loaded_directives[key]++;
 
-		int occurrence = loaded_directives[key];
-		int occurrence_rule = directiveRulesMap.at(key).occurrence;
+        int occurrence_rule = directiveRulesMap.at(key).occurrence;
 
-		if (occurrence_rule != -1 && loaded_directives[key] > occurrence_rule)
-		{
-			throw std::runtime_error(
-				"Directive \"" + key + "\" should occur "
-				+ SSTR(occurrence_rule) + (occurrence_rule == 1 ? " time max" : " times max"));
-		}
-	}
+        if (occurrence_rule != -1 && loaded_directives[key] > occurrence_rule)
+        {
+            throw std::runtime_error(
+                "Directive \"" + key + "\" should occur "
+                + SSTR(occurrence_rule) + (occurrence_rule == 1 ? " time max" : " times max"));
+        }
+    }
 
 
     void SimpleDirective::print() const
@@ -119,6 +118,8 @@ namespace parser
 
     BlockDirective::BlockDirective(const std::string& key, const std::vector<std::string>& _params)
     {
+        (void)key;
+        (void)_params;
     }
 
     BlockDirective::~BlockDirective()
@@ -134,7 +135,7 @@ namespace parser
     {
         return _args;
     }
-    
+
     void BlockDirective::setKey(const std::string& key)
     {
         _key = key;

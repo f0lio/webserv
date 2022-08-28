@@ -2,9 +2,9 @@
 .PHONEY : all clean fclean re run strace setup-dirs with-kqueue
 
 NAME    = webserv
-CC		= clang++
-FLAGS   =  -std=c++98 -D DEBUG
-#-Wall -Werror -Wextra
+CC		= g++ -std=c++98
+FLAGS   = -Wall -Werror -Wextra
+
 INCLUDES= includes 
 
 UTILS	= helpers.cpp mimeTypes.cpp
@@ -82,6 +82,8 @@ strace: $(NAME)
 	@mkdir -p .strace/$(shell date +"%d-%m-%y")
 	@strace -o .strace/$(shell date +"%d-%m-%y")/$(shell date +"%H:%M:%S").log \
 	-f -e trace=${TRACE} ./$(NAME) $(CONFIG_FILE) \
+
+setup: setup-dirs all
 
 setup-dirs:
 #Lazy shells forced me to be explicit at dirs' names

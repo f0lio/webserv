@@ -33,7 +33,7 @@ const char* mimeTypes::getExtension(const char* type)
 {
 	const char* ext = NULL;
 	// can't use binary search because the mimetypes are not sorted
-	for (int i = 0; i < sizeof(types) / sizeof(*types); i++)
+	for (unsigned long i = 0; i < sizeof(types) / sizeof(*types); i++)
 	{
 		if (strcmpi(type, types[i].mimeType) == 0)
 		{

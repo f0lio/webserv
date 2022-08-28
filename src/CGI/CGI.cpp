@@ -157,24 +157,17 @@ int CGI::exec(std::string cgiPath, ws::Request const& request)
 	pid_t pid = fork();
 	if (!pid)
 	{
-		// std::cout << "request.getBody(): " << request.getBody() << std::endl;
 		dup2(fdo, STDOUT_FILENO);
 		dup2(fdi, STDIN_FILENO);
-		char **pth = paths(binPath, cgiPath);
+		char** pth = paths(binPath, cgiPath);
 
 		mapToArray(envp);
 
-		// // std::cout << "pth[0]: [" << pth[0] << "]" << std::endl;
-		// // std::cout << "pth[1]: [" << pth[1] << "]" << std::endl;
-		// close(fdo);
-		// close(fdi);
-
 		int ret = execvp(pth[0], pth);
-		{
-			perror("CGI::exec: execve failed");
-			// console.err("CGI::exec: execve failed");
-		}
-		exit(2); // execve failed
+		console.err("CGI::exec: execve failed");
+		perror("CGI::exec: execve failed");
+		exit(ret);
+		// exit(2);
 	}
 
 	close(fdo);

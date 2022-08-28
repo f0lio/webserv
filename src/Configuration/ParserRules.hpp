@@ -26,6 +26,9 @@ enum Occurrence
     OCCURENCE_OPTIONAL = 0,
 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 static const char* _context_identifiers[] = {
     "server" };
 
@@ -58,6 +61,7 @@ static const char* _location_identifiers[] = {
     "upload_max_size", // could wait.
 };
 
+#pragma GCC diagnostic pop
 
 static std::map<std::string, DirectiveRules> initDirectiveRules()
 {

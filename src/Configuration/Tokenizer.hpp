@@ -26,14 +26,20 @@ namespace parser
         END_OF_FILE
     };
 
-    static const char *TokenTypeStrings[] = {
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+    static const char* TokenTypeStrings[] = {
         "IDENTIFIER",
         "PARAM_LITERAL",
         "BLOCK_OPEN",
         "BLOCK_CLOSE",
         "SDIRECTIVE_END",
         "COMMENT",
-        "END_OF_FILE"};
+        "END_OF_FILE" };
+
+#pragma GCC diagnostic pop
 
     class Token
     {
@@ -56,7 +62,7 @@ namespace parser
         friend class Parser;
 
     public:
-        Tokenizer(std::istream &stream);
+        Tokenizer(std::istream& stream);
         ~Tokenizer();
 
         void print() const;
@@ -69,7 +75,7 @@ namespace parser
         Token peek() const;
 
         std::vector<Token> _tokens;
-        std::istream &_stream;
+        std::istream& _stream;
         size_t _line_number;
         size_t _index;
     };

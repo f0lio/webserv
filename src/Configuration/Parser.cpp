@@ -3,7 +3,7 @@
 
 namespace parser
 {
-    Parser::Parser(Tokenizer &tokenizer) : _tokenizer(tokenizer)
+    Parser::Parser(Tokenizer& tokenizer) : _tokenizer(tokenizer)
     {
         initDirectiveRules();
         _tokenizer.tokenize();
@@ -35,7 +35,7 @@ namespace parser
         }
     }
 
-    void Parser::parseContext(size_t &contextIndex)
+    void Parser::parseContext(size_t& contextIndex)
     {
         Context ctx;
 
@@ -69,7 +69,7 @@ namespace parser
         _contexts.push_back(ctx);
     }
 
-    SimpleDirective Parser::parseSimpleDirective(Context &ctx)
+    SimpleDirective Parser::parseSimpleDirective(Context& ctx)
     {
         SimpleDirective dir;
 
@@ -85,10 +85,8 @@ namespace parser
                 dir._args.push_back(_currentToken._value);
 
             else
-            {
                 throw std::runtime_error(
                     err_directive_not_closed(ctx.getName()));
-            }
         }
 
         if (_currentToken._type != SDIRECTIVE_END)
@@ -99,7 +97,7 @@ namespace parser
     }
 
     // only location directives, and no nested blocks
-    BlockDirective Parser::parseBlockDirective(Context &ctx)
+    BlockDirective Parser::parseBlockDirective(Context& ctx)
     {
         BlockDirective dir;
 
@@ -136,7 +134,7 @@ namespace parser
         return dir;
     }
 
-    bool Parser::isSimpleIdentifier(const std::string &identifier) const
+    bool Parser::isSimpleIdentifier(const std::string& identifier) const
     {
         if (identifier.empty())
             return false;
@@ -149,7 +147,7 @@ namespace parser
         return false;
     }
 
-    bool Parser::isBlockIdentifier(const std::string &identifier) const
+    bool Parser::isBlockIdentifier(const std::string& identifier) const
     {
         if (identifier.empty())
             return false;
@@ -161,7 +159,7 @@ namespace parser
         return false;
     }
 
-    bool Parser::isContextIdentifier(const std::string &identifier) const
+    bool Parser::isContextIdentifier(const std::string& identifier) const
     {
         if (identifier.empty())
             return false;
@@ -174,7 +172,7 @@ namespace parser
         return false;
     }
 
-    void Parser::checkArgs(const std::string &key, const std::vector<std::string> &args) const
+    void Parser::checkArgs(const std::string& key, const std::vector<std::string>& args) const
     {
         // 
         if (directiveRulesMap.find(key) == directiveRulesMap.end())
@@ -184,7 +182,7 @@ namespace parser
         //         err_directive_invalid_args_count(key));
         std::string type = directiveRulesMap.at(key).args_type;
         for (std::vector<std::string>::const_iterator it = args.begin();
-                it != args.end(); ++it)
+            it != args.end(); ++it)
         {
             if (type == DIRECTIVE_ARG_TYPE_ANY)
                 continue;
@@ -218,65 +216,65 @@ namespace parser
         return std::string("line:"); //+ std::string(strtod());
     }
 
-    std::string Parser::err_invalid_identifier(const std::string &identifier) const
+    std::string Parser::err_invalid_identifier(const std::string& identifier) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
-           << "invalid identifier: \"" + identifier + "\"";
+            << "invalid identifier: \"" + identifier + "\"";
         return ss.str();
     }
 
-    std::string Parser::err_directive_not_open(const std::string &dirName) const
+    std::string Parser::err_directive_not_open(const std::string& dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
-           << "directive \"" + dirName + "\" has no opening \""
-           << TOKEN_BLOCK_OPEN
-           << "\"";
+            << "directive \"" + dirName + "\" has no opening \""
+            << TOKEN_BLOCK_OPEN
+            << "\"";
         return ss.str();
     }
 
-    std::string Parser::err_directive_not_closed(const std::string &dirName) const
+    std::string Parser::err_directive_not_closed(const std::string& dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
-           << "directive \"" + dirName + "\" has no closing \""
-           << TOKEN_BLOCK_CLOSE
-           << "\"";
+            << "directive \"" + dirName + "\" has no closing \""
+            << TOKEN_BLOCK_CLOSE
+            << "\"";
         return ss.str();
     }
 
-    std::string Parser::err_directive_invalid_args_count(const std::string &dirName) const
+    std::string Parser::err_directive_invalid_args_count(const std::string& dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
-           << "invalid number of arguments in \"" + dirName + "\" directive";
-        return ss.str();
-    }
-    
-    std::string Parser::err_directive_invalid_arg_type(const std::string &dirName) const
-    {
-        std::stringstream ss;
-        ss << "line:" << _currentToken._line << ", "
-           << "invalid argument type in \"" + dirName + "\" directive";
+            << "invalid number of arguments in \"" + dirName + "\" directive";
         return ss.str();
     }
 
-    std::string Parser::err_unexpected_token(const std::string &dirName) const
+    std::string Parser::err_directive_invalid_arg_type(const std::string& dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
-           << "unexpected token after \"" + dirName + "\" directive";
+            << "invalid argument type in \"" + dirName + "\" directive";
         return ss.str();
     }
 
-    std::string Parser::err_directive_not_terminated(const std::string &dirName) const
+    std::string Parser::err_unexpected_token(const std::string& dirName) const
     {
         std::stringstream ss;
         ss << "line:" << _currentToken._line << ", "
-           << "directive \"" + dirName + "\" is not terminated by \""
-           << TOKEN_SDIRECTIVE_CLOSE
-           << "\"";
+            << "unexpected token after \"" + dirName + "\" directive";
+        return ss.str();
+    }
+
+    std::string Parser::err_directive_not_terminated(const std::string& dirName) const
+    {
+        std::stringstream ss;
+        ss << "line:" << _currentToken._line << ", "
+            << "directive \"" + dirName + "\" is not terminated by \""
+            << TOKEN_SDIRECTIVE_CLOSE
+            << "\"";
         return ss.str();
     }
 
@@ -294,7 +292,7 @@ namespace parser
         // }
     }
 
-    std::vector<Context> const &Parser::getContexts() const
+    std::vector<Context> const& Parser::getContexts() const
     {
         return _contexts;
     }

@@ -2,7 +2,7 @@
 
 namespace ws
 {
-	Cluster::Cluster(Configuration const &config) : _config(config), _running(false), _setup(false)
+	Cluster::Cluster(Configuration const& config) : _config(config), _running(false), _setup(false)
 	{
 		_client_addr_len = sizeof(_client_addr);
 	}
@@ -32,7 +32,7 @@ namespace ws
 	/// Event handlers ///
 	void Cluster::connectionHandler(int fd_index)
 	{
-		_client_fd = accept(_io.getFd(fd_index), (struct sockaddr *)&_client_addr, &_client_addr_len);
+		_client_fd = accept(_io.getFd(fd_index), (struct sockaddr*)&_client_addr, &_client_addr_len);
 		if (_client_fd == -1)
 			throw std::runtime_error("Cluster::run() : accept() failed");
 		fcntl(_client_fd, F_SETFL, O_NONBLOCK);
@@ -46,7 +46,7 @@ namespace ws
 		{
 			// console.log("Cluster::run() : new request", ": ", _io.getFd(fd_index), "\n");
 
-			Request *request = new Request(
+			Request* request = new Request(
 				_io.getFd(fd_index), _fd_to_vserver[_client_to_server[_io.getFd(fd_index)]]);
 			_fd_to_request[_io.getFd(fd_index)] = request;
 		}
@@ -62,11 +62,11 @@ namespace ws
 	{
 		// // console.log("Response handler");
 		if (_fd_to_request[_io.getFd(fd_index)]->isComplete())
-		{	
+		{
 			if (_fd_to_response.find(_io.getFd(fd_index)) == _fd_to_response.end())
 			{
 				// console.log("Cluster::run() : new response", ": ", _io.getFd(fd_index), "\n");
-				Response *response = new Response(*_fd_to_request[_io.getFd(fd_index)], this->_config);
+				Response* response = new Response(*_fd_to_request[_io.getFd(fd_index)]);
 				_fd_to_response[_io.getFd(fd_index)] = response;
 			}
 		}
@@ -101,9 +101,9 @@ namespace ws
 
 	void Cluster::setup()
 	{
-		std::vector<VServer *> const &servers = _config.getVServers();
+		std::vector<VServer*> const& servers = _config.getVServers();
 
-		std::vector<VServer *>::const_iterator it = servers.begin();
+		std::vector<VServer*>::const_iterator it = servers.begin();
 		for (; it != servers.end(); it++)
 		{
 			(*it)->start(_binded_listens);
@@ -111,7 +111,7 @@ namespace ws
 			for (; it3 != (*it)->getFds().end(); it3++)
 				_fd_to_vserver[*it3].push_back(*it);
 		}
-		_io.setup(servers, this->_server_fds);	
+		_io.setup(servers, this->_server_fds);
 		_setup = true;
 	}
 

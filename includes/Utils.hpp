@@ -1,16 +1,26 @@
 #pragma once
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/poll.h>
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <signal.h>
 #include <fcntl.h>
-#include <stdio.h> //printf
+#include <dirent.h>
+
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include <sys/socket.h>
+#include <sys/poll.h>
+
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
+
+
 
 #include <stdexcept>
 #include <algorithm>
@@ -21,8 +31,6 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <sys/stat.h>
-#include <dirent.h>
 
 #include "../src/utils/Console.hpp"
 #include "../src/utils/Logger.hpp"
@@ -39,8 +47,8 @@
 								  TOKEN._line,                   \
 								  TokenTypeStrings[TOKEN._type], \
 								  TOKEN._value.c_str());
-
-#define PASS 0
+#define UNUSED(x) (void)(x)
+#define PASS (void)0
 
 // for request
 #define READING_HEADER 0
@@ -68,21 +76,21 @@ const std::map<int, std::string> initErrorPages();
 const std::set<std::string> initImplementedMethods();
 
 static const std::map<int, std::string>
-	g_statusMessages = initStatusMessages();
+g_statusMessages = initStatusMessages();
 
 static const std::map<int, std::string>
-	g_errorPages = initErrorPages();
+g_errorPages = initErrorPages();
 
 // no need for all methods as per RFC see: https://www.rfc-editor.org/rfc/rfc9112#section-3-4
 
 static const std::set<std::string>
-	ImplementedMethods = initImplementedMethods();
+ImplementedMethods = initImplementedMethods();
 
 static const std::map<std::string, DirectiveRules>
-	directiveRulesMap = initDirectiveRules();
+directiveRulesMap = initDirectiveRules();
 
 static const std::map<std::string, DirectiveRules>
-	locationDirectiveRulesMap = initLocationDirectiveRules();
+locationDirectiveRulesMap = initLocationDirectiveRules();
 
 typedef unsigned short port_t;
 typedef std::vector<std::string> t_vec_str;
@@ -102,32 +110,32 @@ struct Location
 };
 
 // function prototypes
-bool is_included(char c, char *str);
-bool is_number(const std::string &s);
-bool is_number(const char *s);
+bool is_included(char c, char* str);
+bool is_number(const std::string& s);
+bool is_number(const char* s);
 
-std::string toUpperStr(std::string const &str);
-std::string showWhiteSpaces(std::string const &str);
+std::string toUpperStr(std::string const& str);
+std::string showWhiteSpaces(std::string const& str);
 std::string percentDecode(std::string const& str);
 std::string convertSize(size_t size);
 
 const std::string autoIndex(
-	const std::string &root, const std::string &path);
+	const std::string& root, const std::string& path);
 
-bool file_exists(const std::string &name);
-bool file_exists(const std::string &path, struct stat &st);
+bool file_exists(const std::string& name);
+bool file_exists(const std::string& path, struct stat& st);
 
-bool is_directory(const std::string &path);
-bool is_directory(struct stat &st);
+bool is_directory(const std::string& path);
+bool is_directory(struct stat& st);
 
-bool is_regular_file(const std::string &path);
-bool is_regular_file(struct stat &st);
+bool is_regular_file(const std::string& path);
+bool is_regular_file(struct stat& st);
 
-bool is_readable_file(const std::string &path);
-bool is_readable_file(struct stat &st);
+bool is_readable_file(const std::string& path);
+bool is_readable_file(struct stat& st);
 
-bool is_executable_file(const std::string &path);
-bool is_executable_file(struct stat &st);
+bool is_executable_file(const std::string& path);
+bool is_executable_file(struct stat& st);
 
 const std::string sanitizeFilename(std::string const& filename);
 bool isFileNameValid(std::string const& filename);

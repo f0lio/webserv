@@ -3,9 +3,10 @@
 
 namespace ws
 {
-    Response::Response(Request const& request, const Configuration& config)
-        : _request(request), _config(config), _isProcessed(false), _isSent(false),
-        _vs(_request.getVServer()), _loc(_request.getLoc())
+    Response::Response(Request const& request)
+        : _request(request),
+        _vs(_request.getVServer()), _loc(_request.getLoc()),
+        _isProcessed(false), _isSent(false)
     {
         _sent = 0;
         _bodyIsSet = false;
@@ -194,16 +195,14 @@ namespace ws
 
     void Response::postRequestHandler()
     {
-        console.warn("=> Inside postRequestHandler()");
-
-        const VServer& vs = _request.getVServer();
+        // const VServer& vs = _request.getVServer();
         const struct Location& loc = _request.getLoc();
 
         std::string fileName;
         std::string filePath = loc.config.at("root")[0] + loc.path;
         std::string type = _request.getHeaderField("Content-Type");
 
-        if (filePath.back() != '/')
+        if (filePath.at(filePath.size() - 1) != '/')
             filePath += '/';
 
         if (loc.config.find("cgi") != loc.config.end())
@@ -257,7 +256,7 @@ namespace ws
         {
             file << _request.getBody();
             file.close();
-            if (loc.path.back() != '/')
+            if (loc.path.at(loc.path.size() - 1) != '/')
                 setHeader("Content-Location", loc.path + '/' + fileName);
             else
                 setHeader("Content-Location", loc.path + fileName);
@@ -269,11 +268,12 @@ namespace ws
 
     void Response::deleteRequestHandler()
     {
-        console.warn("=> Inside deleteRequestHandler()");
+
         const struct Location& loc = _request.getLoc();
 
         std::string path = loc.config.at("root")[0];
-        path.pop_back();  // remove the last '/'
+        path.erase(path.size() - 1);   // remove the last '/'
+
         path += _request.getPath();
 
         if (file_exists(path))
@@ -294,7 +294,6 @@ namespace ws
 
     void Response::headRequestHandler()
     {
-        console.warn("=> Inside headRequestHandler()");
     }
 
     void Response::cgiHandler()
@@ -312,7 +311,7 @@ namespace ws
                 std::stringstream ss;
                 ss << file.rdbuf();
                 _body = ss.str();
-				// std::cout << "Output: \n" << showWhiteSpaces(_body) << std::endl;
+                // std::cout << "Output: \n" << showWhiteSpaces(_body) << std::endl;
                 file.close();
                 // unlink(cgi.getOutputFile().c_str());
                 setResponse(200, "text/html");
@@ -334,13 +333,11 @@ namespace ws
         while (ret != -1 && !_isSent)
         {
             _sent += ret;
-            // console.log("Response sent: ", convertSize(ret) , " - Total sent: " , convertSize(_sent) , " -  left: " , convertSize(_response.size() - _sent));
             ret = ::send(_request.getClientFd(), _response.c_str() + _sent, _response.size() - _sent, 0);
-            // console.log("\n\n# ", ret, " #\n\n");
             _isSent = _sent == _response.size(); // TODO: need to check if the response is fully sent
         }
-		if (_isSent)
-			console.warn("Response sent");
+        if (_isSent)
+            console.log("Response sent");
         _isProcessed = true;
     }
 
@@ -462,7 +459,9 @@ namespace ws
             return setDefaultErrorPage(status);
         else
         {
-            std::ifstream file(errorPagePath);
+            std::ifstream file;
+
+            file.open(errorPagePath.c_str());
             if (file.is_open())
             {
                 std::stringstream ss;
@@ -520,7 +519,6 @@ namespace ws
         std::string& fileName
     )
     {
-        console.warn("Resolving index file...");
         fileName.assign(path); // to check if changed
         t_vec_str::const_iterator it;
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
@@ -531,49 +529,39 @@ namespace ws
             else
                 indexPath = path + "/" + *it;
             if (access(indexPath.c_str(), F_OK) == -1)
-            {
-                // std::cout << "=> INDEX: [" << indexPath << "] not found" << std::endl;
                 continue;
-            }
             if (access(indexPath.c_str(), R_OK) == -1)
             {
                 console.warn("[" + indexPath + "] is not readable.");
                 return 403; // forbidden
             }
-            // std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
             fileName.assign(indexPath);
             return 0; // index found
         }
         return 404; // index not found
     }
 
-    /* same as above, but doens't set fileName */
+    /* same as above, but doesn't set fileName */
     int Response::resolveIndexFile(
         struct Location const& loc,
         std::string const& path
     )
     {
-        console.warn("Resolving index file...");
         t_vec_str::const_iterator it;
         for (it = loc.config.at("index").begin(); it != loc.config.at("index").end(); ++it)
         {
             std::string indexPath;
-            // if (path.back() == '/')
             if (*path.rbegin() == '/')
                 indexPath = path + *it;
             else
                 indexPath = path + "/" + *it;
             if (access(indexPath.c_str(), F_OK) == -1)
-            {
-                // std::cout << "=> INDEX: [" << indexPath << "] not found" << std::endl;
                 continue;
-            }
             if (access(indexPath.c_str(), R_OK) == -1)
             {
                 console.warn("[" + indexPath + "] is not readable.");
                 return 403; // forbidden
             }
-            // std::cout << "=> INDEX: [" << indexPath << "] found" << std::endl;
             return 0; // index found
         }
         return 404; // index not found

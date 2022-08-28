@@ -7,11 +7,11 @@ void print_usage()
 
 void handle_flags(int argc, const char* argv[])
 {
-	if (argc > 3)
-	{
-		print_usage();
-		exit(2);
-	}
+    if (argc > 3)
+    {
+        print_usage();
+        exit(2);
+    }
 
     if (argc == 2 && strcmp(argv[1], "-h") == 0)
     {
@@ -29,20 +29,18 @@ void handle_flags(int argc, const char* argv[])
         const char* config_file = argc == 3 ? argv[2] : DEFAULT_CONFIG_FILE;
         try
         {
-			if (!is_regular_file(config_file))
-				throw std::runtime_error("'" + std::string(config_file) + "' is a directory or doesnt exist");
+            if (!is_regular_file(config_file))
+                throw std::runtime_error("'" + std::string(config_file) + "' is a directory or doesnt exist");
             ws::Configuration config(config_file);
             config.setup();
         }
         catch (const std::exception& e)
         {
-            console.err(e.what());
+            std::cerr << e.what() << std::endl;
             exit(1);
         }
-        // console.log(SERVER_NAME ": the configuration file ",
-        //     config_file, " syntax is ok\n");
-        // console.log(SERVER_NAME ": the configuration file ",
-        //     config_file, " test is successful\n");
+        std::string msg = SERVER_NAME ": the configuration file " + std::string(config_file);
+        std::cout << msg << " syntax is ok" << std::endl << msg << " test is successful" << std::endl;
         exit(0);
     }
 }
@@ -53,8 +51,8 @@ int main(int argc, const char* argv[])
     try
     {
         const char* config_file = argc == 2 ? argv[1] : DEFAULT_CONFIG_FILE;
-		if (!is_regular_file(config_file))
-			throw std::runtime_error("'" + std::string(config_file) + "' is a directory or doesnt exist");
+        if (!is_regular_file(config_file))
+            throw std::runtime_error("'" + std::string(config_file) + "' is a directory or doesnt exist");
         ws::Configuration config(config_file);
         config.setup();
         config.print();
@@ -66,7 +64,7 @@ int main(int argc, const char* argv[])
     }
     catch (const std::exception& e)
     {
-        console.err(e.what());
+        std::cerr << e.what() << std::endl;
         return 1;
     }
     return 0;

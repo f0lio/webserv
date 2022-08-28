@@ -2,13 +2,14 @@
 
 namespace ws
 {
-	Request::Request(int client_fd, std::vector<VServer *> &vservers)
+	Request::Request(int client_fd, std::vector<VServer*>& vservers)
 		: _client_fd(client_fd), _vservers(vservers),
 		_delim(CRLF), _delim_end(CRLF CRLF)
 	{
 		chunked = 0;
 		done = 0;
-		_content_length = -1;
+		_content_length = 0;
+		_has_content_length = false;
 		readIndex = 0;
 		timeout = 0;
 		max_body_size = -1;
@@ -19,17 +20,17 @@ namespace ws
 	{
 	}
 
-	std::string const &Request::getHeader() const
+	std::string const& Request::getHeader() const
 	{
 		return _header;
 	}
 
-	std::map<std::string, std::string> const &Request::getHeaders() const
+	std::map<std::string, std::string> const& Request::getHeaders() const
 	{
 		return _headers;
 	}
 
-	std::string const &Request::getHeaderField(std::string const &key) const
+	std::string const& Request::getHeaderField(std::string const& key) const
 	{
 		std::string uppedKey = toUpperStr(key);
 		if (_headers.find(uppedKey) != _headers.end())
@@ -38,18 +39,18 @@ namespace ws
 		return empty;
 	}
 
-	bool Request::hasHeaderField(std::string const &key) const
+	bool Request::hasHeaderField(std::string const& key) const
 	{
 		std::string uppedKey = toUpperStr(key);
 		return (_headers.find(uppedKey) != _headers.end());
 	}
 
-	std::string const &Request::getBody() const
+	std::string const& Request::getBody() const
 	{
 		return _body;
 	}
 
-	std::string const &Request::getMethod() const
+	std::string const& Request::getMethod() const
 	{
 		return _method;
 	}
@@ -60,43 +61,43 @@ namespace ws
 		return percentDecode(requestTarget);
 	}
 
-	std::string const &Request::getQuery() const
+	std::string const& Request::getQuery() const
 	{
 		return _query;
 	}
 
-	int const &Request::getClientFd() const
+	int const& Request::getClientFd() const
 	{
 		return _client_fd;
 	}
-	int const &Request::getStatus() const
+	int const& Request::getStatus() const
 	{
 		return _status;
 	}
-	VServer const &Request::getVServer() const
+	VServer const& Request::getVServer() const
 	{
 		return *_vserver;
 	}
 
-	struct Location const &Request::getLoc() const
+	struct Location const& Request::getLoc() const
 	{
 		return *_loc;
 	}
 
-	std::vector<VServer *> &Request::getVServers() const
+	std::vector<VServer*>& Request::getVServers() const
 	{
 		return _vservers;
 	}
 
-	const VServer *Request::resolveVServer() const
+	const VServer* Request::resolveVServer() const
 	{
-		std::vector<VServer *>::iterator it = _vservers.begin();
+		std::vector<VServer*>::iterator it = _vservers.begin();
 
 		std::string host = getHeaderField("Host");
 		for (; it != _vservers.end(); ++it)
 		{
 			if (std::find((*it)->get("server_name").begin(),
-						  (*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
+				(*it)->get("server_name").end(), host) != (*it)->get("server_name").end())
 				return *it;
 		}
 		return *_vservers.begin();
@@ -228,6 +229,7 @@ namespace ws
 					return 400; // Bad request
 				}
 				_content_length = std::atoi(value.c_str()); // stoi is c++11
+				_has_content_length = true;
 			}
 			else if (key == "TRANSFER-ENCODING")
 			{
@@ -264,7 +266,7 @@ namespace ws
 		if (ret) // first occurring non syntax error
 			return ret;
 
-		if (_content_length == -1 && !chunked && _method == "POST")
+		if (_has_content_length == false && !chunked && _method == "POST")
 		{
 			console.err("Invalid header: neither Content-Length nor Transfer-Encoding: chunked found with POST method");
 			return 411; // Length Required
@@ -272,7 +274,7 @@ namespace ws
 
 		if (chunked)
 		{
-			if (_content_length != -1) // https://www.rfc-editor.org/rfc/rfc9112#section-6.1-14
+			if (_has_content_length) // https://www.rfc-editor.org/rfc/rfc9112#section-6.1-14
 			{
 				console.err("Invalid header: Content-Length and Transfer-Encoding: chunked are mutually exclusive");
 				return 400; // Bad request
@@ -288,7 +290,7 @@ namespace ws
 			return 400; // Bad request
 		}
 
-		t_vec_str const &methods = it->second;
+		t_vec_str const& methods = it->second;
 
 		if (std::find(methods.begin(), methods.end(), _method) == methods.end()) //this should not err
 		{
@@ -300,7 +302,7 @@ namespace ws
 
 		if (it != _loc->config.end())
 		{
-			if (_method == "POST" && std::atoll(it->second[0].c_str()) < _content_length)
+			if (_method == "POST" && std::strtoul(it->second[0].c_str(), NULL, 10) < _content_length)
 			{
 				console.err("Invalid header: Content-Length too large");
 				return 413; // Request Entity Too Large

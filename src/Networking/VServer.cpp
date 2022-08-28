@@ -10,7 +10,6 @@ namespace ws
         std::vector<parser::BlockDirective> const& locs = context.getBlockDirectives();
         _ctx_index = context.getIndex();
 
-        struct sockaddr_in addr;
         for (size_t i = 0; i < dirs.size(); i++)
         {
             if (dirs[i].getKey() == "listen")
@@ -31,7 +30,8 @@ namespace ws
                 }
                 else if (dirs[i].getKey() == "error_page")
                 {
-                    int code = std::stoi(dirs[i].getArgs()[0]);
+                    int code;
+                    sscanf(dirs[i].getArgs()[0].c_str(), "%d", &code);
                     if (code < 400 || code > 599)
                         throw std::runtime_error("error_page: code must be between 400 and 599");
                     else if (dirs[i].getArgs()[1] == "")
@@ -47,7 +47,7 @@ namespace ws
         {
             struct Location loc;
             std::vector<parser::SimpleDirective> const&
-            loc_dirs = locs[i].getDirectives();
+                loc_dirs = locs[i].getDirectives();
 
             // TODO: optimize (?)
             // init with server config
@@ -69,8 +69,8 @@ namespace ws
                         continue;
                     }
                 }
-				// if (dirs[j].getKey() == "index") // because it overrides autoindex on
-				// 	continue;
+                // if (dirs[j].getKey() == "index") // because it overrides autoindex on
+                // 	continue;
                 loc.config[dirs[j].getKey()] = dirs[j].getArgs();
             }
 
@@ -88,7 +88,7 @@ namespace ws
             throw std::runtime_error(
                 "server block " + SSTR(context.getIndex()) + " doesn't have any listen directive");
         // _checkConfig(context);
-        prepareServerConfig(context);
+        prepareServerConfig();
     }
 
     VServer::~VServer()
@@ -97,7 +97,7 @@ namespace ws
             ::close(_listens[i].fd);
     }
 
-    void VServer::prepareServerConfig(parser::Context const& context)
+    void VServer::prepareServerConfig()
     {
         bool foundRoot = false;
         for (
@@ -189,6 +189,7 @@ namespace ws
 
     void VServer::_checkConfig(parser::Context const& context) const
     {
+        (void)context;
         // std::vector<parser::SimpleDirective> const& dirs = context.getSimpleDirectives();
         // std::vector<parser::BlockDirective> const& locs = context.getBlockDirectives();
     }
@@ -211,13 +212,15 @@ namespace ws
             if (listen.host == "localhost")
                 listen.host = "127.0.0.1";
             if (is_number(args[1].c_str()))
-                listen.port = atoi(args[1].c_str());
+            {
+                int port = atoi(args[1].c_str());
+                if (port < 1 || port > 65535) // 1024?
+                    throw std::runtime_error("Invalid port number: " + args[1]);
+                listen.port = port;
+            }
             else
                 throw std::runtime_error("Invalid port number: " + args[1]);
         }
-        if (listen.port < 0 || listen.port > 65535) // 1024?
-            throw std::runtime_error(
-                "server block " + SSTR(_ctx_index) + ": invalid port number: " + SSTR(listen.port));
 
         if (_hostPortMap[listen.host] == listen.port)
             throw std::runtime_error(
@@ -297,7 +300,7 @@ namespace ws
             if (pos == std::string::npos)
                 break;
             // path = path.substr(0, pos + 1);
-            path = path.substr(0, pos );
+            path = path.substr(0, pos);
         }
         it = _locations.find(path);
 

@@ -1,7 +1,7 @@
 
 #include "Utils.hpp"
 
-bool is_included(char c, char *str)
+bool is_included(char c, char* str)
 {
 	while (str)
 		if (c == *str++)
@@ -9,7 +9,7 @@ bool is_included(char c, char *str)
 	return false;
 }
 
-bool is_number(const std::string &s)
+bool is_number(const std::string& s)
 {
 	std::string::const_iterator it = s.begin();
 	while (it != s.end() && std::isdigit(*it))
@@ -17,7 +17,7 @@ bool is_number(const std::string &s)
 	return !s.empty() && it == s.end();
 }
 
-bool is_number(const char *s)
+bool is_number(const char* s)
 {
 	while (*s)
 		if (!std::isdigit(*s++))
@@ -25,23 +25,23 @@ bool is_number(const char *s)
 	return true;
 }
 
-bool file_exists(const std::string &path)
+bool file_exists(const std::string& path)
 {
 	struct stat st;
 	return stat(path.c_str(), &st) == 0;
 }
 
-bool file_exists(const std::string &path, struct stat &st)
+bool file_exists(const std::string& path, struct stat& st)
 {
 	return stat(path.c_str(), &st) == 0;
 }
 
-bool is_directory(struct stat &st)
+bool is_directory(struct stat& st)
 {
 	return S_ISDIR(st.st_mode);
 }
 
-bool is_directory(const std::string &path)
+bool is_directory(const std::string& path)
 {
 	struct stat st;
 
@@ -51,12 +51,12 @@ bool is_directory(const std::string &path)
 	return false;
 }
 
-bool is_regular_file(struct stat &st)
+bool is_regular_file(struct stat& st)
 {
 	return S_ISREG(st.st_mode);
 }
 
-bool is_regular_file(const std::string &path)
+bool is_regular_file(const std::string& path)
 {
 	struct stat st;
 
@@ -66,12 +66,12 @@ bool is_regular_file(const std::string &path)
 	return false;
 }
 
-bool is_readable_file(struct stat &st)
+bool is_readable_file(struct stat& st)
 {
 	return st.st_mode & S_IREAD;
 }
 
-bool is_readable_file(const std::string &path)
+bool is_readable_file(const std::string& path)
 {
 	struct stat st;
 
@@ -81,12 +81,12 @@ bool is_readable_file(const std::string &path)
 	return false;
 }
 
-bool is_executable_file(struct stat &st)
+bool is_executable_file(struct stat& st)
 {
 	return st.st_mode & S_IEXEC;
 }
 
-bool is_executable_file(const std::string &path)
+bool is_executable_file(const std::string& path)
 {
 	struct stat st;
 
@@ -287,7 +287,7 @@ const std::set<std::string> initImplementedMethods()
 	return tmp;
 }
 
-std::string toUpperStr(std::string const &str)
+std::string toUpperStr(std::string const& str)
 {
 	std::string uppedStr(str);
 
@@ -306,7 +306,7 @@ std::string charToHex(char c)
 }
 
 // string to url-encoded string
-std::string showWhiteSpaces(std::string const &str)
+std::string showWhiteSpaces(std::string const& str)
 {
 	std::string encodedStr;
 	for (size_t i = 0; i < str.size(); i++)
@@ -329,7 +329,7 @@ std::string showWhiteSpaces(std::string const &str)
 
 const std::string formatDate(time_t time)
 {
-	struct tm *tm = gmtime(&time);
+	struct tm* tm = gmtime(&time);
 	char buffer[80];
 	strftime(buffer, 80, "%d-%b-%Y %H:%M", tm);
 	return buffer;
@@ -342,7 +342,7 @@ const std::string sanitizeFilename(std::string const& filename)
 	for (size_t i = 0; i < sanitizedFilename.size(); i++)
 	{
 		if (sanitizedFilename[i] == '.'
-		&& i + 1 < sanitizedFilename.size() && sanitizedFilename[i + 1] != '.')
+			&& i + 1 < sanitizedFilename.size() && sanitizedFilename[i + 1] != '.')
 			continue; // dots are allowed, but not consecutive (e.g. extension)
 		if (sanitizedFilename[i] == '.'
 			|| sanitizedFilename[i] == ' '
@@ -379,12 +379,10 @@ size_t dbgCounter(size_t index)
 
 std::string convertSize(size_t size)
 {
-	static const char *SIZES[] = { "B", "KB", "MB", "GB" };
-	int div = 0;
-	size_t rem = 0;
+	static const char* SIZES[] = { "B", "KB", "MB", "GB" };
+	unsigned long div = 0;
 
-	while (size >= 1024 && div < (sizeof SIZES / sizeof *SIZES)) {
-		rem = (size % 1024);
+	while (size >= 1024 && div < (sizeof SIZES / sizeof * SIZES)) {
 		div++;
 		size /= 1024;
 	}
@@ -393,8 +391,6 @@ std::string convertSize(size_t size)
 
 	if (size < 1024)
 		result.insert(0, 3 - result.size() / 2, ' ');
-
-	
 	return result;
 }
 

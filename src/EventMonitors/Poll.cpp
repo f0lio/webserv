@@ -7,20 +7,21 @@ namespace ws
 	Poll::~Poll() {}
 
 	void Poll::setup(
-			std::vector<VServer*> const& servers,
-			std::set<int>& _server_fds)
+		std::vector<VServer*> const& servers,
+		std::set<int>& _server_fds)
 	{
 		_nfds = 0;
-		memset(&_pollfds, 0, sizeof(_pollfds));
+		// memset(&_pollfds, 0, sizeof(_pollfds));
+		// _pollfds.clear();
 		for (size_t i = 0; i < servers.size(); i++)
 		{
 			std::vector<struct Listen>::const_iterator
-			it = servers[i]->getListens().begin();	
+				it = servers[i]->getListens().begin();
 			for (; it != servers[i]->getListens().end(); it++)
 			{
 				if (it->fd == -1)
 					continue;
-				struct pollfd pfd = {it->fd, POLLIN, 0};
+				struct pollfd pfd = { it->fd, POLLIN, 0 };
 				_pollfds.push_back(pfd);
 				_nfds++;
 				_server_fds.insert(it->fd);
@@ -35,7 +36,7 @@ namespace ws
 
 	void Poll::addEvent(int fd)
 	{
-		struct pollfd pfd = {fd, POLLIN, 0};
+		struct pollfd pfd = { fd, POLLIN, 0 };
 		_pollfds.push_back(pfd);
 		_nfds++;
 	}

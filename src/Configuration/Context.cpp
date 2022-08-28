@@ -56,14 +56,13 @@ namespace parser
 	{
 		loaded_directives[key]++;
 
-		int occurrence = loaded_directives[key];
 		int occurrence_rule = directiveRulesMap.at(key).occurrence;
 
 		if (occurrence_rule != -1 && loaded_directives[key] > occurrence_rule)
 		{
 			throw std::runtime_error(
 				"Directive \"" + key + "\" should occur "
-				+ SSTR(occurrence_rule) 
+				+ SSTR(occurrence_rule)
 				+ (occurrence_rule == 1 ? " time max" : " times max"));
 		}
 	}
@@ -86,7 +85,7 @@ namespace parser
 				}
 				if (!found)
 					throw std::runtime_error(
-						"Directive \"" + it->first + 
+						"Directive \"" + it->first +
 						"\" is required in " + _name + " context");
 			}
 		}
@@ -102,7 +101,7 @@ namespace parser
 		std::vector<BlockDirective>::iterator it_bdir;
 		for (it_bdir = _block_directives_vec.begin(); it_bdir != _block_directives_vec.end(); ++it_bdir)
 		{
-			if (it_bdir->getKey().back() != '/')
+			if (it_bdir->getKey().at(it_bdir->getKey().size() - 1) != '/')
 				it_bdir->setKey(it_bdir->getKey() + '/');
 			it_bdir->check();
 		}
